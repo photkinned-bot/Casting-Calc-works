@@ -6,9 +6,23 @@
   <title>Casting Calc — Ювелірний калькулятор литва</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1e293b">
+  
+  <!-- Apple iOS / iPadOS Web App & Home Screen Icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Casting Calc">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon-180x180.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="./apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="./apple-touch-icon-180x180.png">
+  <link rel="apple-touch-icon-precomposed" href="./apple-touch-icon.png">
+  
+  <!-- Favicon & Standard Icons -->
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./apple-touch-icon.png">
+  <link rel="shortcut icon" href="./apple-touch-icon.png">
 
   <style>
     :root {
@@ -138,8 +152,11 @@
 <div id="toast-container" class="toast-container"></div>
 
 <div class="container">
-  <header>
-    <h1>Casting Calc</h1>
+  <header style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
+    <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+      <img src="./apple-touch-icon.png" alt="Casting Calc Flame Icon" style="width: 36px; height: 36px; border-radius: 8px; box-shadow: 0 2px 8px rgba(217, 119, 6, 0.4); object-fit: cover;" referrerPolicy="no-referrer">
+      <h1 style="margin: 0;">Casting Calc</h1>
+    </div>
     <p>Калькулятор розрахунку формомаси, шихтовки металу та керування проектами литва</p>
   </header>
 

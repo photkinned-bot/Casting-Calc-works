@@ -3,7 +3,17 @@
   "name": "Casting Calc — Ювелірний калькулятор литва",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3081/3081986.png",
+      "src": "./apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "180x180"
+    },
+    {
+      "src": "./icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "./icon-512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
