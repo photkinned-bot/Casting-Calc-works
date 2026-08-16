@@ -1,6 +1,6 @@
 {
   "name": "Casting Calc",
-  "description": "Ювелірний калькулятор розрахунку формомаси та шихтовки металу для литва",
+  "description": "Ювелірний калькулятор розрахунку формомаси, шихтовки металу та збереження/завантаження проектів литва у форматі JSON",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

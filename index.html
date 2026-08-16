@@ -103,17 +103,87 @@
     .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
     .toast { background-color: var(--bg-card); color: var(--text); border: 1px solid var(--accent); padding: 10px 16px; border-radius: 8px; font-size: 0.88rem; box-shadow: 0 4px 12px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 8px; animation: slideUp 0.25s ease-out; pointer-events: auto; }
     @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* Стилі для управління проектом та роботи з JSON */
+    .project-card { background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); border: 1px solid rgba(217, 119, 6, 0.4); border-radius: 12px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .project-title-input { font-size: 1.05rem; font-weight: 600; color: #f8fafc; background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; width: 100%; transition: border-color 0.2s; }
+    .project-title-input:focus { border-color: var(--accent); }
+    
+    .drop-zone { border: 2px dashed rgba(217, 119, 6, 0.5); border-radius: 8px; padding: 16px; text-align: center; background: rgba(15, 23, 42, 0.5); cursor: pointer; transition: all 0.2s; user-select: none; }
+    .drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: rgba(217, 119, 6, 0.1); }
+    
+    .json-textarea { width: 100%; background: #090d16; color: #38bdf8; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.82rem; line-height: 1.4; border: 1px solid var(--border); border-radius: 8px; padding: 12px; resize: vertical; outline: none; }
+    .json-textarea:focus { border-color: var(--accent); }
+
+    /* Повноекранний оверлей при перетягуванні файлу */
+    .drag-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.94); z-index: 10000; border: 4px dashed var(--accent); justify-content: center; align-items: center; pointer-events: auto; }
+    .drag-overlay-box { background: var(--bg-card); border: 2px solid var(--accent); border-radius: 16px; padding: 32px; text-align: center; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
   </style>
 </head>
 <body>
+
+<!-- Повноекранний Drag-and-Drop оверлей для імпорту JSON -->
+<div id="drag-overlay" class="drag-overlay">
+  <div class="drag-overlay-box">
+    <div style="font-size: 3rem; margin-bottom: 8px;">📦</div>
+    <div style="font-size: 1.3rem; font-weight: 700; color: var(--accent); margin-bottom: 6px;">Відпустіть JSON файл для завантаження проекту</div>
+    <p style="color: var(--text-muted); font-size: 0.88rem;">Проект литва буде миттєво відкритий з усіма опоками, параметрами та розрахунками для редагування.</p>
+  </div>
+</div>
+
+<!-- Прихований інпут для вибору JSON файлу -->
+<input type="file" id="project-file-input" accept=".json,application/json" style="display: none;" onchange="handleProjectFileSelect(event)">
 
 <div id="toast-container" class="toast-container"></div>
 
 <div class="container">
   <header>
     <h1>Casting Calc</h1>
-    <p>Калькулятор розрахунку формомаси та шихтовки металу</p>
+    <p>Калькулятор розрахунку формомаси, шихтовки металу та керування проектами литва</p>
   </header>
+
+  <!-- Блок управління проектом (JSON Збереження / Завантаження) -->
+  <div class="project-card">
+    <div class="card-title" style="margin-bottom: 8px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span>📦 Проект литва (JSON)</span>
+        <span id="project-flasks-badge" class="badge" style="font-size: 0.78rem;">0 опок</span>
+      </div>
+      <div style="display: flex; gap: 6px; align-items: center;">
+        <span id="project-status-badge" class="badge badge-pending" style="font-size: 0.75rem;">Готовий до збереження</span>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div class="form-group">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label for="project-title-input">Назва проекту / номер замовлення:</label>
+          <span id="project-last-saved-text" style="font-size: 0.74rem; color: var(--text-muted);"></span>
+        </div>
+        <div class="input-clear-wrapper">
+          <input type="text" id="project-title-input" class="project-title-input" value="Проект литва" placeholder="Введіть назву проекту (напр. Замовлення №104 — Золоті обручки)" oninput="onProjectTitleInput()">
+          <button type="button" class="input-clear-btn" onclick="clearProjectTitle()" title="Очистити назву">✕</button>
+        </div>
+      </div>
+
+      <!-- Кнопки швидкого збереження та завантаження JSON -->
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px;">
+        <button type="button" class="btn" id="btn-save-project-json" onclick="exportProjectJSON()" title="Зберегти повний стан проекту у файл .json">
+          💾 Зберегти проект (JSON)
+        </button>
+        <button type="button" class="btn btn-secondary" id="btn-load-project-json" onclick="triggerImportProjectJSON()" title="Завантажити раніше збережений файл проекту .json">
+          📂 Відкрити проект (JSON)
+        </button>
+        <button type="button" class="btn btn-secondary" id="btn-open-json-editor" onclick="openJsonModal()" title="Переглянути або вставити текст JSON напряму">
+          📋 Редактор / Текст JSON
+        </button>
+        <button type="button" class="btn btn-secondary" id="btn-new-project" onclick="confirmResetProject()" title="Очистити кошик та розпочати новий проект">
+          📄 Новий проект
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Блок керування пресетами -->
   <div class="card">
@@ -256,9 +326,12 @@
       <!-- Загальний підсумок замісу -->
     </div>
 
-    <div class="grid" style="margin-top: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));" id="export-buttons">
-      <button class="btn btn-secondary" id="btn-download-txt" onclick="downloadTXT()">Зберегти TXT файл</button>
-      <button class="btn btn-secondary" id="btn-export-txt" onclick="exportTXT()">Копіювати текст</button>
+    <div class="grid" style="margin-top: 12px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px;" id="export-buttons">
+      <button class="btn" id="btn-batch-save-json" onclick="exportProjectJSON()">💾 Зберегти проект (.JSON)</button>
+      <button class="btn btn-secondary" id="btn-batch-load-json" onclick="triggerImportProjectJSON()">📂 Завантажити проект (.JSON)</button>
+      <button class="btn btn-secondary" id="btn-batch-modal-json" onclick="openJsonModal()">📋 Переглянути JSON</button>
+      <button class="btn btn-secondary" id="btn-download-txt" onclick="downloadTXT()">📄 Зберегти TXT файл</button>
+      <button class="btn btn-secondary" id="btn-export-txt" onclick="exportTXT()">📋 Копіювати текст</button>
     </div>
   </div>
 </div>
@@ -421,6 +494,59 @@
   </div>
 </div>
 
+<!-- Модальне вікно перегляду, експорту та імпорту JSON проекту -->
+<div class="modal" id="jsonModal">
+  <div class="modal-content" id="json-modal-content" style="max-width: 680px;">
+    <div class="card-title">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span>📦 Проект у форматі JSON</span>
+        <span id="json-modal-tag" class="badge" style="font-size: 0.75rem;">v1.0</span>
+      </div>
+      <button class="btn btn-secondary btn-sm" id="btn-close-json-modal" onclick="closeJsonModal()">✕</button>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">
+        JSON-файл містить повну структуру проекту: назву, поточні параметри розрахунку, всі опоки у замісі зі статусами, а також ваші індивідуальні пресети. Ви можете зберегти його на диск або відкрити будь-коли пізніше для продовження роботи та редагування.
+      </p>
+
+      <!-- Зона швидкого вибору або перетягування файлу -->
+      <div class="drop-zone" id="modal-drop-zone" onclick="triggerImportProjectJSON()" title="Натисніть для вибору JSON файлу або перетягніть файл сюди">
+        <div style="font-size: 1.5rem; margin-bottom: 4px;">📂</div>
+        <div style="font-size: 0.92rem; font-weight: 600; color: var(--accent);">Натисніть або перетягніть сюди файл проекту (.json)</div>
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">Підтримуються всі файли проектів Casting Calc</div>
+      </div>
+
+      <!-- Поле перегляду та вставки коду JSON -->
+      <div class="form-group">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 6px;">
+          <label for="json-modal-textarea" style="font-weight: 600; color: var(--text);">
+            Текстовий код JSON проекту:
+          </label>
+          <span id="json-modal-stats" style="font-size: 0.78rem; color: #38bdf8;"></span>
+        </div>
+        <textarea id="json-modal-textarea" class="json-textarea" rows="11" placeholder="Вставте сюди валідний JSON-код проекту або скопіюйте згенерований..." spellcheck="false"></textarea>
+      </div>
+
+      <!-- Дії з JSON -->
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px;">
+        <button type="button" class="btn" id="btn-modal-save-file" onclick="exportProjectJSON()">
+          💾 Зберегти .json
+        </button>
+        <button type="button" class="btn btn-secondary" id="btn-modal-copy-json" onclick="copyJsonTextFromModal()">
+          📋 Скопіювати JSON
+        </button>
+        <button type="button" class="btn btn-secondary" id="btn-modal-apply-json" onclick="applyJsonFromModal()" style="border-color: #34d399; color: #34d399;">
+          📥 Завантажити з поля вводу
+        </button>
+        <button type="button" class="btn btn-secondary" id="btn-modal-close" onclick="closeJsonModal()">
+          Закрити
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 // --- БАЗА ДАНИХ ТА СТАН ---
 const DEFAULT_FLASKS = [
@@ -450,6 +576,9 @@ let state = {
   batch: JSON.parse(localStorage.getItem("cc_batch")) || []
 };
 
+let projectTitle = localStorage.getItem("cc_project_title") || "Проект литва";
+let projectLastSaved = localStorage.getItem("cc_project_last_saved") || "";
+
 let currentRecalcIndex = -1;
 let isFlaskManual = false;
 let isFlaskExpanded = false;
@@ -472,11 +601,13 @@ function showToast(message, duration = 2800) {
 
 // --- ІНІЦІАЛІЗАЦІЯ ---
 window.addEventListener("DOMContentLoaded", () => {
+  initProjectState();
   renderPresetSelects();
   applyFlaskPreset();
   calculateSingle();
   renderBatch();
   onNoteInput();
+  setupDragAndDrop();
   
   // Очищення застарілого кешу Service Worker для негайного оновлення застосунку
   if ('serviceWorker' in navigator) {
@@ -492,6 +623,65 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+function initProjectState() {
+  const titleInput = document.getElementById("project-title-input");
+  if (titleInput) {
+    titleInput.value = projectTitle;
+  }
+  updateProjectHeader();
+}
+
+function onProjectTitleInput() {
+  const titleInput = document.getElementById("project-title-input");
+  projectTitle = titleInput ? titleInput.value.trim() || "Проект литва" : "Проект литва";
+  localStorage.setItem("cc_project_title", projectTitle);
+  updateProjectHeader();
+}
+
+function clearProjectTitle() {
+  const titleInput = document.getElementById("project-title-input");
+  if (titleInput) {
+    titleInput.value = "";
+    titleInput.focus();
+  }
+  onProjectTitleInput();
+}
+
+function updateProjectHeader() {
+  const badgeFlasks = document.getElementById("project-flasks-badge");
+  const badgeStatus = document.getElementById("project-status-badge");
+  const lastSavedEl = document.getElementById("project-last-saved-text");
+
+  const total = state.batch.length;
+  let completed = 0;
+  state.batch.forEach(item => { if (item.completed) completed++; });
+
+  if (badgeFlasks) {
+    badgeFlasks.innerText = `${total} ${total === 1 ? 'опока' : (total >= 2 && total <= 4 ? 'опоки' : 'опок')}`;
+  }
+
+  if (badgeStatus) {
+    if (total === 0) {
+      badgeStatus.className = "badge badge-pending";
+      badgeStatus.innerText = "Готовий до додавання опок";
+    } else if (completed === total && total > 0) {
+      badgeStatus.className = "badge badge-success";
+      badgeStatus.innerText = `Всі ${total} опок відлито (100%)`;
+    } else {
+      badgeStatus.className = "badge badge-pending";
+      badgeStatus.innerText = `${completed}/${total} відлито (${Math.round((completed/total)*100)}%)`;
+    }
+  }
+
+  if (lastSavedEl) {
+    if (projectLastSaved) {
+      lastSavedEl.innerText = `Збережено: ${projectLastSaved}`;
+    } else {
+      lastSavedEl.innerText = "";
+    }
+  }
+}
 
 // --- РОЗКРИВНЕ ВІКОНЦЕ ОПОКА & РУЧНЕ ВВЕДЕННЯ ---
 function toggleFlaskDimensions() {
@@ -1198,6 +1388,7 @@ function renderBatch() {
   }).join("");
 
   renderBatchSummary();
+  updateProjectHeader();
 }
 
 function renderBatchSummary() {
@@ -1446,6 +1637,337 @@ function fallbackCopyText(text) {
     showToast("Не вдалося скопіювати звіт.");
   }
   document.body.removeChild(ta);
+}
+
+// --- КЕРУВАННЯ ПРОЕКТАМИ ТА ЗБЕРЕЖЕННЯ / ЗАВАНТАЖЕННЯ JSON ---
+
+function buildProjectObject() {
+  const now = new Date();
+  
+  const singleInputs = {
+    d: parseFloat(document.getElementById("flask-diameter").value) || 60,
+    h: parseFloat(document.getElementById("flask-height").value) || 100,
+    isFlaskManual: isFlaskManual,
+    presetFlaskIndex: parseInt(document.getElementById("preset-flask").value, 10),
+    presetInvIndex: parseInt(document.getElementById("preset-investment").value, 10),
+    presetMetalIndex: parseInt(document.getElementById("preset-metal").value, 10),
+    modelW: parseFloat(document.getElementById("model-weight").value) || 0,
+    polyDensity: parseFloat(document.getElementById("polymer-density").value) || 1.1,
+    sprueMargin: parseFloat(document.getElementById("sprue-margin").value) || 15,
+    existingMetal: parseFloat(document.getElementById("existing-metal").value) || 0,
+    note: document.getElementById("flask-note") ? document.getElementById("flask-note").value.trim() : ""
+  };
+
+  return {
+    version: "1.0",
+    appName: "Casting Calc",
+    schema: "casting-project",
+    exportedAt: now.toISOString(),
+    readableDate: now.toLocaleString('uk-UA'),
+    project: {
+      title: projectTitle || "Проект литва",
+      updatedAt: now.toISOString()
+    },
+    currentSingleCalc: singleInputs,
+    batch: state.batch.map(item => {
+      return recomputeFlaskItem(JSON.parse(JSON.stringify(item)));
+    }),
+    presets: {
+      flasks: state.flasks,
+      investments: state.investments
+    }
+  };
+}
+
+function exportProjectJSON() {
+  const projectObj = buildProjectObject();
+  const jsonString = JSON.stringify(projectObj, null, 2);
+  
+  const safeTitle = (projectTitle || "Проект").replace(/[^\w\dа-яА-ЯіїєґІЇЄҐ_-]/gi, '_');
+  const dateStr = getFormattedDate();
+  const filename = `Casting_${safeTitle}_${dateStr}.json`;
+
+  const blob = new Blob([jsonString], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  projectLastSaved = new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+  localStorage.setItem("cc_project_last_saved", projectLastSaved);
+  updateProjectHeader();
+
+  showToast(`💾 Проект "${projectTitle}" збережено у файл ${filename}!`);
+}
+
+function triggerImportProjectJSON() {
+  const fileInput = document.getElementById("project-file-input");
+  if (fileInput) {
+    fileInput.value = "";
+    fileInput.click();
+  }
+}
+
+function handleProjectFileSelect(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  readAndApplyJsonFile(file);
+}
+
+function readAndApplyJsonFile(file) {
+  if (!file.name.toLowerCase().endsWith('.json') && file.type !== 'application/json' && file.type !== '') {
+    showToast("⚠️ Будь ласка, виберіть файл у форматі .json");
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const content = e.target.result;
+    parseAndApplyProjectJSON(content, file.name);
+  };
+  reader.onerror = () => {
+    showToast("❌ Помилка читання файлу");
+  };
+  reader.readAsText(file, "UTF-8");
+}
+
+function parseAndApplyProjectJSON(jsonText, sourceName = "") {
+  try {
+    const data = typeof jsonText === "string" ? JSON.parse(jsonText) : jsonText;
+    if (!data || typeof data !== "object") {
+      throw new Error("Невалідний формат JSON");
+    }
+
+    let importedBatch = [];
+    let importedTitle = "";
+    let importedPresets = null;
+    let importedSingle = null;
+
+    if (Array.isArray(data)) {
+      // Прямий масив опок
+      importedBatch = data;
+      importedTitle = sourceName ? sourceName.replace(/\.json$/i, '') : "Імпортований заміс";
+    } else if (data.batch && Array.isArray(data.batch)) {
+      // Повна схема проекту Casting Calc
+      importedBatch = data.batch;
+      if (data.project && data.project.title) {
+        importedTitle = data.project.title;
+      } else if (data.projectName) {
+        importedTitle = data.projectName;
+      } else if (sourceName) {
+        importedTitle = sourceName.replace(/\.json$/i, '');
+      }
+      if (data.presets) importedPresets = data.presets;
+      if (data.currentSingleCalc) importedSingle = data.currentSingleCalc;
+    } else if (data.flasks && Array.isArray(data.flasks) && !data.batch) {
+      // Імпорт лише списку пресетів
+      if (data.flasks) state.flasks = data.flasks;
+      if (data.investments) state.investments = data.investments;
+      localStorage.setItem("cc_flasks", JSON.stringify(state.flasks));
+      localStorage.setItem("cc_investments", JSON.stringify(state.investments));
+      renderPresetSelects();
+      renderPresetModalLists();
+      showToast("✅ Пресети успішно імпортовано!");
+      return;
+    } else {
+      throw new Error("Не знайдено коректної структури даних або опок у файлі");
+    }
+
+    // 1. Відновлення назви проекту
+    if (importedTitle) {
+      projectTitle = importedTitle;
+      localStorage.setItem("cc_project_title", projectTitle);
+      const titleEl = document.getElementById("project-title-input");
+      if (titleEl) titleEl.value = projectTitle;
+    }
+
+    // 2. Відновлення пресетів користувача
+    if (importedPresets) {
+      if (Array.isArray(importedPresets.flasks) && importedPresets.flasks.length > 0) {
+        state.flasks = importedPresets.flasks;
+        localStorage.setItem("cc_flasks", JSON.stringify(state.flasks));
+      }
+      if (Array.isArray(importedPresets.investments) && importedPresets.investments.length > 0) {
+        state.investments = importedPresets.investments;
+        localStorage.setItem("cc_investments", JSON.stringify(state.investments));
+      }
+      renderPresetSelects();
+      renderPresetModalLists();
+    }
+
+    // 3. Відновлення та перерахунок кошика замісу
+    state.batch = importedBatch.map(item => {
+      // Зіставлення сплаву металу
+      if (typeof item.metal === 'string') {
+        const found = METALS.find(m => m.id === item.metal || m.name === item.metal);
+        item.metal = found || METALS[0];
+      } else if (item.metal && !item.metal.density) {
+        const found = METALS.find(m => m.id === item.metal.id);
+        item.metal = found || METALS[0];
+      }
+      return recomputeFlaskItem(item);
+    });
+    localStorage.setItem("cc_batch", JSON.stringify(state.batch));
+
+    // 4. Відновлення полів одиночного калькулятора (якщо присутні)
+    if (importedSingle) {
+      if (importedSingle.d) document.getElementById("flask-diameter").value = importedSingle.d;
+      if (importedSingle.h) document.getElementById("flask-height").value = importedSingle.h;
+      if (importedSingle.modelW !== undefined) document.getElementById("model-weight").value = importedSingle.modelW;
+      if (importedSingle.polyDensity !== undefined) document.getElementById("polymer-density").value = importedSingle.polyDensity;
+      if (importedSingle.sprueMargin !== undefined) document.getElementById("sprue-margin").value = importedSingle.sprueMargin;
+      if (importedSingle.existingMetal !== undefined) document.getElementById("existing-metal").value = importedSingle.existingMetal;
+      if (importedSingle.note !== undefined && document.getElementById("flask-note")) {
+        document.getElementById("flask-note").value = importedSingle.note;
+      }
+      if (importedSingle.presetFlaskIndex !== undefined && importedSingle.presetFlaskIndex >= 0 && importedSingle.presetFlaskIndex < state.flasks.length) {
+        document.getElementById("preset-flask").value = importedSingle.presetFlaskIndex;
+      }
+      if (importedSingle.presetInvIndex !== undefined && importedSingle.presetInvIndex >= 0 && importedSingle.presetInvIndex < state.investments.length) {
+        document.getElementById("preset-investment").value = importedSingle.presetInvIndex;
+      }
+      if (importedSingle.presetMetalIndex !== undefined && importedSingle.presetMetalIndex >= 0 && importedSingle.presetMetalIndex < METALS.length) {
+        document.getElementById("preset-metal").value = importedSingle.presetMetalIndex;
+      }
+      isFlaskManual = !!importedSingle.isFlaskManual;
+      updateFlaskHeaderDisplay();
+      onNoteInput();
+    }
+
+    // 5. Оновлення інтерфейсу
+    calculateSingle();
+    renderBatch();
+    updateProjectHeader();
+    closeJsonModal();
+
+    showToast(`✅ Проект "${projectTitle}" завантажено (${state.batch.length} опок)! Всі дані готові для редагування.`);
+  } catch (err) {
+    console.error("JSON parse error:", err);
+    showToast(`❌ Помилка завантаження JSON: ${err.message || "Некоректний файл"}`);
+  }
+}
+
+function openJsonModal() {
+  const projectObj = buildProjectObject();
+  const jsonString = JSON.stringify(projectObj, null, 2);
+  const textarea = document.getElementById("json-modal-textarea");
+  const statsSpan = document.getElementById("json-modal-stats");
+  
+  if (textarea) textarea.value = jsonString;
+  if (statsSpan) {
+    const sizeKb = (new Blob([jsonString]).size / 1024).toFixed(1);
+    statsSpan.innerText = `${state.batch.length} опок | ${sizeKb} КБ`;
+  }
+  
+  document.getElementById("jsonModal").style.display = "flex";
+}
+
+function closeJsonModal() {
+  document.getElementById("jsonModal").style.display = "none";
+}
+
+function copyJsonTextFromModal() {
+  const textarea = document.getElementById("json-modal-textarea");
+  if (!textarea || !textarea.value) {
+    showToast("Немає тексту для копіювання");
+    return;
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(textarea.value).then(() => {
+      showToast("📋 Код JSON скопійовано в буфер обміну!");
+    }).catch(() => {
+      fallbackCopyText(textarea.value);
+    });
+  } else {
+    fallbackCopyText(textarea.value);
+  }
+}
+
+function applyJsonFromModal() {
+  const textarea = document.getElementById("json-modal-textarea");
+  if (!textarea || !textarea.value.trim()) {
+    showToast("⚠️ Вставте JSON-текст у поле для завантаження");
+    return;
+  }
+  parseAndApplyProjectJSON(textarea.value.trim(), "Вставлений проект");
+}
+
+function confirmResetProject() {
+  if (state.batch.length > 0) {
+    if (!confirm("Ви впевнені, що хочете розпочати новий проект? Поточний заміс буде очищено (рекомендуємо спочатку зберегти JSON).")) {
+      return;
+    }
+  }
+  state.batch = [];
+  localStorage.setItem("cc_batch", JSON.stringify([]));
+  projectTitle = "Новий проект литва";
+  localStorage.setItem("cc_project_title", projectTitle);
+  const titleInput = document.getElementById("project-title-input");
+  if (titleInput) titleInput.value = projectTitle;
+  document.getElementById("model-weight").value = "0";
+  document.getElementById("existing-metal").value = "0";
+  if (document.getElementById("flask-note")) document.getElementById("flask-note").value = "";
+  onNoteInput();
+  calculateSingle();
+  renderBatch();
+  updateProjectHeader();
+  showToast("📄 Створено новий проект");
+}
+
+function setupDragAndDrop() {
+  const overlay = document.getElementById("drag-overlay");
+  let dragCounter = 0;
+
+  window.addEventListener("dragenter", (e) => {
+    e.preventDefault();
+    dragCounter++;
+    if (overlay) overlay.style.display = "flex";
+  });
+
+  window.addEventListener("dragover", (e) => {
+    e.preventDefault();
+  });
+
+  window.addEventListener("dragleave", (e) => {
+    e.preventDefault();
+    dragCounter--;
+    if (dragCounter <= 0) {
+      dragCounter = 0;
+      if (overlay) overlay.style.display = "none";
+    }
+  });
+
+  window.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dragCounter = 0;
+    if (overlay) overlay.style.display = "none";
+
+    const files = e.dataTransfer && e.dataTransfer.files;
+    if (files && files.length > 0) {
+      readAndApplyJsonFile(files[0]);
+    }
+  });
+
+  const modalDropZone = document.getElementById("modal-drop-zone");
+  if (modalDropZone) {
+    modalDropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      modalDropZone.classList.add("dragover");
+    });
+    modalDropZone.addEventListener("dragleave", () => {
+      modalDropZone.classList.remove("dragover");
+    });
+    modalDropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      modalDropZone.classList.remove("dragover");
+      const files = e.dataTransfer && e.dataTransfer.files;
+      if (files && files.length > 0) {
+        readAndApplyJsonFile(files[0]);
+      }
+    });
+  }
 }
 </script>
 
