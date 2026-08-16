@@ -62,6 +62,24 @@
     th { color: var(--text-muted); font-weight: 600; background-color: rgba(0,0,0,0.2); }
 
     .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; background-color: var(--bg-input); color: var(--accent); border: 1px solid var(--accent); }
+    .badge-success { background-color: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
+    .badge-pending { background-color: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid #f59e0b; }
+
+    /* Стилі для готових (відлитих) опок */
+    .flask-card-completed { border: 2px solid #10b981 !important; background: rgba(16, 185, 129, 0.09) !important; box-shadow: 0 0 15px rgba(16, 185, 129, 0.15); }
+    .flask-row-completed { background: rgba(16, 185, 129, 0.07) !important; }
+    .flask-row-completed td { border-bottom-color: rgba(16, 185, 129, 0.2) !important; }
+
+    /* Кастомний ергономічний чекбокс */
+    .complete-checkbox-label { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; font-size: 0.88rem; font-weight: 600; padding: 4px 8px; border-radius: 6px; transition: all 0.2s; }
+    .complete-checkbox-label:hover { background: rgba(255,255,255,0.05); }
+    .complete-checkbox { width: 18px; height: 18px; accent-color: #10b981; cursor: pointer; border-radius: 4px; }
+
+    .progress-bar-container { background: rgba(15,23,42,0.8); border: 1px solid var(--border); border-radius: 9999px; height: 10px; overflow: hidden; width: 100%; margin-top: 6px; }
+    .progress-bar-fill { background: linear-gradient(90deg, #10b981, #34d399); height: 100%; transition: width 0.3s ease; }
+
+    .note-input { background: rgba(15,23,42,0.6); border: 1px dashed var(--border); border-radius: 6px; padding: 6px 10px; font-size: 0.83rem; color: var(--text); width: 100%; transition: border-color 0.2s; }
+    .note-input:focus { border-color: var(--accent); border-style: solid; background: var(--bg-input); }
 
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; padding: 12px; }
     .modal-content { background: var(--bg-card); width: 100%; max-width: 500px; border-radius: 12px; padding: 20px; border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; }
@@ -140,6 +158,10 @@
         <label>Наявний метал (г)</label>
         <input type="number" id="existing-metal" value="0" step="0.1" oninput="calculateSingle()">
       </div>
+      <div class="form-group" style="grid-column: 1 / -1;">
+        <label>Примітка до опоки (необов'язково)</label>
+        <input type="text" id="flask-note" placeholder="напр. Золоті обручки №14, терміново / Клієнт Олексій" oninput="calculateSingle()">
+      </div>
     </div>
 
     <!-- Результати поточної опоки -->
@@ -147,7 +169,7 @@
       <!-- Динамічний вміст -->
     </div>
 
-    <button class="btn" style="width: 100%; margin-top: 12px;" onclick="addToBatch()">+ Додати опоку в заміс</button>
+    <button class="btn" id="btn-add-to-batch" style="width: 100%; margin-top: 12px;" onclick="addToBatch()">+ Додати опоку в заміс</button>
   </div>
 
   <!-- Модуль мульти-опок / Кошик замісу -->
@@ -164,17 +186,18 @@
       <table id="batch-table">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Опока (мм)</th>
+            <th style="width: 110px;">Статус / Готово</th>
+            <th># Опока (мм)</th>
             <th>Сплав / Проба</th>
             <th>Формомаса (г)</th>
             <th>Вода (мл)</th>
             <th>Метал на опоку</th>
+            <th>Примітка</th>
             <th>Дії</th>
           </tr>
         </thead>
         <tbody id="batch-table-body">
-          <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Кошик замісу порожній</td></tr>
+          <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Кошик замісу порожній</td></tr>
         </tbody>
       </table>
     </div>
@@ -199,6 +222,15 @@
     </div>
 
     <div style="display: flex; flex-direction: column; gap: 14px;">
+      <!-- Чекбокс готовності (відлито) у модальному вікні -->
+      <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; border-radius: 8px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
+        <label class="complete-checkbox-label" for="recalc-completed-input" style="padding: 0; width: 100%;">
+          <input type="checkbox" id="recalc-completed-input" class="complete-checkbox" onchange="updateRecalcLivePreview()">
+          <span id="recalc-completed-label" style="color: #34d399; font-size: 0.95rem;">Опоку відлито (ГОТОВО)</span>
+        </label>
+        <span id="recalc-status-badge" class="badge badge-pending">В черзі</span>
+      </div>
+
       <!-- Інфо про поточну опоку -->
       <div style="background: rgba(15,23,42,0.6); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
@@ -209,6 +241,14 @@
           <span>Вага воску/полімеру: <strong id="recalc-model-weight" style="color: var(--text);">2.5 г</strong></span>
           <span>Ливник: <strong id="recalc-sprue-val" style="color: var(--text);">+15%</strong></span>
         </div>
+      </div>
+
+      <!-- Редагування примітки для опоки -->
+      <div class="form-group">
+        <label for="recalc-note-input" style="font-size: 0.82rem; color: var(--text-muted);">
+          📝 Примітка до цієї опоки:
+        </label>
+        <input type="text" id="recalc-note-input" class="note-input" placeholder="напр. Замовлення #14, золоті каблучки" style="font-size: 0.9rem;">
       </div>
 
       <!-- Загальна потреба в металі (базова вага залишається незмінною) -->
@@ -557,6 +597,16 @@ function resetDefaultPresets() {
 }
 
 // --- МАТЕМАТИЧНИЙ ЯДРО РОЗРАХУНКІВ ---
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 function getSingleCalculations() {
   const d = parseFloat(document.getElementById("flask-diameter").value) || 0;
   const h = parseFloat(document.getElementById("flask-height").value) || 0;
@@ -564,6 +614,8 @@ function getSingleCalculations() {
   const polyDensity = parseFloat(document.getElementById("polymer-density").value) || 1.1;
   const sprueMargin = parseFloat(document.getElementById("sprue-margin").value) || 0;
   const existingMetal = parseFloat(document.getElementById("existing-metal").value) || 0;
+  const noteEl = document.getElementById("flask-note");
+  const note = noteEl ? noteEl.value.trim() : "";
 
   const invIdx = parseInt(document.getElementById("preset-investment").value, 10);
   const invRatio = (invIdx >= 0 && state.investments[invIdx]) ? state.investments[invIdx].ratio : 38;
@@ -603,7 +655,7 @@ function getSingleCalculations() {
 
   return {
     d, h, modelW, polyDensity, sprueMargin, existingMetal,
-    invRatio, metal,
+    invRatio, metal, note, completed: false,
     flaskVolume, modelVolume, investmentVolume,
     powderWeight, waterVolume,
     totalMetalNeeded, remainingMetalNeeded, pureMetalToAdd, alloyToAdd
@@ -637,11 +689,17 @@ function calculateSingle() {
       <span>Доплавка (Чистота 999.9 + Лігатура):</span>
       <span class="val" style="color: #fde047;">${calc.pureMetalToAdd.toFixed(2)} г + ${calc.alloyToAdd.toFixed(2)} г (${calc.remainingMetalNeeded.toFixed(2)} г)</span>
     </div>
+    ${calc.note ? `
+    <div class="results-row" style="background: rgba(217,119,6,0.1); padding: 4px 8px; border-radius: 6px; margin-top: 4px;">
+      <span style="color: var(--accent);">📝 Примітка:</span>
+      <span style="color: var(--text); font-style: italic;">${escapeHtml(calc.note)}</span>
+    </div>
+    ` : ''}
   `;
 }
 
 // --- ПЕРЕРАХУНОК МЕТАЛУ ТА ШИХТОВКИ ДЛЯ ОПОКИ В КОШИКУ ---
-function recomputeFlaskItem(item, newExistingMetal = null, newSprueMargin = null) {
+function recomputeFlaskItem(item, newExistingMetal = null, newSprueMargin = null, newCompleted = null, newNote = null) {
   if (newSprueMargin !== null && !isNaN(newSprueMargin) && newSprueMargin >= 0) {
     item.sprueMargin = parseFloat(newSprueMargin);
   }
@@ -649,6 +707,16 @@ function recomputeFlaskItem(item, newExistingMetal = null, newSprueMargin = null
     item.existingMetal = Math.max(0, parseFloat(newExistingMetal));
   } else if (item.existingMetal === undefined) {
     item.existingMetal = 0;
+  }
+  if (newCompleted !== null) {
+    item.completed = !!newCompleted;
+  } else if (item.completed === undefined) {
+    item.completed = false;
+  }
+  if (newNote !== null) {
+    item.note = String(newNote).trim();
+  } else if (item.note === undefined) {
+    item.note = "";
   }
 
   // Перевірка об'єму моделі та густини
@@ -675,6 +743,34 @@ function recomputeFlaskItem(item, newExistingMetal = null, newSprueMargin = null
   return item;
 }
 
+function toggleFlaskCompleted(index) {
+  if (index >= 0 && index < state.batch.length) {
+    state.batch[index].completed = !state.batch[index].completed;
+    localStorage.setItem("cc_batch", JSON.stringify(state.batch));
+    renderBatch();
+    const statusText = state.batch[index].completed ? "позначено як ВІДЛИТО (ГОТОВО) ✓" : "повернуто в чергу на литво";
+    showToast(`Опоку #${index + 1} ${statusText}`);
+  }
+}
+
+function updateFlaskNote(index, noteVal) {
+  if (index >= 0 && index < state.batch.length) {
+    state.batch[index].note = noteVal.trim();
+    localStorage.setItem("cc_batch", JSON.stringify(state.batch));
+    renderBatchSummary();
+  }
+}
+
+function markAllCompleted(completed) {
+  if (state.batch.length === 0) return;
+  state.batch.forEach(item => {
+    item.completed = completed;
+  });
+  localStorage.setItem("cc_batch", JSON.stringify(state.batch));
+  renderBatch();
+  showToast(completed ? "Всі опоки позначено як відлиті!" : "Позначки готовності скинуто.");
+}
+
 function openRecalcModal(index) {
   if (state.batch.length === 0) {
     showToast("Кошик замісу порожній! Додайте спочатку опоку в кошик.");
@@ -694,6 +790,8 @@ function openRecalcModal(index) {
   document.getElementById("recalc-sprue-val").innerText = `+${item.sprueMargin}%`;
   document.getElementById("recalc-existing-input").value = item.existingMetal > 0 ? item.existingMetal : "";
   document.getElementById("recalc-sprue-input").value = item.sprueMargin !== undefined ? item.sprueMargin : 15;
+  document.getElementById("recalc-note-input").value = item.note || "";
+  document.getElementById("recalc-completed-input").checked = !!item.completed;
 
   // Оновлення стану кнопок навігації
   document.getElementById("btn-recalc-prev").disabled = (currentRecalcIndex === 0);
@@ -712,6 +810,22 @@ function closeRecalcModal() {
 function updateRecalcLivePreview() {
   if (currentRecalcIndex < 0 || currentRecalcIndex >= state.batch.length) return;
   const item = state.batch[currentRecalcIndex];
+
+  const isCompleted = document.getElementById("recalc-completed-input").checked;
+  const badgeEl = document.getElementById("recalc-status-badge");
+  const labelEl = document.getElementById("recalc-completed-label");
+
+  if (isCompleted) {
+    badgeEl.className = "badge badge-success";
+    badgeEl.innerText = "✓ ВІДЛИТО";
+    labelEl.style.color = "#34d399";
+    labelEl.innerText = "Опоку відлито (ГОТОВО)";
+  } else {
+    badgeEl.className = "badge badge-pending";
+    badgeEl.innerText = "⏳ В черзі";
+    labelEl.style.color = "var(--text)";
+    labelEl.innerText = "Позначити як відлиту";
+  }
 
   const existingInput = parseFloat(document.getElementById("recalc-existing-input").value) || 0;
   const sprueInput = parseFloat(document.getElementById("recalc-sprue-input").value) || 0;
@@ -772,12 +886,14 @@ function saveRecalcModal(closeAfter = false) {
 
   const existingInput = parseFloat(document.getElementById("recalc-existing-input").value) || 0;
   const sprueInput = parseFloat(document.getElementById("recalc-sprue-input").value) || item.sprueMargin;
+  const completedInput = document.getElementById("recalc-completed-input").checked;
+  const noteInput = document.getElementById("recalc-note-input").value;
 
-  recomputeFlaskItem(item, existingInput, sprueInput);
+  recomputeFlaskItem(item, existingInput, sprueInput, completedInput, noteInput);
   localStorage.setItem("cc_batch", JSON.stringify(state.batch));
   renderBatch();
 
-  showToast(`Опоку #${currentRecalcIndex + 1} успішно перераховано!`);
+  showToast(`Опоку #${currentRecalcIndex + 1} успішно оновлено!`);
 
   if (closeAfter) {
     closeRecalcModal();
@@ -791,7 +907,10 @@ function navigateRecalcModal(step) {
   const item = state.batch[currentRecalcIndex];
   const existingInput = parseFloat(document.getElementById("recalc-existing-input").value) || 0;
   const sprueInput = parseFloat(document.getElementById("recalc-sprue-input").value) || item.sprueMargin;
-  recomputeFlaskItem(item, existingInput, sprueInput);
+  const completedInput = document.getElementById("recalc-completed-input").checked;
+  const noteInput = document.getElementById("recalc-note-input").value;
+
+  recomputeFlaskItem(item, existingInput, sprueInput, completedInput, noteInput);
   localStorage.setItem("cc_batch", JSON.stringify(state.batch));
   renderBatch();
 
@@ -806,6 +925,11 @@ function addToBatch() {
   const calc = getSingleCalculations();
   state.batch.push(calc);
   localStorage.setItem("cc_batch", JSON.stringify(state.batch));
+  
+  // Очищаємо поле примітки після додавання для зручності введення наступної
+  const noteEl = document.getElementById("flask-note");
+  if (noteEl) noteEl.value = "";
+  
   renderBatch();
   showToast(`Опоку #${state.batch.length} додано у кошик замісу`);
 }
@@ -830,13 +954,12 @@ function clearBatch() {
 function renderBatch() {
   const tbody = document.getElementById("batch-table-body");
   const countSpan = document.getElementById("batch-count");
-  const summaryBox = document.getElementById("batch-summary");
 
   countSpan.innerText = state.batch.length;
 
   if (state.batch.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 16px 0;">Кошик замісу порожній</td></tr>`;
-    summaryBox.style.display = "none";
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 16px 0;">Кошик замісу порожній</td></tr>`;
+    document.getElementById("batch-summary").style.display = "none";
     return;
   }
 
@@ -854,14 +977,27 @@ function renderBatch() {
       metalDetail += `<div style="font-size: 0.72rem; color: #94a3b8;">(Наявний: -${item.existingMetal.toFixed(2)}г)</div>`;
     }
 
+    const rowClass = item.completed ? 'flask-row-completed' : '';
+
     return `
-      <tr>
-        <td style="font-weight: 600;">#${i + 1}</td>
-        <td>⌀${item.d}×${item.h} мм<br><span style="font-size: 0.75rem; color: var(--text-muted);">Модель: ${item.modelW}г</span></td>
+      <tr class="${rowClass}">
+        <td>
+          <label class="complete-checkbox-label" title="${item.completed ? 'Опоку відлито' : 'Натисніть щоб відмітити як готову'}">
+            <input type="checkbox" class="complete-checkbox" ${item.completed ? 'checked' : ''} onchange="toggleFlaskCompleted(${i})">
+            <span style="font-size: 0.8rem; color: ${item.completed ? '#34d399' : 'var(--text-muted)'};">${item.completed ? '✓ Відлито' : 'В черзі'}</span>
+          </label>
+        </td>
+        <td style="font-weight: 600;">
+          <span>#${i + 1} ⌀${item.d}×${item.h} мм</span>
+          <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">Модель: ${item.modelW}г</div>
+        </td>
         <td><span class="badge">${item.metal.name}</span></td>
         <td><span style="color: #a7f3d0; font-weight: 600;">${Math.round(item.powderWeight)} г</span></td>
         <td><span style="color: #38bdf8; font-weight: 600;">${Math.round(item.waterVolume)} мл</span></td>
         <td>${metalDetail}</td>
+        <td>
+          <input type="text" class="note-input" value="${escapeHtml(item.note || '')}" placeholder="Примітка..." onchange="updateFlaskNote(${i}, this.value)" style="min-width: 110px;">
+        </td>
         <td>
           <div style="display: flex; gap: 4px; align-items: center;">
             <button class="btn btn-secondary btn-sm" id="btn-recalc-flask-${i}" onclick="openRecalcModal(${i})" title="Перерахувати наявний метал та шихтовку для цієї опоки" style="padding: 4px 8px; font-size: 0.75rem; border-color: var(--accent); color: var(--accent);">⚡ Перерахунок</button>
@@ -872,14 +1008,28 @@ function renderBatch() {
     `;
   }).join("");
 
+  renderBatchSummary();
+}
+
+function renderBatchSummary() {
+  const summaryBox = document.getElementById("batch-summary");
+  if (state.batch.length === 0) {
+    summaryBox.style.display = "none";
+    return;
+  }
+
   // Розрахунок підсумків формомаси для сумісного замісу
   let totalPowder = 0;
   let totalWater = 0;
+  let completedCount = 0;
 
   state.batch.forEach(item => {
     totalPowder += item.powderWeight;
     totalWater += item.waterVolume;
+    if (item.completed) completedCount++;
   });
+
+  const progressPercent = Math.round((completedCount / state.batch.length) * 100);
 
   // Формування поопочного розрахунку металу (метал НЕ підсумовується)
   const perFlaskMetalsHTML = state.batch.map((item, i) => {
@@ -892,22 +1042,36 @@ function renderBatch() {
       composition = `<span style="color: #a7f3d0;">➜ 100% закрито наявним металом (доплавка не потрібна)</span>`;
     }
 
+    const cardClass = item.completed ? 'flask-card-completed' : '';
+
     return `
-      <div style="margin-top: 8px; padding: 12px; background: rgba(15,23,42,0.75); border-radius: 8px; border: 1px solid var(--border);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
-          <div>
-            <span style="font-weight: 600; color: var(--accent); font-size: 0.95rem;">Опока #${i + 1} (⌀${item.d}×${item.h} мм) — ${item.metal.name}</span>
+      <div style="margin-top: 10px; padding: 14px; background: rgba(15,23,42,0.75); border-radius: 8px; border: 1px solid var(--border); transition: all 0.25s;" class="${cardClass}">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <label class="complete-checkbox-label" style="background: rgba(0,0,0,0.25); border: 1px solid ${item.completed ? '#10b981' : 'var(--border)'};">
+              <input type="checkbox" class="complete-checkbox" ${item.completed ? 'checked' : ''} onchange="toggleFlaskCompleted(${i})">
+              <span style="color: ${item.completed ? '#34d399' : 'var(--text)'};">${item.completed ? '✓ ВІДЛИТО (ГОТОВО)' : 'Позначити як відлиту'}</span>
+            </label>
+            <span style="font-weight: 700; color: ${item.completed ? '#34d399' : 'var(--accent)'}; font-size: 0.98rem;">Опока #${i + 1} (⌀${item.d}×${item.h} мм)</span>
+            <span class="badge">${item.metal.name}</span>
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-weight: 700; color: #38bdf8; font-size: 0.98rem;">Метал: ${item.totalMetalNeeded.toFixed(2)} г</span>
-            <button class="btn btn-secondary btn-sm" id="btn-recalc-summary-${i}" onclick="openRecalcModal(${i})" title="Перерахувати наявний метал для опоки #${i + 1}" style="padding: 3px 8px; font-size: 0.75rem; border-color: var(--accent); color: var(--accent);">⚡ Перерахувати</button>
+            <span style="font-weight: 700; color: #38bdf8; font-size: 1rem;">Метал: ${item.totalMetalNeeded.toFixed(2)} г</span>
+            <button class="btn btn-secondary btn-sm" id="btn-recalc-summary-${i}" onclick="openRecalcModal(${i})" title="Перерахувати наявний метал для опоки #${i + 1}" style="padding: 4px 10px; font-size: 0.78rem; border-color: var(--accent); color: var(--accent);">⚡ Перерахувати</button>
           </div>
         </div>
+
+        <!-- Примітка до опоки -->
+        <div style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 0.8rem; color: var(--text-muted); white-space: nowrap;">📝 Примітка:</span>
+          <input type="text" class="note-input" value="${escapeHtml(item.note || '')}" placeholder="Додати примітку (наприклад, Замовлення №45 / Золоті каблучки)..." onchange="updateFlaskNote(${i}, this.value)" style="font-size: 0.82rem;">
+        </div>
+
         <div style="font-size: 0.83rem; color: var(--text-muted); margin-bottom: 6px;">
           Вага моделі: ${item.modelW} г (густина: ${item.polyDensity} г/см³) | Ливник: +${item.sprueMargin}%
           ${item.existingMetal > 0 ? `| <span style="color: #fde047;">Наявний метал: ${item.existingMetal.toFixed(2)} г</span> (доплавка: ${item.remainingMetalNeeded.toFixed(2)} г)` : '| <span style="color: #94a3b8;">Наявного металу: 0 г (повна доплавка)</span>'}
         </div>
-        <div style="font-size: 0.88rem; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 6px; border-left: 3px solid var(--accent);">
+        <div style="font-size: 0.88rem; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px; border-left: 3px solid ${item.completed ? '#10b981' : 'var(--accent)'};">
           ${composition}
         </div>
       </div>
@@ -916,9 +1080,29 @@ function renderBatch() {
 
   summaryBox.style.display = "block";
   summaryBox.innerHTML = `
-    <div style="font-weight: 700; font-size: 1rem; color: var(--accent); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
-      <span>ЗАГАЛЬНИЙ ПІДСУМОК ЗАМІСУ:</span>
-      <span style="font-size: 0.75rem; background: rgba(217,119,6,0.15); border: 1px solid var(--accent); color: var(--accent); padding: 2px 8px; border-radius: 12px;">${state.batch.length} опок у замісі</span>
+    <div style="font-weight: 700; font-size: 1rem; color: var(--accent); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+      <span>ЗАГАЛЬНИЙ ПІДСУМОК ЗАМІСУ ТА ЛИТВА:</span>
+      <div style="display: flex; gap: 6px; align-items: center;">
+        <button class="btn btn-secondary btn-sm" onclick="markAllCompleted(true)" style="font-size: 0.72rem; padding: 2px 6px;">✓ Всі відлито</button>
+        <button class="btn btn-secondary btn-sm" onclick="markAllCompleted(false)" style="font-size: 0.72rem; padding: 2px 6px;">↺ Скинути</button>
+        <span style="font-size: 0.75rem; background: rgba(217,119,6,0.15); border: 1px solid var(--accent); color: var(--accent); padding: 2px 8px; border-radius: 12px;">${state.batch.length} опок у замісі</span>
+      </div>
+    </div>
+
+    <!-- Блок прогресу литва -->
+    <div style="background: rgba(15,23,42,0.8); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem;">
+        <span>📊 <strong>Прогрес литва:</strong></span>
+        <span style="font-weight: 700; color: ${completedCount === state.batch.length ? '#34d399' : '#38bdf8'};">
+          ${completedCount} з ${state.batch.length} опок відлито (${progressPercent}%)
+        </span>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" style="width: ${progressPercent}%;"></div>
+      </div>
+      <div style="font-size: 0.76rem; color: #fde047; margin-top: 6px;">
+        💡 <strong>Пріоритет литва в майстерні:</strong> спочатку відливайте золоті опоки (висока чистота та температура), потім срібні та неблагородні метали.
+      </div>
     </div>
 
     <!-- Блок замісу формомаси -->
@@ -941,7 +1125,7 @@ function renderBatch() {
         <button class="btn btn-secondary btn-sm" id="btn-recalc-all-summary" onclick="openRecalcModal(0)" style="font-size: 0.75rem; padding: 3px 8px; border-color: var(--accent); color: var(--accent);">⚡ Перерахувати метал по черзі</button>
       </div>
       <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px;">
-        ⚠️ Метал не підсумовується в загальну масу, оскільки кожна опока відливається окремо зі своєю шихтовкою. Якщо після відливки першої опоки змінився наявний метал — скористайтеся кнопкою <strong>«⚡ Перерахувати»</strong>.
+        ⚠️ Кожна опока плавиться окремо. Після відливки кожної опоки відмічайте її як <strong>«✓ Готово»</strong> та при необхідності перераховуйте залишки наявного металу для наступної опоки через <strong>«⚡ Перерахувати»</strong>.
       </div>
       ${perFlaskMetalsHTML}
     </div>
@@ -966,17 +1150,19 @@ function getFormattedTextReport() {
     hour: '2-digit', minute: '2-digit' 
   });
 
-  let txt = `=======================================================\n`;
-  txt += `       CASTING CALC — ТЕХНОЛОГІЧНИЙ ЗВІТ ЛИТВА        \n`;
-  txt += `=======================================================\n`;
-  txt += `Дата та час розрахунку: ${readableDate}\n`;
-  txt += `Кількість опок у замісі: ${state.batch.length} шт.\n\n`;
-
+  let completedCount = 0;
   let totalPowder = 0, totalWater = 0;
   state.batch.forEach((item) => {
     totalPowder += item.powderWeight;
     totalWater += item.waterVolume;
+    if (item.completed) completedCount++;
   });
+
+  let txt = `=======================================================\n`;
+  txt += `       CASTING CALC — ТЕХНОЛОГІЧНИЙ ЗВІТ ЛИТВА        \n`;
+  txt += `=======================================================\n`;
+  txt += `Дата та час розрахунку: ${readableDate}\n`;
+  txt += `Кількість опок у замісі: ${state.batch.length} шт. (Відлито: ${completedCount} шт.)\n\n`;
 
   txt += `-------------------------------------------------------\n`;
   txt += `🥣 1. ЗАГАЛЬНИЙ ЗАМІС ФОРМОМАСИ (СУМАРНО ДЛЯ ВСІХ ОПОК):\n`;
@@ -990,7 +1176,11 @@ function getFormattedTextReport() {
   txt += `-------------------------------------------------------\n\n`;
 
   state.batch.forEach((item, i) => {
-    txt += `[ ОПОКА #${i + 1} ] ⌀${item.d} × ${item.h} мм — ${item.metal.name}\n`;
+    const statusMark = item.completed ? `[✓ ВІДЛИТО / ГОТОВО]` : `[⏳ В ЧЕРЗІ НА ЛИТВО]`;
+    txt += `[ ОПОКА #${i + 1} ] ${statusMark} ⌀${item.d} × ${item.h} мм — ${item.metal.name}\n`;
+    if (item.note) {
+      txt += `  • Примітка:           ${item.note}\n`;
+    }
     txt += `  • Вага моделі:        ${item.modelW} г (густина: ${item.polyDensity} г/см³)\n`;
     txt += `  • Ливникова система:  +${item.sprueMargin}%\n`;
     txt += `  • Формомаса на опоку: ${Math.round(item.powderWeight)} г порошку + ${Math.round(item.waterVolume)} мл води\n`;
