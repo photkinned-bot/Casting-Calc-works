@@ -155,6 +155,28 @@
     .json-textarea { width: 100%; background: #090d16; color: #38bdf8; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.82rem; line-height: 1.4; border: 1px solid var(--border); border-radius: 8px; padding: 12px; resize: vertical; outline: none; }
     .json-textarea:focus { border-color: var(--accent); }
 
+    /* Стилі для відображення густини металу та формульних підказок */
+    .metal-density-box { background: linear-gradient(135deg, rgba(15,23,42,0.85), rgba(30,41,59,0.85)); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; transition: all 0.25s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+    .density-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.88rem; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); text-shadow: 0 0 8px rgba(56,189,248,0.3); }
+    .ratio-pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 0.82rem; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .formula-code { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 0.82rem; color: #a7f3d0; background: rgba(0,0,0,0.35); padding: 6px 10px; border-radius: 6px; border-left: 3px solid #10b981; line-height: 1.45; word-break: break-word; }
+    .table-density-tag { font-size: 0.76rem; color: #38bdf8; font-weight: 600; margin-top: 3px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .table-density-tag .density-ratio { color: var(--text-muted); font-size: 0.72rem; font-weight: normal; }
+
+    /* Довідник густини сплавів */
+    .density-table-card { background: rgba(15,23,42,0.95); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-top: 10px; overflow-x: auto; }
+    .density-ref-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: left; }
+    .density-ref-table th { padding: 6px 8px; border-bottom: 2px solid var(--border); color: var(--text-muted); font-weight: 600; background: rgba(0,0,0,0.3); }
+    .density-ref-table td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.06); vertical-align: middle; }
+    .density-ref-row { cursor: pointer; transition: background 0.15s; }
+    .density-ref-row:hover { background: rgba(255,255,255,0.06); }
+    .density-ref-active { background: rgba(56, 189, 248, 0.12) !important; border-left: 3px solid #38bdf8; }
+
+    /* Стилі для Платини */
+    .badge-platinum { background: rgba(129, 140, 248, 0.2); color: #c7d2fe; border: 1px solid #818cf8; font-weight: 600; text-shadow: 0 0 6px rgba(129,140,248,0.4); }
+    .flask-row-platinum { background: rgba(129, 140, 248, 0.08) !important; border-left: 4px solid #818cf8 !important; }
+    .flask-card-platinum { border: 1px solid #818cf8 !important; border-left: 5px solid #818cf8 !important; background: rgba(129, 140, 248, 0.07) !important; box-shadow: 0 2px 10px rgba(129,140,248,0.12); }
+
     /* Повноекранний оверлей при перетягуванні файлу */
     .drag-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.94); z-index: 10000; border: 4px dashed var(--accent); justify-content: center; align-items: center; pointer-events: auto; }
     .drag-overlay-box { background: var(--bg-card); border: 2px solid var(--accent); border-radius: 16px; padding: 32px; text-align: center; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); animation: pulse 1.5s infinite; }
@@ -302,6 +324,11 @@
         </select>
       </div>
     </div>
+
+    <!-- Візуальна панель густини та формули розрахунку обраного сплаву -->
+    <div id="metal-density-info-box" class="metal-density-box" style="margin-top: 12px;">
+      <!-- Динамічний вміст формули та густини -->
+    </div>
   </div>
 
   <!-- Робочий калькулятор одиночної опоки -->
@@ -447,14 +474,16 @@
 
       <!-- Інфо про поточну опоку -->
       <div style="background: rgba(15,23,42,0.6); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
           <span style="font-weight: 600; color: var(--accent); font-size: 0.95rem;" id="recalc-flask-dimensions">Опока ⌀60×100 мм</span>
           <span class="badge" id="recalc-flask-metal-badge">Срібло 925</span>
         </div>
-        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted);">
-          <span>Вага воску/полімеру: <strong id="recalc-model-weight" style="color: var(--text);">2.5 г</strong></span>
+        <div style="display: flex; justify-content: space-between; font-size: 0.84rem; color: var(--text-muted); flex-wrap: wrap; gap: 6px; margin-bottom: 4px;">
+          <span>Вага моделі: <strong id="recalc-model-weight" style="color: var(--text);">2.5 г</strong></span>
+          <span>Густина металу (ρ): <strong id="recalc-metal-density" style="color: #38bdf8;">13.50 г/см³</strong></span>
           <span>Ливник: <strong id="recalc-sprue-val" style="color: var(--text);">+15%</strong></span>
         </div>
+        <div id="recalc-formula-desc" class="formula-code" style="font-size: 0.76rem; padding: 4px 8px; margin-top: 4px;"></div>
       </div>
 
       <!-- Редагування примітки для опоки -->
@@ -661,7 +690,9 @@ const METALS = [
   { id: "au750_red", name: "Золото 750 Красне (Розрахунок 752)", shortName: "Au 750 Красне", density: 15.5, targetPurity: 752, basePurity: 750, colorCode: "red_gold", icon: "🔴" },
   { id: "au750_yellow", name: "Золото 750 Жовте (Розрахунок 752)", shortName: "Au 750 Жовте", density: 15.5, targetPurity: 752, basePurity: 750, colorCode: "yellow_gold", icon: "🟡" },
   { id: "au750_white", name: "Золото 750 Біле (Розрахунок 752)", shortName: "Au 750 Біле", density: 15.5, targetPurity: 752, basePurity: 750, colorCode: "white_gold", icon: "⚪" },
+  { id: "au375", name: "Золото 375 (Розрахунок 380)", shortName: "Au 375 Золото", density: 11.2, targetPurity: 380, basePurity: 375, colorCode: "yellow_gold", icon: "🟡" },
   { id: "ag925", name: "Срібло 925 (Розрахунок 930)", shortName: "Ag 925 Срібло", density: 10.36, targetPurity: 930, basePurity: 925, colorCode: "silver", icon: "🔘" },
+  { id: "pt950", name: "Платина 950 (Розрахунок 955)", shortName: "Pt 950 Платина", density: 20.7, targetPurity: 955, basePurity: 950, colorCode: "platinum", icon: "💎" },
   { id: "brass", name: "Латунь / Бронза", shortName: "Латунь / Бронза", density: 8.5, targetPurity: 1000, basePurity: 1000, colorCode: "bronze", icon: "🟠" }
 ];
 
@@ -723,6 +754,20 @@ function getMetalColorMeta(metal) {
       border: "#94a3b8",
       borderAccent: "#cbd5e1",
       bg: "rgba(148, 163, 184, 0.08)"
+    };
+  }
+
+  if (colorCode === "platinum" || id.includes("pt") || name.includes("платин")) {
+    return {
+      code: "platinum",
+      badgeClass: "badge-platinum",
+      rowClass: "flask-row-platinum",
+      cardClass: "flask-card-platinum",
+      colorName: "Платина 950",
+      icon: "💎",
+      border: "#818cf8",
+      borderAccent: "#c7d2fe",
+      bg: "rgba(129, 140, 248, 0.08)"
     };
   }
 
@@ -1015,7 +1060,7 @@ function renderPresetSelects() {
   const prevMetalVal = metalSel.value;
   metalSel.innerHTML = METALS.map((m, i) => {
     const meta = getMetalColorMeta(m);
-    return `<option value="${i}">${meta.icon} ${m.name}</option>`;
+    return `<option value="${i}">${meta.icon} ${m.name} (ρ = ${m.density.toFixed(2)} г/см³)</option>`;
   }).join("");
   if (prevMetalVal !== "" && parseInt(prevMetalVal, 10) < METALS.length) {
     metalSel.value = prevMetalVal;
@@ -1023,6 +1068,121 @@ function renderPresetSelects() {
 
   updateFlaskHeaderDisplay();
   updateMetalColorBadgeDisplay();
+  renderMetalDensityInfoCard();
+}
+
+let isDensityTableOpen = false;
+
+function toggleDensityTable() {
+  isDensityTableOpen = !isDensityTableOpen;
+  renderMetalDensityInfoCard();
+}
+
+function selectMetalFromTable(index) {
+  const metalSel = document.getElementById("preset-metal");
+  if (metalSel && index >= 0 && index < METALS.length) {
+    metalSel.value = index;
+    applyMetalPreset();
+  }
+}
+
+function renderMetalDensityInfoCard() {
+  const container = document.getElementById("metal-density-info-box");
+  if (!container) return;
+
+  const sel = document.getElementById("preset-metal");
+  const idx = sel ? parseInt(sel.value, 10) : 0;
+  const metal = (idx >= 0 && METALS[idx]) ? METALS[idx] : METALS[0];
+  const colorMeta = getMetalColorMeta(metal);
+
+  const modelW = parseFloat(document.getElementById("model-weight").value) || 0;
+  const polyDensity = parseFloat(document.getElementById("polymer-density").value) || 1.1;
+  const sprueMargin = parseFloat(document.getElementById("sprue-margin").value) || 0;
+
+  const densityRatioPoly = (metal.density / polyDensity).toFixed(2);
+  const densityRatioWax = (metal.density / 0.92).toFixed(2);
+  const modelVolume = (modelW / polyDensity).toFixed(2);
+  const baseMetalNeeded = ((modelW / polyDensity) * metal.density).toFixed(2);
+  const totalMetalNeeded = (((modelW / polyDensity) * metal.density) * (1 + sprueMargin / 100)).toFixed(2);
+
+  let densityTableHTML = '';
+  if (isDensityTableOpen) {
+    densityTableHTML = `
+      <div class="density-table-card">
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--accent); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;">
+          <span>📚 Довідкова таблиця густини сплавів та коефіцієнтів перерахунку:</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Клікніть по рядку для вибору сплаву</span>
+        </div>
+        <table class="density-ref-table">
+          <thead>
+            <tr>
+              <th>Сплав / Проба</th>
+              <th>Густина (ρ)</th>
+              <th>Коеф. з 3D-полімеру (${polyDensity} г/см³)</th>
+              <th>Коеф. з воску (0.92 г/см³)</th>
+              <th>Розрахункова проба</th>
+              <th>Вибір</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${METALS.map((m, mIdx) => {
+              const mMeta = getMetalColorMeta(m);
+              const isCur = (mIdx === idx);
+              const kPoly = (m.density / polyDensity).toFixed(2);
+              const kWax = (m.density / 0.92).toFixed(2);
+              return `
+                <tr class="density-ref-row ${isCur ? 'density-ref-active' : ''}" onclick="selectMetalFromTable(${mIdx})">
+                  <td style="font-weight: 600;">
+                    <span class="badge ${mMeta.badgeClass}" style="font-size: 0.75rem;">${mMeta.icon} ${m.shortName || m.name}</span>
+                  </td>
+                  <td><strong style="color: #38bdf8; font-size: 0.9rem;">${m.density.toFixed(2)} г/см³</strong></td>
+                  <td style="color: #fbbf24; font-weight: 600;">${kPoly}×</td>
+                  <td style="color: #a7f3d0;">${kWax}×</td>
+                  <td style="color: var(--text-muted);">${m.targetPurity < 1000 ? m.targetPurity : '100%'}</td>
+                  <td>
+                    ${isCur ? '<span style="color: #34d399; font-weight: 700; font-size: 0.75rem;">● Обрано</span>' : `<button type="button" class="quick-chip" style="font-size: 0.72rem; padding: 2px 6px;">Вибрати</button>`}
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  container.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <span style="font-weight: 600; font-size: 0.9rem; color: var(--text);">⚖️ Густина сплаву:</span>
+        <span class="density-pill" title="Точна густина металу, яка враховується у формулі розрахунку ваги">
+          <span>ρ = ${metal.density.toFixed(2)} г/см³</span>
+        </span>
+        <span class="ratio-pill" title="Коефіцієнт переводу ваги з поточної моделі (${polyDensity} г/см³)">
+          📐 До полімеру: ${densityRatioPoly}×
+        </span>
+        <span style="font-size: 0.78rem; color: var(--text-muted);">
+          (до ливарного воску 0.92: <strong style="color: #a7f3d0;">${densityRatioWax}×</strong>)
+        </span>
+      </div>
+      <button type="button" class="quick-chip" onclick="toggleDensityTable()" style="font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px;">
+        <span>${isDensityTableOpen ? '▲ Згорнути довідник' : '📖 Довідник густини сплавів'}</span>
+      </button>
+    </div>
+
+    <div class="formula-code">
+      <div style="color: #38bdf8; font-weight: 600; margin-bottom: 2px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
+        <span>🧮 Формула розрахунку потреби металу:</span>
+        <span style="font-size: 0.75rem; color: #cbd5e1;">M<sub>металу</sub> = (V<sub>моделі</sub> × <strong>ρ<sub>металу</sub></strong>) × (1 + Ливник %)</span>
+      </div>
+      <div>
+        <strong>Розрахунок:</strong> (${modelW > 0 ? modelW + ' г' : 'M_воску'} ÷ ${polyDensity} г/см³ = <strong>${modelVolume} см³</strong>) × <strong>${metal.density.toFixed(2)} г/см³</strong> 
+        = ${baseMetalNeeded} г + запас ливника ${sprueMargin}% = <strong style="color: #fde047; font-size: 0.92rem;">${totalMetalNeeded} г ${metal.shortName || metal.name}</strong>
+      </div>
+    </div>
+
+    ${densityTableHTML}
+  `;
 }
 
 function updateMetalColorBadgeDisplay() {
@@ -1035,6 +1195,7 @@ function updateMetalColorBadgeDisplay() {
     badge.className = `badge ${meta.badgeClass}`;
     badge.innerHTML = `${meta.icon} ${meta.colorName}`;
   }
+  renderMetalDensityInfoCard();
 }
 
 function renderPresetModalLists() {
@@ -1252,10 +1413,23 @@ function calculateSingle() {
       <span class="val" style="color: #a7f3d0;">${Math.round(calc.powderWeight)} г / ${Math.round(calc.waterVolume)} мл</span>
     </div>
     <div class="results-row">
+      <span>Густина сплаву (ρ) / Коефіцієнт:</span>
+      <span class="val" style="display: flex; align-items: center; gap: 6px; justify-content: flex-end; flex-wrap: wrap;">
+        <span class="density-pill" style="font-size: 0.8rem; padding: 2px 8px;">⚖️ ${calc.metal.density.toFixed(2)} г/см³</span>
+        <span class="ratio-pill" style="font-size: 0.76rem; padding: 2px 6px;">${(calc.metal.density / calc.polyDensity).toFixed(2)}× до моделі</span>
+      </span>
+    </div>
+    <div class="results-row">
       <span>Загальний метал:</span>
       <span class="val" style="display: flex; align-items: center; gap: 6px; justify-content: flex-end; flex-wrap: wrap;">
         <span class="badge ${colorMeta.badgeClass}">${colorMeta.icon} ${calc.metal.name}</span>
         <strong style="color: #38bdf8;">${calc.totalMetalNeeded.toFixed(2)} г</strong>
+      </span>
+    </div>
+    <div class="results-row" style="background: rgba(0,0,0,0.25); padding: 4px 8px; border-radius: 6px; margin-top: 4px;">
+      <span style="font-size: 0.78rem; color: var(--text-muted);">Формула металу:</span>
+      <span style="font-size: 0.78rem; color: #a7f3d0; font-family: monospace; text-align: right;">
+        (${calc.modelVolume.toFixed(2)} см³ × ${calc.metal.density.toFixed(2)} г/см³) + ${calc.sprueMargin}% = <strong>${calc.totalMetalNeeded.toFixed(2)} г</strong>
       </span>
     </div>
     ${calc.existingMetal > 0 ? `
@@ -1275,6 +1449,8 @@ function calculateSingle() {
     </div>
     ` : ''}
   `;
+
+  renderMetalDensityInfoCard();
 }
 
 // --- ПЕРЕРАХУНОК МЕТАЛУ ТА ШИХТОВКИ ДЛЯ ОПОКИ В КОШИКУ ---
@@ -1386,6 +1562,10 @@ function openRecalcModal(index) {
   metalBadgeEl.className = `badge ${colorMeta.badgeClass}`;
   metalBadgeEl.innerText = `${colorMeta.icon} ${item.metal.name}`;
   document.getElementById("recalc-model-weight").innerText = `${item.modelW} г`;
+  const metalDensityEl = document.getElementById("recalc-metal-density");
+  if (metalDensityEl) {
+    metalDensityEl.innerText = `${item.metal.density.toFixed(2)} г/см³`;
+  }
   document.getElementById("recalc-sprue-val").innerText = `+${item.sprueMargin}%`;
   document.getElementById("recalc-existing-input").value = item.existingMetal > 0 ? item.existingMetal : "";
   document.getElementById("recalc-sprue-input").value = item.sprueMargin !== undefined ? item.sprueMargin : 15;
@@ -1450,6 +1630,11 @@ function updateRecalcLivePreview() {
   document.getElementById("recalc-total-metal").innerText = `${totalMetal.toFixed(2)} г`;
   document.getElementById("recalc-res-existing").innerText = `-${existingInput.toFixed(2)} г`;
   document.getElementById("recalc-res-remaining").innerText = `${remaining.toFixed(2)} г`;
+
+  const formulaDescEl = document.getElementById("recalc-formula-desc");
+  if (formulaDescEl) {
+    formulaDescEl.innerHTML = `🧮 <strong>Формула:</strong> (${modelVolume.toFixed(2)} см³ × ${item.metal.density.toFixed(2)} г/см³) + ливник ${sprueInput}% = <strong>${totalMetal.toFixed(2)} г</strong>`;
+  }
 
   if (item.metal.targetPurity < 1000 && remaining > 0) {
     document.getElementById("recalc-res-formula").innerText = `999.9: ${pureToAdd.toFixed(2)} г | Лігатура: ${alloyToAdd.toFixed(2)} г`;
@@ -1593,9 +1778,15 @@ function renderBatch() {
         </td>
         <td style="font-weight: 600;">
           <span>#${i + 1} ⌀${item.d}×${item.h} мм</span>
-          <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">Модель: ${item.modelW}г</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">Модель: ${item.modelW}г (V: ${item.modelVolume.toFixed(2)} см³)</div>
         </td>
-        <td><span class="badge ${colorMeta.badgeClass}">${colorMeta.icon} ${item.metal.name}</span></td>
+        <td>
+          <span class="badge ${colorMeta.badgeClass}">${colorMeta.icon} ${item.metal.name}</span>
+          <div class="table-density-tag">
+            <span>⚖️ ρ = ${item.metal.density.toFixed(2)} г/см³</span>
+            <span class="density-ratio">(${(item.metal.density / (item.polyDensity || 1.1)).toFixed(2)}×)</span>
+          </div>
+        </td>
         <td><span style="color: #a7f3d0; font-weight: 600;">${Math.round(item.powderWeight)} г</span></td>
         <td><span style="color: #38bdf8; font-weight: 600;">${Math.round(item.waterVolume)} мл</span></td>
         <td>${metalDetail}</td>
@@ -1673,9 +1864,16 @@ function renderBatchSummary() {
           <input type="text" class="note-input" value="${escapeHtml(item.note || '')}" placeholder="Додати примітку (наприклад, Замовлення №45 / Золоті каблучки)..." onchange="updateFlaskNote(${i}, this.value)" style="font-size: 0.82rem;">
         </div>
 
-        <div style="font-size: 0.83rem; color: var(--text-muted); margin-bottom: 6px;">
-          Вага моделі: ${item.modelW} г (густина: ${item.polyDensity} г/см³) | Ливник: +${item.sprueMargin}%
+        <div style="font-size: 0.83rem; color: var(--text-muted); margin-bottom: 6px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+          <span>Вага моделі: <strong>${item.modelW} г</strong> (густина: ${item.polyDensity} г/см³)</span>
+          <span>|</span>
+          <span style="color: #38bdf8; font-weight: 600;">⚖️ Густина: <strong>${item.metal.density.toFixed(2)} г/см³</strong> (${(item.metal.density / (item.polyDensity || 1.1)).toFixed(2)}×)</span>
+          <span>|</span>
+          <span>Ливник: <strong>+${item.sprueMargin}%</strong></span>
           ${item.existingMetal > 0 ? `| <span style="color: #fde047;">Наявний метал: ${item.existingMetal.toFixed(2)} г</span> (доплавка: ${item.remainingMetalNeeded.toFixed(2)} г)` : '| <span style="color: #94a3b8;">Наявного металу: 0 г (повна доплавка)</span>'}
+        </div>
+        <div style="font-size: 0.78rem; color: #a7f3d0; background: rgba(0,0,0,0.25); padding: 4px 8px; border-radius: 4px; margin-bottom: 6px; font-family: monospace;">
+          Формула: (${item.modelVolume.toFixed(2)} см³ × ${item.metal.density.toFixed(2)} г/см³) + ${item.sprueMargin}% = <strong>${item.totalMetalNeeded.toFixed(2)} г</strong>
         </div>
         <div style="font-size: 0.88rem; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px; border-left: 3px solid ${item.completed ? '#10b981' : colorMeta.border};">
           ${composition}
@@ -1787,10 +1985,11 @@ function getFormattedTextReport() {
     if (item.note) {
       txt += `  • Примітка:           ${item.note}\n`;
     }
-    txt += `  • Вага моделі:        ${item.modelW} г (густина: ${item.polyDensity} г/см³)\n`;
+    txt += `  • Вага моделі:        ${item.modelW} г (густина моделі: ${item.polyDensity} г/см³, об'єм: ${item.modelVolume.toFixed(2)} см³)\n`;
+    txt += `  • Густина сплаву (ρ): ${item.metal.density.toFixed(2)} г/см³ (коефіцієнт: ${(item.metal.density / (item.polyDensity || 1.1)).toFixed(2)}x)\n`;
     txt += `  • Ливникова система:  +${item.sprueMargin}%\n`;
     txt += `  • Формомаса на опоку: ${Math.round(item.powderWeight)} г порошку + ${Math.round(item.waterVolume)} мл води\n`;
-    txt += `  • ВСЬОГО МЕТАЛУ:      ${item.totalMetalNeeded.toFixed(2)} г\n`;
+    txt += `  • ВСЬОГО МЕТАЛУ:      ${item.totalMetalNeeded.toFixed(2)} г [Формула: (${item.modelVolume.toFixed(2)} см³ × ${item.metal.density.toFixed(2)} г/см³) + ${item.sprueMargin}%]\n`;
     if (item.existingMetal > 0) {
       txt += `  • Наявний метал/брухт: -${item.existingMetal.toFixed(2)} г (доплавка: ${item.remainingMetalNeeded.toFixed(2)} г)\n`;
     }
