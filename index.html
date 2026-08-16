@@ -159,14 +159,14 @@
   </div>
 
   <!-- Модуль мульти-опок / Кошик замісу -->
-  <div class="card">
+  <div class="card" id="batch-card">
     <div class="card-title">
       <span>Специфікація замісу (<span id="batch-count">0</span> опок)</span>
-      <button class="btn btn-danger btn-sm" onclick="clearBatch()">Очистити кошик</button>
+      <button class="btn btn-danger btn-sm" id="btn-clear-batch" onclick="clearBatch()">Очистити кошик</button>
     </div>
 
     <div class="table-responsive">
-      <table>
+      <table id="batch-table">
         <thead>
           <tr>
             <th>#</th>
@@ -174,7 +174,7 @@
             <th>Сплав / Проба</th>
             <th>Формомаса (г)</th>
             <th>Вода (мл)</th>
-            <th>Метал (г)</th>
+            <th>Метал на опоку</th>
             <th>Дія</th>
           </tr>
         </thead>
@@ -189,8 +189,8 @@
     </div>
 
     <div class="grid" style="margin-top: 12px;" id="export-buttons">
-      <button class="btn btn-secondary" onclick="exportPDF()">Зберегти PDF / Google Диск</button>
-      <button class="btn btn-secondary" onclick="exportTXT()">Копіювати TXT розрахунок</button>
+      <button class="btn btn-secondary" id="btn-export-pdf" onclick="exportPDF()">Зберегти PDF / Google Диск</button>
+      <button class="btn btn-secondary" id="btn-export-txt" onclick="exportTXT()">Копіювати TXT розрахунок</button>
     </div>
   </div>
 </div>
@@ -259,18 +259,19 @@
       <tr>
         <th>#</th>
         <th>Розмір опоки</th>
-        <th>Модель (г)</th>
+        <th>Модель</th>
         <th>Сплав</th>
-        <th>Формомаса (г)</th>
-        <th>Вода (мл)</th>
-        <th>Метал всього (г)</th>
+        <th>Формомаса</th>
+        <th>Вода</th>
+        <th>Метал на опоку</th>
+        <th>Шихтовка (999.9 + Ліг.)</th>
       </tr>
     </thead>
     <tbody id="pdf-batch-table"></tbody>
   </table>
 
   <div class="pdf-summary">
-    <h3>2. Загальний підсумок замісу</h3>
+    <h3>2. Підсумок замісу та розрахунок металу</h3>
     <div id="pdf-summary-content" style="font-size: 12px; line-height: 1.5;"></div>
   </div>
 </div>
@@ -591,72 +592,97 @@ function renderBatch() {
   countSpan.innerText = state.batch.length;
 
   if (state.batch.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Кошик замісу порожній</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 16px 0;">Кошик замісу порожній</td></tr>`;
     summaryBox.style.display = "none";
     return;
   }
 
-  tbody.innerHTML = state.batch.map((item, i) => `
-    <tr>
-      <td>${i + 1}</td>
-      <td>${item.d}x${item.h}</td>
-      <td><span class="badge">${item.metal.name}</span></td>
-      <td>${Math.round(item.powderWeight)} г</td>
-      <td>${Math.round(item.waterVolume)} мл</td>
-      <td>${item.totalMetalNeeded.toFixed(1)} г</td>
-      <td><button class="btn btn-danger btn-sm" onclick="removeFromBatch(${i})">✕</button></td>
-    </tr>
-  `).join("");
+  tbody.innerHTML = state.batch.map((item, i) => {
+    let metalDetail = `<span style="font-weight: 600; color: #38bdf8;">${item.totalMetalNeeded.toFixed(2)} г</span>`;
+    if (item.metal.targetPurity < 1000 && item.remainingMetalNeeded > 0) {
+      metalDetail += `<div style="font-size: 0.75rem; color: #fde047; margin-top: 2px;">999.9: ${item.pureMetalToAdd.toFixed(2)}г + Ліг: ${item.alloyToAdd.toFixed(2)}г</div>`;
+    }
+    if (item.existingMetal > 0) {
+      metalDetail += `<div style="font-size: 0.72rem; color: var(--text-muted);">(Наявний: -${item.existingMetal.toFixed(2)}г)</div>`;
+    }
 
-  // Розрахунок підсумків кошика
+    return `
+      <tr>
+        <td style="font-weight: 600;">#${i + 1}</td>
+        <td>⌀${item.d}×${item.h} мм<br><span style="font-size: 0.75rem; color: var(--text-muted);">Модель: ${item.modelW}г</span></td>
+        <td><span class="badge">${item.metal.name}</span></td>
+        <td><span style="color: #a7f3d0; font-weight: 600;">${Math.round(item.powderWeight)} г</span></td>
+        <td><span style="color: #38bdf8; font-weight: 600;">${Math.round(item.waterVolume)} мл</span></td>
+        <td>${metalDetail}</td>
+        <td><button class="btn btn-danger btn-sm" id="btn-remove-batch-${i}" onclick="removeFromBatch(${i})" title="Видалити опоку з кошика">✕</button></td>
+      </tr>
+    `;
+  }).join("");
+
+  // Розрахунок підсумків формомаси для сумісного замісу
   let totalPowder = 0;
   let totalWater = 0;
-  let metalsSummary = {};
 
   state.batch.forEach(item => {
     totalPowder += item.powderWeight;
     totalWater += item.waterVolume;
-
-    const metalKey = item.metal.name;
-    if (!metalsSummary[metalKey]) {
-      metalsSummary[metalKey] = {
-        totalMetal: 0,
-        existingMetal: 0,
-        pureToAdd: 0,
-        alloyToAdd: 0
-      };
-    }
-    metalsSummary[metalKey].totalMetal += item.totalMetalNeeded;
-    metalsSummary[metalKey].existingMetal += item.existingMetal;
-    metalsSummary[metalKey].pureToAdd += item.pureMetalToAdd;
-    metalsSummary[metalKey].alloyToAdd += item.alloyToAdd;
   });
 
-  let metalsHTML = Object.keys(metalsSummary).map(key => {
-    const m = metalsSummary[key];
+  // Формування поопочного розрахунку металу (метал НЕ підсумовується)
+  const perFlaskMetalsHTML = state.batch.map((item, i) => {
+    let composition = '';
+    if (item.metal.targetPurity < 1000 && item.remainingMetalNeeded > 0) {
+      composition = `<span style="color: #fde047;">➜ Чистота 999.9: <strong>${item.pureMetalToAdd.toFixed(2)} г</strong> | Лігатура: <strong>${item.alloyToAdd.toFixed(2)} г</strong></span>`;
+    } else {
+      composition = `<span style="color: #fde047;">➜ Чистий метал / сплав: <strong>${item.remainingMetalNeeded.toFixed(2)} г</strong></span>`;
+    }
+
     return `
-      <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dotted rgba(255,255,255,0.1);">
-        <strong>${key}:</strong> Всього ${m.totalMetal.toFixed(2)} г 
-        ${m.existingMetal > 0 ? `(Наявний: ${m.existingMetal.toFixed(2)} г)` : ''}<br>
-        <span style="color: #fde047;">➜ Додати: Чистота 999.9: ${m.pureToAdd.toFixed(2)} г | Лігатура: ${m.alloyToAdd.toFixed(2)} г</span>
+      <div style="margin-top: 8px; padding: 10px; background: rgba(15,23,42,0.7); border-radius: 8px; border: 1px solid var(--border);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 4px;">
+          <span style="font-weight: 600; color: var(--accent); font-size: 0.92rem;">Опока #${i + 1} (⌀${item.d}×${item.h} мм) — ${item.metal.name}</span>
+          <span style="font-weight: 700; color: #38bdf8; font-size: 0.95rem;">Метал на опоку: ${item.totalMetalNeeded.toFixed(2)} г</span>
+        </div>
+        <div style="font-size: 0.83rem; color: var(--text-muted); margin-bottom: 4px;">
+          Вага моделі: ${item.modelW} г (густина: ${item.polyDensity} г/см³) | Ливник: +${item.sprueMargin}%
+          ${item.existingMetal > 0 ? `| Наявний метал: ${item.existingMetal.toFixed(2)} г (доплавка: ${item.remainingMetalNeeded.toFixed(2)} г)` : ''}
+        </div>
+        <div style="font-size: 0.86rem;">
+          ${composition}
+        </div>
       </div>
     `;
   }).join("");
 
   summaryBox.style.display = "block";
   summaryBox.innerHTML = `
-    <div style="font-weight: 600; font-size: 1rem; color: var(--accent); margin-bottom: 8px;">ЗАГАЛЬНИЙ ПІДСУМОК ЗАМІСУ:</div>
-    <div class="results-row">
-      <span>Загальна маса формомаси:</span>
-      <span class="val" style="font-size: 1.1rem; color: #a7f3d0;">${Math.round(totalPowder)} г</span>
+    <div style="font-weight: 700; font-size: 1rem; color: var(--accent); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+      <span>ЗАГАЛЬНИЙ ПІДСУМОК ЗАМІСУ:</span>
+      <span style="font-size: 0.75rem; background: rgba(217,119,6,0.15); border: 1px solid var(--accent); color: var(--accent); padding: 2px 8px; border-radius: 12px;">${state.batch.length} опок у замісі</span>
     </div>
-    <div class="results-row">
-      <span>Загальний об'єм дистильованої води:</span>
-      <span class="val" style="font-size: 1.1rem; color: #38bdf8;">${Math.round(totalWater)} мл</span>
+
+    <!-- Блок замісу формомаси -->
+    <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;">
+      <div style="font-size: 0.85rem; font-weight: 600; color: #a7f3d0; margin-bottom: 6px;">🥣 ЗАМІС ФОРМОМАСИ (СУМАРНО ДЛЯ ВСІХ ОПОК):</div>
+      <div class="results-row" style="border-bottom: 1px dotted rgba(255,255,255,0.15);">
+        <span>Загальна суха формомаса:</span>
+        <span class="val" style="font-size: 1.15rem; color: #a7f3d0;">${Math.round(totalPowder)} г</span>
+      </div>
+      <div class="results-row">
+        <span>Загальний об'єм дистильованої води:</span>
+        <span class="val" style="font-size: 1.15rem; color: #38bdf8;">${Math.round(totalWater)} мл</span>
+      </div>
     </div>
-    <div style="margin-top: 8px;">
-      <span style="color: var(--text-muted); font-size: 0.85rem;">Потреба в металі по сплавах:</span>
-      ${metalsHTML}
+
+    <!-- Блок розрахунку металу окремо на кожну опоку -->
+    <div style="margin-top: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 4px;">
+        <span style="font-size: 0.88rem; font-weight: 600; color: #fde047;">🔥 РОЗРАХУНОК МЕТАЛУ ОКРЕМО НА КОЖНУ ОПОКУ (ПЛАВКА):</span>
+      </div>
+      <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px;">
+        ⚠️ Метал не підсумовується в загальну масу, оскільки кожна опока відливається окремо зі своєю шихтовкою.
+      </div>
+      ${perFlaskMetalsHTML}
     </div>
   `;
 }
@@ -680,26 +706,66 @@ function exportTXT() {
 
   const dateStr = getFormattedDate();
   let txt = `Casting Calc — Звіт замісу (${dateStr})\n`;
-  txt += `-------------------------------------------\n\n`;
+  txt += `===========================================\n\n`;
 
   let totalPowder = 0, totalWater = 0;
-  state.batch.forEach((item, i) => {
+  state.batch.forEach((item) => {
     totalPowder += item.powderWeight;
     totalWater += item.waterVolume;
-    txt += `Опока #${i+1} [${item.d}x${item.h} мм]:\n`;
-    txt += ` - Сплав: ${item.metal.name}\n`;
-    txt += ` - Формомаса: ${Math.round(item.powderWeight)} г | Вода: ${Math.round(item.waterVolume)} мл\n`;
-    txt += ` - Метал всього: ${item.totalMetalNeeded.toFixed(2)} г (Чистота: ${item.pureMetalToAdd.toFixed(2)}г, Лігатура: ${item.alloyToAdd.toFixed(2)}г)\n\n`;
   });
+
+  txt += `🥣 ЗАМІС ФОРМОМАСИ (СУМАРНО ДЛЯ ВСІХ ${state.batch.length} ОПОК):\n`;
+  txt += ` - Суха формомаса: ${Math.round(totalPowder)} г\n`;
+  txt += ` - Дистильована вода: ${Math.round(totalWater)} мл\n\n`;
 
   txt += `-------------------------------------------\n`;
-  txt += `ЗАГАЛЬНИЙ ПІДСУМОК:\n`;
-  txt += `Суха формомаса: ${Math.round(totalPowder)} г\n`;
-  txt += `Вода: ${Math.round(totalWater)} мл\n`;
+  txt += `🔥 РОЗРАХУНОК МЕТАЛУ НА КОЖНУ ОПОКУ ОКРЕМО:\n`;
+  txt += `(Кожна опока плавиться окремо, метал не змішується)\n\n`;
 
-  navigator.clipboard.writeText(txt).then(() => {
-    alert("Текстовий звіт скопійовано в буфер обміну!");
+  state.batch.forEach((item, i) => {
+    txt += `Опока #${i+1} [⌀${item.d}x${item.h} мм]:\n`;
+    txt += ` - Сплав: ${item.metal.name}\n`;
+    txt += ` - Модель: ${item.modelW} г (Ливник: +${item.sprueMargin}%)\n`;
+    txt += ` - Формомаса: ${Math.round(item.powderWeight)} г | Вода: ${Math.round(item.waterVolume)} мл\n`;
+    txt += ` - Всього металу на опоку: ${item.totalMetalNeeded.toFixed(2)} г\n`;
+    if (item.existingMetal > 0) {
+      txt += ` - Наявний метал: ${item.existingMetal.toFixed(2)} г (доплавка: ${item.remainingMetalNeeded.toFixed(2)} г)\n`;
+    }
+    if (item.metal.targetPurity < 1000 && item.remainingMetalNeeded > 0) {
+      txt += ` - Шихтовка доплавки: Чистота 999.9 = ${item.pureMetalToAdd.toFixed(2)} г | Лігатура = ${item.alloyToAdd.toFixed(2)} г\n`;
+    } else {
+      txt += ` - Чистий метал: ${item.remainingMetalNeeded.toFixed(2)} г\n`;
+    }
+    txt += `\n`;
   });
+
+  txt += `===========================================\n`;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(() => {
+      alert("Текстовий звіт скопійовано в буфер обміну!");
+    }).catch(() => {
+      fallbackCopyText(txt);
+    });
+  } else {
+    fallbackCopyText(txt);
+  }
+}
+
+function fallbackCopyText(text) {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.left = "-9999px";
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand("copy");
+    alert("Текстовий звіт скопійовано в буфер обміну!");
+  } catch (e) {
+    alert("Не вдалося скопіювати звіт.");
+  }
+  document.body.removeChild(ta);
 }
 
 function exportPDF() {
@@ -712,17 +778,28 @@ function exportPDF() {
   document.getElementById("pdf-date").innerText = `Дата та час формування: ${dateStr.replace('_', ' ')}`;
 
   const pdfTable = document.getElementById("pdf-batch-table");
-  pdfTable.innerHTML = state.batch.map((item, i) => `
-    <tr>
-      <td>${i + 1}</td>
-      <td>${item.d}х${item.h} мм</td>
-      <td>${item.modelW} г</td>
-      <td>${item.metal.name}</td>
-      <td>${Math.round(item.powderWeight)} г</td>
-      <td>${Math.round(item.waterVolume)} мл</td>
-      <td>${item.totalMetalNeeded.toFixed(2)} г</td>
-    </tr>
-  `).join("");
+  pdfTable.innerHTML = state.batch.map((item, i) => {
+    let composition = `${item.pureMetalToAdd.toFixed(2)}г (999.9) + ${item.alloyToAdd.toFixed(2)}г (ліг.)`;
+    if (item.metal.targetPurity >= 1000) {
+      composition = `${item.remainingMetalNeeded.toFixed(2)}г (100%)`;
+    }
+    if (item.existingMetal > 0) {
+      composition += ` [Наявн: ${item.existingMetal.toFixed(2)}г]`;
+    }
+
+    return `
+      <tr>
+        <td>#${i + 1}</td>
+        <td>⌀${item.d}х${item.h} мм</td>
+        <td>${item.modelW} г</td>
+        <td>${item.metal.name}</td>
+        <td>${Math.round(item.powderWeight)} г</td>
+        <td>${Math.round(item.waterVolume)} мл</td>
+        <td><strong>${item.totalMetalNeeded.toFixed(2)} г</strong></td>
+        <td>${composition}</td>
+      </tr>
+    `;
+  }).join("");
 
   const pdfSummary = document.getElementById("pdf-summary-content");
   pdfSummary.innerHTML = document.getElementById("batch-summary").innerHTML;
@@ -732,7 +809,7 @@ function exportPDF() {
 
   const opt = {
     margin:       10,
-    filename:     `Заміс_${dateStr}.pdf`,
+    filename:     `Заміс_опок_${dateStr}.pdf`,
     image:        { type: 'jpeg', quality: 0.98 },
     html2canvas:  { scale: 2 },
     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
