@@ -1,0 +1,14 @@
+{
+  "name": "casting-calc",
+  "version": "1.0.0",
+  "description": "Ювелірний калькулятор розрахунку формомаси та шихтовки металу",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "node -e \"console.log('Build completed')\""
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

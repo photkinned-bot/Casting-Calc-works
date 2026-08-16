@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Casting Calc — Ювелірний калькулятор литва</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e293b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Casting Calc">
+  
+  <!-- CDN html2pdf.js для друку та збереження PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    :root {
+      --bg-main: #0f172a;
+      --bg-card: #1e293b;
+      --bg-input: #334155;
+      --accent: #d97706;
+      --accent-hover: #b45309;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #475569;
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--bg-main); color: var(--text); padding: 12px; padding-bottom: 40px; }
+
+    .container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+    
+    header { text-align: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    header h1 { font-size: 1.5rem; color: var(--accent); letter-spacing: 0.5px; }
+    header p { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+
+    .card { background-color: var(--bg-card); border-radius: 12px; padding: 16px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); }
+    .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 12px; color: var(--accent); display: flex; justify-content: space-between; align-items: center; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 0.85rem; color: var(--text-muted); }
+    
+    input, select { background-color: var(--bg-input); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
+    input:focus, select:focus { border-color: var(--accent); }
+
+    .btn { background-color: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 10px 16px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn:hover { background-color: var(--accent-hover); }
+    .btn-secondary { background-color: var(--bg-input); border: 1px solid var(--border); color: var(--text); }
+    .btn-secondary:hover { background-color: var(--border); }
+    .btn-danger { background-color: var(--danger); }
+    .btn-danger:hover { background-color: #dc2626; }
+    .btn-sm { padding: 6px 10px; font-size: 0.8rem; }
+
+    .results-box { background-color: rgba(15, 23, 42, 0.6); border-radius: 8px; padding: 12px; margin-top: 12px; border: 1px dashed var(--border); }
+    .results-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dotted rgba(255,255,255,0.1); font-size: 0.9rem; }
+    .results-row:last-child { border-bottom: none; }
+    .results-row span.val { font-weight: 600; color: #38bdf8; }
+
+    .table-responsive { overflow-x: auto; margin-top: 10px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
+    th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    th { color: var(--text-muted); font-weight: 600; background-color: rgba(0,0,0,0.2); }
+
+    .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; background-color: var(--bg-input); color: var(--accent); border: 1px solid var(--accent); }
+
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; padding: 12px; }
+    .modal-content { background: var(--bg-card); width: 100%; max-width: 500px; border-radius: 12px; padding: 20px; border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; }
+
+    /* PDF Report Specific Styling */
+    #pdf-template { display: none; background: #fff; color: #000; padding: 20px; font-family: Arial, sans-serif; }
+    #pdf-template h2 { color: #b45309; border-bottom: 2px solid #b45309; padding-bottom: 5px; margin-bottom: 15px; }
+    #pdf-template table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 15px; }
+    #pdf-template th, #pdf-template td { border: 1px solid #ccc; padding: 6px; font-size: 11px; text-align: left; color: #000; }
+    #pdf-template th { background-color: #f3f4f6; }
+    .pdf-summary { background: #fef3c7; padding: 10px; border-radius: 6px; border: 1px solid #f59e0b; margin-top: 10px; }
+
+    @media print {
+      body * { visibility: hidden; }
+      #pdf-template, #pdf-template * { visibility: visible; }
+      #pdf-template { position: absolute; left: 0; top: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Casting Calc</h1>
+    <p>Калькулятор розрахунку формомаси та шихтовки металу</p>
+  </header>
+
+  <!-- Блок керування пресетами -->
+  <div class="card">
+    <div class="card-title">
+      <span>Пресет-менеджер</span>
+      <button class="btn btn-secondary btn-sm" onclick="openPresetModal()">Керування пресетами</button>
+    </div>
+    <div class="grid">
+      <div class="form-group">
+        <label>Опока (Пресет)</label>
+        <select id="preset-flask" onchange="applyFlaskPreset()">
+          <!-- Динамічні варіанти -->
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Формомаса W/P (Пресет)</label>
+        <select id="preset-investment" onchange="applyInvestmentPreset()">
+          <!-- Динамічні варіанти -->
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Сплав металу (Пресет)</label>
+        <select id="preset-metal" onchange="applyMetalPreset()">
+          <!-- Динамічні варіанти -->
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Робочий калькулятор одиночної опоки -->
+  <div class="card">
+    <div class="card-title">Розрахунок одиночної опоки</div>
+    <div class="grid">
+      <div class="form-group">
+        <label>Діаметр опоки (мм)</label>
+        <input type="number" id="flask-diameter" value="60" oninput="calculateSingle()">
+      </div>
+      <div class="form-group">
+        <label>Висота опоки (мм)</label>
+        <input type="number" id="flask-height" value="100" oninput="calculateSingle()">
+      </div>
+      <div class="form-group">
+        <label>Вага фотополімеру / ялинки (г)</label>
+        <input type="number" id="model-weight" value="2.5" step="0.1" oninput="calculateSingle()">
+      </div>
+      <div class="form-group">
+        <label>Густина полімеру (г/см³)</label>
+        <input type="number" id="polymer-density" value="1.1" step="0.01" oninput="calculateSingle()">
+      </div>
+      <div class="form-group">
+        <label>Запас на ливникову систему (%)</label>
+        <input type="number" id="sprue-margin" value="15" oninput="calculateSingle()">
+      </div>
+      <div class="form-group">
+        <label>Наявний метал (г)</label>
+        <input type="number" id="existing-metal" value="0" step="0.1" oninput="calculateSingle()">
+      </div>
+    </div>
+
+    <!-- Результати поточної опоки -->
+    <div class="results-box" id="single-results">
+      <!-- Динамічний вміст -->
+    </div>
+
+    <button class="btn" style="width: 100%; margin-top: 12px;" onclick="addToBatch()">+ Додати опоку в заміс</button>
+  </div>
+
+  <!-- Модуль мульти-опок / Кошик замісу -->
+  <div class="card">
+    <div class="card-title">
+      <span>Специфікація замісу (<span id="batch-count">0</span> опок)</span>
+      <button class="btn btn-danger btn-sm" onclick="clearBatch()">Очистити кошик</button>
+    </div>
+
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Опока (мм)</th>
+            <th>Сплав / Проба</th>
+            <th>Формомаса (г)</th>
+            <th>Вода (мл)</th>
+            <th>Метал (г)</th>
+            <th>Дія</th>
+          </tr>
+        </thead>
+        <tbody id="batch-table-body">
+          <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Кошик замісу порожній</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="results-box" id="batch-summary" style="display: none; margin-top: 16px;">
+      <!-- Загальний підсумок замісу -->
+    </div>
+
+    <div class="grid" style="margin-top: 12px;" id="export-buttons">
+      <button class="btn btn-secondary" onclick="exportPDF()">Зберегти PDF / Google Диск</button>
+      <button class="btn btn-secondary" onclick="exportTXT()">Копіювати TXT розрахунок</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модальне вікно керування пресетами -->
+<div class="modal" id="presetModal">
+  <div class="modal-content" id="preset-modal-content">
+    <div class="card-title">
+      <span>Керування пресетами</span>
+      <button class="btn btn-secondary btn-sm" id="btn-close-preset-modal" onclick="closePresetModal()">✕</button>
+    </div>
+    
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+      <!-- Секція пресетів опок -->
+      <div style="border-bottom: 1px solid var(--border); padding-bottom: 16px;">
+        <label style="font-weight: 600; color: var(--accent); display: block; margin-bottom: 8px;">Збережені пресети опок</label>
+        <div id="flask-presets-list" style="max-height: 180px; overflow-y: auto; margin-bottom: 10px;">
+          <!-- Динамічний список пресетів опок з кнопками видалення -->
+        </div>
+
+        <div style="background: rgba(15,23,42,0.4); padding: 10px; border-radius: 8px; border: 1px dashed var(--border);">
+          <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 6px;">+ Додати новий пресет опоки</label>
+          <div class="grid" style="margin-top: 4px;">
+            <input type="text" id="new-flask-name" placeholder="Назва (напр. 65х110)" style="font-size: 0.85rem;">
+            <input type="number" id="new-flask-d" placeholder="Діаметр (мм)" style="font-size: 0.85rem;">
+            <input type="number" id="new-flask-h" placeholder="Висота (мм)" style="font-size: 0.85rem;">
+          </div>
+          <button class="btn btn-sm" id="btn-save-flask-preset" style="margin-top: 8px; width: 100%;" onclick="saveFlaskPreset()">Зберегти опоку</button>
+        </div>
+      </div>
+
+      <!-- Секція пресетів формомаси -->
+      <div style="border-bottom: 1px solid var(--border); padding-bottom: 16px;">
+        <label style="font-weight: 600; color: var(--accent); display: block; margin-bottom: 8px;">Збережені пресети формомаси (W/P)</label>
+        <div id="inv-presets-list" style="max-height: 180px; overflow-y: auto; margin-bottom: 10px;">
+          <!-- Динамічний список пресетів формомаси з кнопками видалення -->
+        </div>
+
+        <div style="background: rgba(15,23,42,0.4); padding: 10px; border-radius: 8px; border: 1px dashed var(--border);">
+          <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 6px;">+ Додати новий пресет формомаси</label>
+          <div class="grid" style="margin-top: 4px;">
+            <input type="text" id="new-inv-name" placeholder="Назва (напр. Satin Cast 35)" style="font-size: 0.85rem;">
+            <input type="number" id="new-inv-ratio" placeholder="Води на 100г порошку (мл)" style="font-size: 0.85rem;">
+          </div>
+          <button class="btn btn-sm" id="btn-save-inv-preset" style="margin-top: 8px; width: 100%;" onclick="saveInvestmentPreset()">Зберегти пропорцію</button>
+        </div>
+      </div>
+
+      <!-- Кнопка скидання до заводських значень -->
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <button class="btn btn-secondary btn-sm" id="btn-reset-presets" onclick="resetDefaultPresets()">Скинути до стандартних</button>
+        <button class="btn btn-sm" id="btn-done-presets" onclick="closePresetModal()">Готово</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Шаблон для експорту в PDF (Прихований) -->
+<div id="pdf-template">
+  <h2>Casting Calc — Звіт замісу</h2>
+  <p id="pdf-date" style="font-size: 11px; color: #555;"></p>
+  
+  <h3>1. Перелік опок у замісі</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Розмір опоки</th>
+        <th>Модель (г)</th>
+        <th>Сплав</th>
+        <th>Формомаса (г)</th>
+        <th>Вода (мл)</th>
+        <th>Метал всього (г)</th>
+      </tr>
+    </thead>
+    <tbody id="pdf-batch-table"></tbody>
+  </table>
+
+  <div class="pdf-summary">
+    <h3>2. Загальний підсумок замісу</h3>
+    <div id="pdf-summary-content" style="font-size: 12px; line-height: 1.5;"></div>
+  </div>
+</div>
+
+<script>
+// --- БАЗА ДАНИХ ТА СТАН ---
+const DEFAULT_FLASKS = [
+  { name: "Опока 60х100", d: 60, h: 100 },
+  { name: "Опока 80х120", d: 80, h: 120 },
+  { name: "Опока 100х150", d: 100, h: 150 }
+];
+
+const DEFAULT_INVESTMENTS = [
+  { name: "Satin Cast (35:100)", ratio: 35 },
+  { name: "Kerr / Gold Star (36:100)", ratio: 36 },
+  { name: "Стандарт (38:100)", ratio: 38 },
+  { name: "Рідка (40:100)", ratio: 40 }
+];
+
+// Фиксовані алгоритми проб за специфікацією
+const METALS = [
+  { id: "au585", name: "Золото 585 (Розрахунок 587)", density: 13.5, targetPurity: 587, basePurity: 585 },
+  { id: "au750", name: "Золото 750 (Розрахунок 752)", density: 15.5, targetPurity: 752, basePurity: 750 },
+  { id: "ag925", name: "Срібло 925 (Розрахунок 930)", density: 10.36, targetPurity: 930, basePurity: 925 },
+  { id: "brass", name: "Латунь / Бронза", density: 8.5, targetPurity: 1000, basePurity: 1000 }
+];
+
+let state = {
+  flasks: JSON.parse(localStorage.getItem("cc_flasks")) || DEFAULT_FLASKS,
+  investments: JSON.parse(localStorage.getItem("cc_investments")) || DEFAULT_INVESTMENTS,
+  batch: JSON.parse(localStorage.getItem("cc_batch")) || []
+};
+
+// --- ІНІЦІАЛІЗАЦІЯ ---
+window.addEventListener("DOMContentLoaded", () => {
+  renderPresetSelects();
+  calculateSingle();
+  renderBatch();
+  
+  // Реєстрація Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
+  }
+});
+
+// --- РОБОТА З ПРЕСЕТАМИ ---
+function renderPresetSelects() {
+  const flaskSel = document.getElementById("preset-flask");
+  const prevFlaskVal = flaskSel.value;
+  if (state.flasks.length === 0) {
+    flaskSel.innerHTML = `<option value="-1">Немає пресетів (введіть розміри)</option>`;
+  } else {
+    flaskSel.innerHTML = state.flasks.map((f, i) => `<option value="${i}">${f.name} (${f.d}x${f.h} мм)</option>`).join("");
+    if (prevFlaskVal !== "" && parseInt(prevFlaskVal, 10) < state.flasks.length && parseInt(prevFlaskVal, 10) >= 0) {
+      flaskSel.value = prevFlaskVal;
+    }
+  }
+  
+  const invSel = document.getElementById("preset-investment");
+  const prevInvVal = invSel.value;
+  if (state.investments.length === 0) {
+    invSel.innerHTML = `<option value="-1">Стандарт (38:100)</option>`;
+  } else {
+    invSel.innerHTML = state.investments.map((inv, i) => `<option value="${i}">${inv.name} (${inv.ratio}:100)</option>`).join("");
+    if (prevInvVal !== "" && parseInt(prevInvVal, 10) < state.investments.length && parseInt(prevInvVal, 10) >= 0) {
+      invSel.value = prevInvVal;
+    }
+  }
+  
+  const metalSel = document.getElementById("preset-metal");
+  const prevMetalVal = metalSel.value;
+  metalSel.innerHTML = METALS.map((m, i) => `<option value="${i}">${m.name}</option>`).join("");
+  if (prevMetalVal !== "" && parseInt(prevMetalVal, 10) < METALS.length) {
+    metalSel.value = prevMetalVal;
+  }
+}
+
+function renderPresetModalLists() {
+  const flaskListEl = document.getElementById("flask-presets-list");
+  if (flaskListEl) {
+    if (state.flasks.length === 0) {
+      flaskListEl.innerHTML = `<div style="font-size: 0.85rem; color: var(--text-muted); padding: 8px 0; text-align: center;">Список пресетів опок порожній</div>`;
+    } else {
+      flaskListEl.innerHTML = state.flasks.map((f, i) => `
+        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15,23,42,0.6); padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; border: 1px solid var(--border);">
+          <div>
+            <span style="font-weight: 600; font-size: 0.9rem;">${f.name}</span>
+            <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 6px;">⌀${f.d} × ${f.h} мм</span>
+          </div>
+          <button class="btn btn-danger btn-sm" id="btn-delete-flask-${i}" onclick="deleteFlaskPreset(${i})" title="Видалити цей пресет" style="padding: 4px 8px; font-size: 0.75rem;">Видалити</button>
+        </div>
+      `).join("");
+    }
+  }
+
+  const invListEl = document.getElementById("inv-presets-list");
+  if (invListEl) {
+    if (state.investments.length === 0) {
+      invListEl.innerHTML = `<div style="font-size: 0.85rem; color: var(--text-muted); padding: 8px 0; text-align: center;">Список пресетів формомаси порожній</div>`;
+    } else {
+      invListEl.innerHTML = state.investments.map((inv, i) => `
+        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15,23,42,0.6); padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; border: 1px solid var(--border);">
+          <div>
+            <span style="font-weight: 600; font-size: 0.9rem;">${inv.name}</span>
+            <span style="font-size: 0.8rem; color: #a7f3d0; margin-left: 6px;">${inv.ratio} мл / 100 г</span>
+          </div>
+          <button class="btn btn-danger btn-sm" id="btn-delete-inv-${i}" onclick="deleteInvestmentPreset(${i})" title="Видалити цей пресет" style="padding: 4px 8px; font-size: 0.75rem;">Видалити</button>
+        </div>
+      `).join("");
+    }
+  }
+}
+
+function applyFlaskPreset() {
+  const sel = document.getElementById("preset-flask");
+  const idx = parseInt(sel.value, 10);
+  if (idx >= 0 && state.flasks[idx]) {
+    const f = state.flasks[idx];
+    document.getElementById("flask-diameter").value = f.d;
+    document.getElementById("flask-height").value = f.h;
+    calculateSingle();
+  }
+}
+
+function applyInvestmentPreset() {
+  calculateSingle();
+}
+
+function applyMetalPreset() {
+  calculateSingle();
+}
+
+function openPresetModal() { 
+  renderPresetModalLists();
+  document.getElementById("presetModal").style.display = "flex"; 
+}
+
+function closePresetModal() { 
+  document.getElementById("presetModal").style.display = "none"; 
+}
+
+function saveFlaskPreset() {
+  const nameEl = document.getElementById("new-flask-name");
+  const dEl = document.getElementById("new-flask-d");
+  const hEl = document.getElementById("new-flask-h");
+  const name = nameEl.value.trim();
+  const d = parseFloat(dEl.value);
+  const h = parseFloat(hEl.value);
+  if (name && !isNaN(d) && d > 0 && !isNaN(h) && h > 0) {
+    state.flasks.push({ name, d, h });
+    localStorage.setItem("cc_flasks", JSON.stringify(state.flasks));
+    nameEl.value = "";
+    dEl.value = "";
+    hEl.value = "";
+    renderPresetSelects();
+    renderPresetModalLists();
+    document.getElementById("preset-flask").value = state.flasks.length - 1;
+    applyFlaskPreset();
+  }
+}
+
+function saveInvestmentPreset() {
+  const nameEl = document.getElementById("new-inv-name");
+  const ratioEl = document.getElementById("new-inv-ratio");
+  const name = nameEl.value.trim();
+  const ratio = parseFloat(ratioEl.value);
+  if (name && !isNaN(ratio) && ratio > 0) {
+    state.investments.push({ name, ratio });
+    localStorage.setItem("cc_investments", JSON.stringify(state.investments));
+    nameEl.value = "";
+    ratioEl.value = "";
+    renderPresetSelects();
+    renderPresetModalLists();
+    document.getElementById("preset-investment").value = state.investments.length - 1;
+    calculateSingle();
+  }
+}
+
+function deleteFlaskPreset(index) {
+  if (index >= 0 && index < state.flasks.length) {
+    state.flasks.splice(index, 1);
+    localStorage.setItem("cc_flasks", JSON.stringify(state.flasks));
+    renderPresetSelects();
+    renderPresetModalLists();
+    applyFlaskPreset();
+  }
+}
+
+function deleteInvestmentPreset(index) {
+  if (index >= 0 && index < state.investments.length) {
+    state.investments.splice(index, 1);
+    localStorage.setItem("cc_investments", JSON.stringify(state.investments));
+    renderPresetSelects();
+    renderPresetModalLists();
+    calculateSingle();
+  }
+}
+
+function resetDefaultPresets() {
+  state.flasks = JSON.parse(JSON.stringify(DEFAULT_FLASKS));
+  state.investments = JSON.parse(JSON.stringify(DEFAULT_INVESTMENTS));
+  localStorage.setItem("cc_flasks", JSON.stringify(state.flasks));
+  localStorage.setItem("cc_investments", JSON.stringify(state.investments));
+  renderPresetSelects();
+  renderPresetModalLists();
+  applyFlaskPreset();
+}
+
+// --- МАТЕМАТИЧНИЙ ЯДРО РОЗРАХУНКІВ ---
+function getSingleCalculations() {
+  const d = parseFloat(document.getElementById("flask-diameter").value) || 0;
+  const h = parseFloat(document.getElementById("flask-height").value) || 0;
+  const modelW = parseFloat(document.getElementById("model-weight").value) || 0;
+  const polyDensity = parseFloat(document.getElementById("polymer-density").value) || 1.1;
+  const sprueMargin = parseFloat(document.getElementById("sprue-margin").value) || 0;
+  const existingMetal = parseFloat(document.getElementById("existing-metal").value) || 0;
+
+  const invIdx = parseInt(document.getElementById("preset-investment").value, 10);
+  const invRatio = (invIdx >= 0 && state.investments[invIdx]) ? state.investments[invIdx].ratio : 38;
+
+  const metalIdx = document.getElementById("preset-metal").value;
+  const metal = METALS[metalIdx] || METALS[0];
+
+  // 1. Об'єми
+  const flaskRadiusCm = (d / 10) / 2;
+  const flaskHeightCm = h / 10;
+  const flaskVolume = Math.PI * Math.pow(flaskRadiusCm, 2) * flaskHeightCm; // см3
+  
+  const modelVolume = modelW / polyDensity; // см3
+  const investmentVolume = Math.max(0, flaskVolume - modelVolume); // см3
+
+  // 2. Формомаса (Густина сухого гіпсу ~ 1.15 г/см3 у засипці)
+  const powderWeight = investmentVolume * 1.15; // грами
+  const waterVolume = powderWeight * (invRatio / 100); // мл
+
+  // 3. Метал
+  const baseMetalNeeded = modelVolume * metal.density;
+  const totalMetalNeeded = baseMetalNeeded * (1 + sprueMargin / 100);
+  const remainingMetalNeeded = Math.max(0, totalMetalNeeded - existingMetal);
+
+  // 4. Шихтовка (Чистота 999.9 та Лігатура) під технологічну надпробу
+  let pureMetalToAdd = 0;
+  let alloyToAdd = 0;
+
+  if (metal.targetPurity < 1000 && remainingMetalNeeded > 0) {
+    const targetFraction = metal.targetPurity / 1000;
+    pureMetalToAdd = remainingMetalNeeded * targetFraction;
+    alloyToAdd = remainingMetalNeeded * (1 - targetFraction);
+  } else {
+    pureMetalToAdd = remainingMetalNeeded;
+    alloyToAdd = 0;
+  }
+
+  return {
+    d, h, modelW, polyDensity, sprueMargin, existingMetal,
+    invRatio, metal,
+    flaskVolume, modelVolume, investmentVolume,
+    powderWeight, waterVolume,
+    totalMetalNeeded, remainingMetalNeeded, pureMetalToAdd, alloyToAdd
+  };
+}
+
+function calculateSingle() {
+  const calc = getSingleCalculations();
+  const resContainer = document.getElementById("single-results");
+
+  resContainer.innerHTML = `
+    <div class="results-row">
+      <span>Об'єм опоки / Матеріал моделі:</span>
+      <span class="val">${calc.flaskVolume.toFixed(1)} см³ / ${calc.modelVolume.toFixed(2)} см³</span>
+    </div>
+    <div class="results-row">
+      <span>Суха формомаса / Вода (${calc.invRatio}:100):</span>
+      <span class="val" style="color: #a7f3d0;">${Math.round(calc.powderWeight)} г / ${Math.round(calc.waterVolume)} мл</span>
+    </div>
+    <div class="results-row">
+      <span>Загальний метал (${calc.metal.name}):</span>
+      <span class="val">${calc.totalMetalNeeded.toFixed(2)} г</span>
+    </div>
+    ${calc.existingMetal > 0 ? `
+    <div class="results-row">
+      <span>Наявний метал (відраховано):</span>
+      <span class="val">-${calc.existingMetal.toFixed(2)} г</span>
+    </div>
+    ` : ''}
+    <div class="results-row">
+      <span>Доплавка (Чистота 999.9 + Лігатура):</span>
+      <span class="val" style="color: #fde047;">${calc.pureMetalToAdd.toFixed(2)} г + ${calc.alloyToAdd.toFixed(2)} г (${calc.remainingMetalNeeded.toFixed(2)} г)</span>
+    </div>
+  `;
+}
+
+// --- РОБОТА З КОШИКОМ (МУЛЬТИ-ОПОКИ) ---
+function addToBatch() {
+  const calc = getSingleCalculations();
+  state.batch.push(calc);
+  localStorage.setItem("cc_batch", JSON.stringify(state.batch));
+  renderBatch();
+}
+
+function removeFromBatch(index) {
+  state.batch.splice(index, 1);
+  localStorage.setItem("cc_batch", JSON.stringify(state.batch));
+  renderBatch();
+}
+
+function clearBatch() {
+  state.batch = [];
+  localStorage.setItem("cc_batch", JSON.stringify(state.batch));
+  renderBatch();
+}
+
+function renderBatch() {
+  const tbody = document.getElementById("batch-table-body");
+  const countSpan = document.getElementById("batch-count");
+  const summaryBox = document.getElementById("batch-summary");
+
+  countSpan.innerText = state.batch.length;
+
+  if (state.batch.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Кошик замісу порожній</td></tr>`;
+    summaryBox.style.display = "none";
+    return;
+  }
+
+  tbody.innerHTML = state.batch.map((item, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${item.d}x${item.h}</td>
+      <td><span class="badge">${item.metal.name}</span></td>
+      <td>${Math.round(item.powderWeight)} г</td>
+      <td>${Math.round(item.waterVolume)} мл</td>
+      <td>${item.totalMetalNeeded.toFixed(1)} г</td>
+      <td><button class="btn btn-danger btn-sm" onclick="removeFromBatch(${i})">✕</button></td>
+    </tr>
+  `).join("");
+
+  // Розрахунок підсумків кошика
+  let totalPowder = 0;
+  let totalWater = 0;
+  let metalsSummary = {};
+
+  state.batch.forEach(item => {
+    totalPowder += item.powderWeight;
+    totalWater += item.waterVolume;
+
+    const metalKey = item.metal.name;
+    if (!metalsSummary[metalKey]) {
+      metalsSummary[metalKey] = {
+        totalMetal: 0,
+        existingMetal: 0,
+        pureToAdd: 0,
+        alloyToAdd: 0
+      };
+    }
+    metalsSummary[metalKey].totalMetal += item.totalMetalNeeded;
+    metalsSummary[metalKey].existingMetal += item.existingMetal;
+    metalsSummary[metalKey].pureToAdd += item.pureMetalToAdd;
+    metalsSummary[metalKey].alloyToAdd += item.alloyToAdd;
+  });
+
+  let metalsHTML = Object.keys(metalsSummary).map(key => {
+    const m = metalsSummary[key];
+    return `
+      <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dotted rgba(255,255,255,0.1);">
+        <strong>${key}:</strong> Всього ${m.totalMetal.toFixed(2)} г 
+        ${m.existingMetal > 0 ? `(Наявний: ${m.existingMetal.toFixed(2)} г)` : ''}<br>
+        <span style="color: #fde047;">➜ Додати: Чистота 999.9: ${m.pureToAdd.toFixed(2)} г | Лігатура: ${m.alloyToAdd.toFixed(2)} г</span>
+      </div>
+    `;
+  }).join("");
+
+  summaryBox.style.display = "block";
+  summaryBox.innerHTML = `
+    <div style="font-weight: 600; font-size: 1rem; color: var(--accent); margin-bottom: 8px;">ЗАГАЛЬНИЙ ПІДСУМОК ЗАМІСУ:</div>
+    <div class="results-row">
+      <span>Загальна маса формомаси:</span>
+      <span class="val" style="font-size: 1.1rem; color: #a7f3d0;">${Math.round(totalPowder)} г</span>
+    </div>
+    <div class="results-row">
+      <span>Загальний об'єм дистильованої води:</span>
+      <span class="val" style="font-size: 1.1rem; color: #38bdf8;">${Math.round(totalWater)} мл</span>
+    </div>
+    <div style="margin-top: 8px;">
+      <span style="color: var(--text-muted); font-size: 0.85rem;">Потреба в металі по сплавах:</span>
+      ${metalsHTML}
+    </div>
+  `;
+}
+
+// --- ЕКСПОРТ ЗВІТІВ (PDF / TXT) ---
+function getFormattedDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const mins = String(now.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}_${hours}-${mins}`;
+}
+
+function exportTXT() {
+  if (state.batch.length === 0) {
+    alert("Кошик замісу порожній!");
+    return;
+  }
+
+  const dateStr = getFormattedDate();
+  let txt = `Casting Calc — Звіт замісу (${dateStr})\n`;
+  txt += `-------------------------------------------\n\n`;
+
+  let totalPowder = 0, totalWater = 0;
+  state.batch.forEach((item, i) => {
+    totalPowder += item.powderWeight;
+    totalWater += item.waterVolume;
+    txt += `Опока #${i+1} [${item.d}x${item.h} мм]:\n`;
+    txt += ` - Сплав: ${item.metal.name}\n`;
+    txt += ` - Формомаса: ${Math.round(item.powderWeight)} г | Вода: ${Math.round(item.waterVolume)} мл\n`;
+    txt += ` - Метал всього: ${item.totalMetalNeeded.toFixed(2)} г (Чистота: ${item.pureMetalToAdd.toFixed(2)}г, Лігатура: ${item.alloyToAdd.toFixed(2)}г)\n\n`;
+  });
+
+  txt += `-------------------------------------------\n`;
+  txt += `ЗАГАЛЬНИЙ ПІДСУМОК:\n`;
+  txt += `Суха формомаса: ${Math.round(totalPowder)} г\n`;
+  txt += `Вода: ${Math.round(totalWater)} мл\n`;
+
+  navigator.clipboard.writeText(txt).then(() => {
+    alert("Текстовий звіт скопійовано в буфер обміну!");
+  });
+}
+
+function exportPDF() {
+  if (state.batch.length === 0) {
+    alert("Кошик замісу порожній!");
+    return;
+  }
+
+  const dateStr = getFormattedDate();
+  document.getElementById("pdf-date").innerText = `Дата та час формування: ${dateStr.replace('_', ' ')}`;
+
+  const pdfTable = document.getElementById("pdf-batch-table");
+  pdfTable.innerHTML = state.batch.map((item, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${item.d}х${item.h} мм</td>
+      <td>${item.modelW} г</td>
+      <td>${item.metal.name}</td>
+      <td>${Math.round(item.powderWeight)} г</td>
+      <td>${Math.round(item.waterVolume)} мл</td>
+      <td>${item.totalMetalNeeded.toFixed(2)} г</td>
+    </tr>
+  `).join("");
+
+  const pdfSummary = document.getElementById("pdf-summary-content");
+  pdfSummary.innerHTML = document.getElementById("batch-summary").innerHTML;
+
+  const element = document.getElementById("pdf-template");
+  element.style.display = "block";
+
+  const opt = {
+    margin:       10,
+    filename:     `Заміс_${dateStr}.pdf`,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2 },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opt).from(element).save().then(() => {
+    element.style.display = "none";
+  });
+}
+</script>
+
+</body>
+</html>

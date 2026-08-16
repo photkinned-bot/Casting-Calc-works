@@ -1,11 +1,9 @@
-<div align="center">
+# Casting Calc — Ювелірний калькулятор литва
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Автономний вебзастосунок для розрахунку ваги формомаси, дистильованої води та шихтовки металу (з урахуванням технологічної надпроби 587, 752 та 930) для ювелірного литва.
 
-  <h1>Built with AI Studio</h2>
-
-  <p>The fastest path from prompt to production with Gemini.</p>
-
-  <a href="https://aistudio.google.com/apps">Start building</a>
-
-</div>
+## Інструкція зі збереження на iPad / Смартфон (PWA)
+1. Відкрийте застосунок через Safari на iPad.
+2. Натисніть кнопку **«Поділитися» (Share)**.
+3. Виберіть пункт **«На початковий екран» (Add to Home Screen)**.
+4. Додаток з'явиться на робочому столі і працюватиме повністю автономно (без інтернету).
