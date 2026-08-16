@@ -84,9 +84,30 @@
     .badge-success { background-color: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
     .badge-pending { background-color: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid #f59e0b; }
 
+    /* Стилі підсвітки металів за кольорами (Красне, Жовте, Біле золото, Срібло, Латунь) */
+    .badge-red-gold { background: rgba(244, 63, 94, 0.18); color: #fda4af; border: 1px solid #f43f5e; font-weight: 600; text-shadow: 0 0 6px rgba(244,63,94,0.4); }
+    .badge-yellow-gold { background: rgba(234, 179, 8, 0.18); color: #fef08a; border: 1px solid #eab308; font-weight: 600; text-shadow: 0 0 6px rgba(234,179,8,0.4); }
+    .badge-white-gold { background: rgba(255, 255, 255, 0.22); color: #ffffff; border: 1px solid #ffffff; font-weight: 700; text-shadow: 0 0 8px rgba(255,255,255,0.7); box-shadow: 0 0 8px rgba(255,255,255,0.25); }
+    .badge-silver { background: rgba(148, 163, 184, 0.18); color: #cbd5e1; border: 1px solid #94a3b8; font-weight: 600; text-shadow: 0 0 6px rgba(148,163,184,0.3); }
+    .badge-bronze { background: rgba(217, 119, 6, 0.18); color: #fcd34d; border: 1px solid #d97706; font-weight: 600; }
+
+    /* Підсвітка рядків у таблиці замісу за кольором сплаву */
+    .flask-row-red-gold { background: rgba(244, 63, 94, 0.08) !important; border-left: 4px solid #f43f5e !important; }
+    .flask-row-yellow-gold { background: rgba(234, 179, 8, 0.08) !important; border-left: 4px solid #eab308 !important; }
+    .flask-row-white-gold { background: rgba(255, 255, 255, 0.10) !important; border-left: 4px solid #ffffff !important; box-shadow: inset 0 0 15px rgba(255,255,255,0.06); }
+    .flask-row-silver { background: rgba(148, 163, 184, 0.08) !important; border-left: 4px solid #94a3b8 !important; }
+    .flask-row-bronze { background: rgba(217, 119, 6, 0.08) !important; border-left: 4px solid #d97706 !important; }
+
+    /* Підсвітка карток опок у підсумку замісу за кольором сплаву */
+    .flask-card-red-gold { border: 1px solid #f43f5e !important; border-left: 5px solid #f43f5e !important; background: rgba(244, 63, 94, 0.07) !important; box-shadow: 0 2px 10px rgba(244,63,94,0.12); }
+    .flask-card-yellow-gold { border: 1px solid #eab308 !important; border-left: 5px solid #eab308 !important; background: rgba(234, 179, 8, 0.07) !important; box-shadow: 0 2px 10px rgba(234,179,8,0.12); }
+    .flask-card-white-gold { border: 1px solid #ffffff !important; border-left: 5px solid #ffffff !important; background: rgba(255, 255, 255, 0.09) !important; box-shadow: 0 0 16px rgba(255,255,255,0.18), inset 0 0 10px rgba(255,255,255,0.05); }
+    .flask-card-silver { border: 1px solid #94a3b8 !important; border-left: 5px solid #94a3b8 !important; background: rgba(148, 163, 184, 0.07) !important; box-shadow: 0 2px 10px rgba(148,163,184,0.12); }
+    .flask-card-bronze { border: 1px solid #d97706 !important; border-left: 5px solid #d97706 !important; background: rgba(217, 119, 6, 0.07) !important; box-shadow: 0 2px 10px rgba(217,119,6,0.12); }
+
     /* Стилі для готових (відлитих) опок */
-    .flask-card-completed { border: 2px solid #10b981 !important; background: rgba(16, 185, 129, 0.09) !important; box-shadow: 0 0 15px rgba(16, 185, 129, 0.15); }
-    .flask-row-completed { background: rgba(16, 185, 129, 0.07) !important; }
+    .flask-card-completed { border: 2px solid #10b981 !important; border-left: 6px solid #10b981 !important; background: rgba(16, 185, 129, 0.12) !important; box-shadow: 0 0 15px rgba(16, 185, 129, 0.2) !important; }
+    .flask-row-completed { background: rgba(16, 185, 129, 0.10) !important; border-left: 4px solid #10b981 !important; }
     .flask-row-completed td { border-bottom-color: rgba(16, 185, 129, 0.2) !important; }
 
     /* Кастомний ергономічний чекбокс */
@@ -272,7 +293,10 @@
         </select>
       </div>
       <div class="form-group">
-        <label>Сплав металу (Пресет)</label>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label for="preset-metal">Сплав металу (Пресет)</label>
+          <span id="preset-metal-color-badge" class="badge" style="font-size: 0.72rem; padding: 1px 6px;"></span>
+        </div>
         <select id="preset-metal" onchange="applyMetalPreset()">
           <!-- Динамічні варіанти -->
         </select>
@@ -629,13 +653,105 @@ const DEFAULT_INVESTMENTS = [
   { name: "Рідка (40:100)", ratio: 40 }
 ];
 
-// Фиксовані алгоритми проб за специфікацією
+// Фіксовані алгоритми проб та колірні сплави металів за ювелірною специфікацією
 const METALS = [
-  { id: "au585", name: "Золото 585 (Розрахунок 587)", density: 13.5, targetPurity: 587, basePurity: 585 },
-  { id: "au750", name: "Золото 750 (Розрахунок 752)", density: 15.5, targetPurity: 752, basePurity: 750 },
-  { id: "ag925", name: "Срібло 925 (Розрахунок 930)", density: 10.36, targetPurity: 930, basePurity: 925 },
-  { id: "brass", name: "Латунь / Бронза", density: 8.5, targetPurity: 1000, basePurity: 1000 }
+  { id: "au585_red", name: "Золото 585 Красне (Розрахунок 587)", shortName: "Au 585 Красне", density: 13.5, targetPurity: 587, basePurity: 585, colorCode: "red_gold", icon: "🔴" },
+  { id: "au585_yellow", name: "Золото 585 Жовте (Розрахунок 587)", shortName: "Au 585 Жовте", density: 13.5, targetPurity: 587, basePurity: 585, colorCode: "yellow_gold", icon: "🟡" },
+  { id: "au585_white", name: "Золото 585 Біле (Розрахунок 587)", shortName: "Au 585 Біле", density: 13.5, targetPurity: 587, basePurity: 585, colorCode: "white_gold", icon: "⚪" },
+  { id: "au750_red", name: "Золото 750 Красне (Розрахунок 752)", shortName: "Au 750 Красне", density: 15.5, targetPurity: 752, basePurity: 750, colorCode: "red_gold", icon: "🔴" },
+  { id: "au750_yellow", name: "Золото 750 Жовте (Розрахунок 752)", shortName: "Au 750 Жовте", density: 15.5, targetPurity: 752, basePurity: 750, colorCode: "yellow_gold", icon: "🟡" },
+  { id: "au750_white", name: "Золото 750 Біле (Розрахунок 752)", shortName: "Au 750 Біле", density: 15.5, targetPurity: 752, basePurity: 750, colorCode: "white_gold", icon: "⚪" },
+  { id: "ag925", name: "Срібло 925 (Розрахунок 930)", shortName: "Ag 925 Срібло", density: 10.36, targetPurity: 930, basePurity: 925, colorCode: "silver", icon: "🔘" },
+  { id: "brass", name: "Латунь / Бронза", shortName: "Латунь / Бронза", density: 8.5, targetPurity: 1000, basePurity: 1000, colorCode: "bronze", icon: "🟠" }
 ];
+
+function getMetalColorMeta(metal) {
+  if (!metal) {
+    return {
+      code: "yellow_gold",
+      badgeClass: "badge-yellow-gold",
+      rowClass: "flask-row-yellow-gold",
+      cardClass: "flask-card-yellow-gold",
+      colorName: "Жовте золото",
+      icon: "🟡",
+      border: "#eab308",
+      borderAccent: "#facc15",
+      bg: "rgba(234, 179, 8, 0.08)"
+    };
+  }
+
+  const id = String(metal.id || "").toLowerCase();
+  const name = String(metal.name || "").toLowerCase();
+  const colorCode = metal.colorCode || "";
+
+  if (colorCode === "red_gold" || id.includes("red") || name.includes("красн") || name.includes("червон")) {
+    return {
+      code: "red_gold",
+      badgeClass: "badge-red-gold",
+      rowClass: "flask-row-red-gold",
+      cardClass: "flask-card-red-gold",
+      colorName: "Красне золото",
+      icon: "🔴",
+      border: "#f43f5e",
+      borderAccent: "#fb7185",
+      bg: "rgba(244, 63, 94, 0.08)"
+    };
+  }
+
+  if (colorCode === "white_gold" || id.includes("white") || name.includes("біл") || name.includes("бел")) {
+    return {
+      code: "white_gold",
+      badgeClass: "badge-white-gold",
+      rowClass: "flask-row-white-gold",
+      cardClass: "flask-card-white-gold",
+      colorName: "Біле золото",
+      icon: "⚪",
+      border: "#ffffff",
+      borderAccent: "#f8fafc",
+      bg: "rgba(255, 255, 255, 0.10)"
+    };
+  }
+
+  if (colorCode === "silver" || id.includes("ag") || name.includes("срібл") || name.includes("серебр")) {
+    return {
+      code: "silver",
+      badgeClass: "badge-silver",
+      rowClass: "flask-row-silver",
+      cardClass: "flask-card-silver",
+      colorName: "Срібло (сірувато-сріблястий)",
+      icon: "🔘",
+      border: "#94a3b8",
+      borderAccent: "#cbd5e1",
+      bg: "rgba(148, 163, 184, 0.08)"
+    };
+  }
+
+  if (colorCode === "bronze" || id.includes("brass") || name.includes("латунь") || name.includes("бронз")) {
+    return {
+      code: "bronze",
+      badgeClass: "badge-bronze",
+      rowClass: "flask-row-bronze",
+      cardClass: "flask-card-bronze",
+      colorName: "Латунь / Бронза",
+      icon: "🟠",
+      border: "#d97706",
+      borderAccent: "#f59e0b",
+      bg: "rgba(217, 119, 6, 0.08)"
+    };
+  }
+
+  return {
+    code: "yellow_gold",
+    badgeClass: "badge-yellow-gold",
+    rowClass: "flask-row-yellow-gold",
+    cardClass: "flask-card-yellow-gold",
+    colorName: "Жовте золото",
+    icon: "🟡",
+    border: "#eab308",
+    borderAccent: "#facc15",
+    bg: "rgba(234, 179, 8, 0.08)"
+  };
+}
 
 let state = {
   flasks: JSON.parse(localStorage.getItem("cc_flasks")) || DEFAULT_FLASKS,
@@ -897,12 +1013,28 @@ function renderPresetSelects() {
   
   const metalSel = document.getElementById("preset-metal");
   const prevMetalVal = metalSel.value;
-  metalSel.innerHTML = METALS.map((m, i) => `<option value="${i}">${m.name}</option>`).join("");
+  metalSel.innerHTML = METALS.map((m, i) => {
+    const meta = getMetalColorMeta(m);
+    return `<option value="${i}">${meta.icon} ${m.name}</option>`;
+  }).join("");
   if (prevMetalVal !== "" && parseInt(prevMetalVal, 10) < METALS.length) {
     metalSel.value = prevMetalVal;
   }
 
   updateFlaskHeaderDisplay();
+  updateMetalColorBadgeDisplay();
+}
+
+function updateMetalColorBadgeDisplay() {
+  const sel = document.getElementById("preset-metal");
+  const badge = document.getElementById("preset-metal-color-badge");
+  if (sel && badge) {
+    const idx = parseInt(sel.value, 10);
+    const metal = (idx >= 0 && METALS[idx]) ? METALS[idx] : METALS[0];
+    const meta = getMetalColorMeta(metal);
+    badge.className = `badge ${meta.badgeClass}`;
+    badge.innerHTML = `${meta.icon} ${meta.colorName}`;
+  }
 }
 
 function renderPresetModalLists() {
@@ -959,6 +1091,7 @@ function applyInvestmentPreset() {
 }
 
 function applyMetalPreset() {
+  updateMetalColorBadgeDisplay();
   calculateSingle();
 }
 
@@ -1107,6 +1240,7 @@ function getSingleCalculations() {
 function calculateSingle() {
   const calc = getSingleCalculations();
   const resContainer = document.getElementById("single-results");
+  const colorMeta = getMetalColorMeta(calc.metal);
 
   resContainer.innerHTML = `
     <div class="results-row">
@@ -1118,8 +1252,11 @@ function calculateSingle() {
       <span class="val" style="color: #a7f3d0;">${Math.round(calc.powderWeight)} г / ${Math.round(calc.waterVolume)} мл</span>
     </div>
     <div class="results-row">
-      <span>Загальний метал (${calc.metal.name}):</span>
-      <span class="val">${calc.totalMetalNeeded.toFixed(2)} г</span>
+      <span>Загальний метал:</span>
+      <span class="val" style="display: flex; align-items: center; gap: 6px; justify-content: flex-end; flex-wrap: wrap;">
+        <span class="badge ${colorMeta.badgeClass}">${colorMeta.icon} ${calc.metal.name}</span>
+        <strong style="color: #38bdf8;">${calc.totalMetalNeeded.toFixed(2)} г</strong>
+      </span>
     </div>
     ${calc.existingMetal > 0 ? `
     <div class="results-row">
@@ -1142,6 +1279,23 @@ function calculateSingle() {
 
 // --- ПЕРЕРАХУНОК МЕТАЛУ ТА ШИХТОВКИ ДЛЯ ОПОКИ В КОШИКУ ---
 function recomputeFlaskItem(item, newExistingMetal = null, newSprueMargin = null, newCompleted = null, newNote = null) {
+  // Нормалізація металу та колірних метаданих
+  if (!item.metal || !item.metal.density) {
+    const metalId = String((item.metal && item.metal.id) || item.metal || "").toLowerCase();
+    let found = METALS.find(m => m.id === metalId || m.name === metalId);
+    if (!found) {
+      if (metalId.includes("585")) found = METALS.find(m => m.id === "au585_red");
+      else if (metalId.includes("750")) found = METALS.find(m => m.id === "au750_yellow");
+      else if (metalId.includes("ag") || metalId.includes("925")) found = METALS.find(m => m.id === "ag925");
+      else if (metalId.includes("brass") || metalId.includes("латунь")) found = METALS.find(m => m.id === "brass");
+    }
+    item.metal = Object.assign({}, found || METALS[0]);
+  } else if (!item.metal.colorCode) {
+    const meta = getMetalColorMeta(item.metal);
+    item.metal.colorCode = meta.code;
+    item.metal.icon = meta.icon;
+  }
+
   if (newSprueMargin !== null && !isNaN(newSprueMargin) && newSprueMargin >= 0) {
     item.sprueMargin = parseFloat(newSprueMargin);
   }
@@ -1227,7 +1381,10 @@ function openRecalcModal(index) {
 
   document.getElementById("recalc-modal-title").innerText = `⚡ Перерахунок металу: Опока #${currentRecalcIndex + 1}`;
   document.getElementById("recalc-flask-dimensions").innerText = `Опока ⌀${item.d} × ${item.h} мм`;
-  document.getElementById("recalc-flask-metal-badge").innerText = item.metal.name;
+  const colorMeta = getMetalColorMeta(item.metal);
+  const metalBadgeEl = document.getElementById("recalc-flask-metal-badge");
+  metalBadgeEl.className = `badge ${colorMeta.badgeClass}`;
+  metalBadgeEl.innerText = `${colorMeta.icon} ${item.metal.name}`;
   document.getElementById("recalc-model-weight").innerText = `${item.modelW} г`;
   document.getElementById("recalc-sprue-val").innerText = `+${item.sprueMargin}%`;
   document.getElementById("recalc-existing-input").value = item.existingMetal > 0 ? item.existingMetal : "";
@@ -1412,6 +1569,7 @@ function renderBatch() {
   tbody.innerHTML = state.batch.map((item, i) => {
     // Безпечний перерахунок у разі завантаження старих даних
     recomputeFlaskItem(item);
+    const colorMeta = getMetalColorMeta(item.metal);
 
     let metalDetail = `<span style="font-weight: 600; color: #38bdf8;">${item.totalMetalNeeded.toFixed(2)} г</span>`;
     if (item.metal.targetPurity < 1000 && item.remainingMetalNeeded > 0) {
@@ -1423,7 +1581,7 @@ function renderBatch() {
       metalDetail += `<div style="font-size: 0.72rem; color: #94a3b8;">(Наявний: -${item.existingMetal.toFixed(2)}г)</div>`;
     }
 
-    const rowClass = item.completed ? 'flask-row-completed' : '';
+    const rowClass = item.completed ? 'flask-row-completed' : colorMeta.rowClass;
 
     return `
       <tr class="${rowClass}">
@@ -1437,7 +1595,7 @@ function renderBatch() {
           <span>#${i + 1} ⌀${item.d}×${item.h} мм</span>
           <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">Модель: ${item.modelW}г</div>
         </td>
-        <td><span class="badge">${item.metal.name}</span></td>
+        <td><span class="badge ${colorMeta.badgeClass}">${colorMeta.icon} ${item.metal.name}</span></td>
         <td><span style="color: #a7f3d0; font-weight: 600;">${Math.round(item.powderWeight)} г</span></td>
         <td><span style="color: #38bdf8; font-weight: 600;">${Math.round(item.waterVolume)} мл</span></td>
         <td>${metalDetail}</td>
@@ -1480,6 +1638,7 @@ function renderBatchSummary() {
 
   // Формування поопочного розрахунку металу (метал НЕ підсумовується)
   const perFlaskMetalsHTML = state.batch.map((item, i) => {
+    const colorMeta = getMetalColorMeta(item.metal);
     let composition = '';
     if (item.metal.targetPurity < 1000 && item.remainingMetalNeeded > 0) {
       composition = `<span style="color: #fde047;">➜ Чистота 999.9: <strong>${item.pureMetalToAdd.toFixed(2)} г</strong> | Лігатура: <strong>${item.alloyToAdd.toFixed(2)} г</strong></span>`;
@@ -1489,7 +1648,7 @@ function renderBatchSummary() {
       composition = `<span style="color: #a7f3d0;">➜ 100% закрито наявним металом (доплавка не потрібна)</span>`;
     }
 
-    const cardClass = item.completed ? 'flask-card-completed' : '';
+    const cardClass = item.completed ? 'flask-card-completed' : colorMeta.cardClass;
 
     return `
       <div style="margin-top: 10px; padding: 14px; background: rgba(15,23,42,0.75); border-radius: 8px; border: 1px solid var(--border); transition: all 0.25s;" class="${cardClass}">
@@ -1499,8 +1658,8 @@ function renderBatchSummary() {
               <input type="checkbox" class="complete-checkbox" ${item.completed ? 'checked' : ''} onchange="toggleFlaskCompleted(${i})">
               <span style="color: ${item.completed ? '#34d399' : 'var(--text)'};">${item.completed ? '✓ ВІДЛИТО (ГОТОВО)' : 'Позначити як відлиту'}</span>
             </label>
-            <span style="font-weight: 700; color: ${item.completed ? '#34d399' : 'var(--accent)'}; font-size: 0.98rem;">Опока #${i + 1} (⌀${item.d}×${item.h} мм)</span>
-            <span class="badge">${item.metal.name}</span>
+            <span style="font-weight: 700; color: ${item.completed ? '#34d399' : colorMeta.borderAccent}; font-size: 0.98rem;">Опока #${i + 1} (⌀${item.d}×${item.h} мм)</span>
+            <span class="badge ${colorMeta.badgeClass}">${colorMeta.icon} ${item.metal.name}</span>
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-weight: 700; color: #38bdf8; font-size: 1rem;">Метал: ${item.totalMetalNeeded.toFixed(2)} г</span>
@@ -1518,7 +1677,7 @@ function renderBatchSummary() {
           Вага моделі: ${item.modelW} г (густина: ${item.polyDensity} г/см³) | Ливник: +${item.sprueMargin}%
           ${item.existingMetal > 0 ? `| <span style="color: #fde047;">Наявний метал: ${item.existingMetal.toFixed(2)} г</span> (доплавка: ${item.remainingMetalNeeded.toFixed(2)} г)` : '| <span style="color: #94a3b8;">Наявного металу: 0 г (повна доплавка)</span>'}
         </div>
-        <div style="font-size: 0.88rem; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px; border-left: 3px solid ${item.completed ? '#10b981' : 'var(--accent)'};">
+        <div style="font-size: 0.88rem; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px; border-left: 3px solid ${item.completed ? '#10b981' : colorMeta.border};">
           ${composition}
         </div>
       </div>
@@ -1866,13 +2025,35 @@ function parseAndApplyProjectJSON(jsonText, sourceName = "") {
 
     // 3. Відновлення та перерахунок кошика замісу
     state.batch = importedBatch.map(item => {
-      // Зіставлення сплаву металу
+      // Зіставлення сплаву металу з новими колірними пресетами
       if (typeof item.metal === 'string') {
-        const found = METALS.find(m => m.id === item.metal || m.name === item.metal);
-        item.metal = found || METALS[0];
-      } else if (item.metal && !item.metal.density) {
-        const found = METALS.find(m => m.id === item.metal.id);
-        item.metal = found || METALS[0];
+        const metalStr = item.metal.toLowerCase();
+        let found = METALS.find(m => m.id === item.metal || m.name.toLowerCase() === metalStr);
+        if (!found) {
+          if (metalStr.includes("585") && (metalStr.includes("красн") || metalStr.includes("червон"))) found = METALS.find(m => m.id === "au585_red");
+          else if (metalStr.includes("585") && metalStr.includes("біл")) found = METALS.find(m => m.id === "au585_white");
+          else if (metalStr.includes("585") && metalStr.includes("жовт")) found = METALS.find(m => m.id === "au585_yellow");
+          else if (metalStr.includes("585")) found = METALS.find(m => m.id === "au585_red");
+          else if (metalStr.includes("750") && (metalStr.includes("красн") || metalStr.includes("червон"))) found = METALS.find(m => m.id === "au750_red");
+          else if (metalStr.includes("750") && metalStr.includes("біл")) found = METALS.find(m => m.id === "au750_white");
+          else if (metalStr.includes("750")) found = METALS.find(m => m.id === "au750_yellow");
+          else if (metalStr.includes("925") || metalStr.includes("срібл")) found = METALS.find(m => m.id === "ag925");
+          else if (metalStr.includes("латунь") || metalStr.includes("бронз")) found = METALS.find(m => m.id === "brass");
+        }
+        item.metal = Object.assign({}, found || METALS[0]);
+      } else if (item.metal) {
+        const metalId = String(item.metal.id || "").toLowerCase();
+        const metalName = String(item.metal.name || "").toLowerCase();
+        let found = METALS.find(m => m.id === item.metal.id || m.name === item.metal.name);
+        if (!found) {
+          if (metalId === "au585" || (metalName.includes("585") && !metalName.includes("біл") && !metalName.includes("жовт"))) found = METALS.find(m => m.id === "au585_red");
+          else if (metalId === "au750" || (metalName.includes("750") && !metalName.includes("біл") && !metalName.includes("красн"))) found = METALS.find(m => m.id === "au750_yellow");
+          else if (metalId.includes("585")) found = METALS.find(m => m.id === "au585_red");
+          else if (metalId.includes("750")) found = METALS.find(m => m.id === "au750_yellow");
+          else if (metalId.includes("ag") || metalName.includes("925")) found = METALS.find(m => m.id === "ag925");
+          else if (metalId.includes("brass") || metalName.includes("латунь")) found = METALS.find(m => m.id === "brass");
+        }
+        item.metal = Object.assign({}, found || METALS[0]);
       }
       return recomputeFlaskItem(item);
     });
