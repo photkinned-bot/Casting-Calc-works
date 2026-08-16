@@ -9,9 +9,6 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Casting Calc">
-  
-  <!-- CDN html2pdf.js для друку та збереження PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
     :root {
@@ -68,20 +65,6 @@
 
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; padding: 12px; }
     .modal-content { background: var(--bg-card); width: 100%; max-width: 500px; border-radius: 12px; padding: 20px; border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; }
-
-    /* PDF Report Specific Styling */
-    #pdf-template { display: none; background: #fff; color: #000; padding: 20px; font-family: Arial, sans-serif; }
-    #pdf-template h2 { color: #b45309; border-bottom: 2px solid #b45309; padding-bottom: 5px; margin-bottom: 15px; }
-    #pdf-template table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 15px; }
-    #pdf-template th, #pdf-template td { border: 1px solid #ccc; padding: 6px; font-size: 11px; text-align: left; color: #000; }
-    #pdf-template th { background-color: #f3f4f6; }
-    .pdf-summary { background: #fef3c7; padding: 10px; border-radius: 6px; border: 1px solid #f59e0b; margin-top: 10px; }
-
-    @media print {
-      body * { visibility: hidden; }
-      #pdf-template, #pdf-template * { visibility: visible; }
-      #pdf-template { position: absolute; left: 0; top: 0; width: 100%; }
-    }
   </style>
 </head>
 <body>
@@ -188,9 +171,9 @@
       <!-- Загальний підсумок замісу -->
     </div>
 
-    <div class="grid" style="margin-top: 12px;" id="export-buttons">
-      <button class="btn btn-secondary" id="btn-export-pdf" onclick="exportPDF()">Зберегти PDF / Google Диск</button>
-      <button class="btn btn-secondary" id="btn-export-txt" onclick="exportTXT()">Копіювати TXT розрахунок</button>
+    <div class="grid" style="margin-top: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));" id="export-buttons">
+      <button class="btn btn-secondary" id="btn-download-txt" onclick="downloadTXT()">Зберегти TXT файл</button>
+      <button class="btn btn-secondary" id="btn-export-txt" onclick="exportTXT()">Копіювати текст</button>
     </div>
   </div>
 </div>
@@ -248,34 +231,6 @@
   </div>
 </div>
 
-<!-- Шаблон для експорту в PDF (Прихований) -->
-<div id="pdf-template">
-  <h2>Casting Calc — Звіт замісу</h2>
-  <p id="pdf-date" style="font-size: 11px; color: #555;"></p>
-  
-  <h3>1. Перелік опок у замісі</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Розмір опоки</th>
-        <th>Модель</th>
-        <th>Сплав</th>
-        <th>Формомаса</th>
-        <th>Вода</th>
-        <th>Метал на опоку</th>
-        <th>Шихтовка (999.9 + Ліг.)</th>
-      </tr>
-    </thead>
-    <tbody id="pdf-batch-table"></tbody>
-  </table>
-
-  <div class="pdf-summary">
-    <h3>2. Підсумок замісу та розрахунок металу</h3>
-    <div id="pdf-summary-content" style="font-size: 12px; line-height: 1.5;"></div>
-  </div>
-</div>
-
 <script>
 // --- БАЗА ДАНИХ ТА СТАН ---
 const DEFAULT_FLASKS = [
@@ -311,9 +266,18 @@ window.addEventListener("DOMContentLoaded", () => {
   calculateSingle();
   renderBatch();
   
-  // Реєстрація Service Worker
+  // Очищення застарілого кешу Service Worker для негайного оновлення застосунку
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      for (let reg of registrations) {
+        reg.unregister();
+      }
+    });
+  }
+  if ('caches' in window) {
+    caches.keys().then(keys => {
+      keys.forEach(key => caches.delete(key));
+    });
   }
 });
 
@@ -698,15 +662,18 @@ function getFormattedDate() {
   return `${year}-${month}-${day}_${hours}-${mins}`;
 }
 
-function exportTXT() {
-  if (state.batch.length === 0) {
-    alert("Кошик замісу порожній!");
-    return;
-  }
-
+function getFormattedTextReport() {
   const dateStr = getFormattedDate();
-  let txt = `Casting Calc — Звіт замісу (${dateStr})\n`;
-  txt += `===========================================\n\n`;
+  const readableDate = new Date().toLocaleString('uk-UA', { 
+    year: 'numeric', month: '2-digit', day: '2-digit', 
+    hour: '2-digit', minute: '2-digit' 
+  });
+
+  let txt = `=======================================================\n`;
+  txt += `       CASTING CALC — ТЕХНОЛОГІЧНИЙ ЗВІТ ЛИТВА        \n`;
+  txt += `=======================================================\n`;
+  txt += `Дата та час розрахунку: ${readableDate}\n`;
+  txt += `Кількість опок у замісі: ${state.batch.length} шт.\n\n`;
 
   let totalPowder = 0, totalWater = 0;
   state.batch.forEach((item) => {
@@ -714,36 +681,70 @@ function exportTXT() {
     totalWater += item.waterVolume;
   });
 
-  txt += `🥣 ЗАМІС ФОРМОМАСИ (СУМАРНО ДЛЯ ВСІХ ${state.batch.length} ОПОК):\n`;
-  txt += ` - Суха формомаса: ${Math.round(totalPowder)} г\n`;
-  txt += ` - Дистильована вода: ${Math.round(totalWater)} мл\n\n`;
+  txt += `-------------------------------------------------------\n`;
+  txt += `🥣 1. ЗАГАЛЬНИЙ ЗАМІС ФОРМОМАСИ (СУМАРНО ДЛЯ ВСІХ ОПОК):\n`;
+  txt += `-------------------------------------------------------\n`;
+  txt += ` • Суха формомаса (порошок): ${Math.round(totalPowder)} г\n`;
+  txt += ` • Дистильована вода:       ${Math.round(totalWater)} мл\n\n`;
 
-  txt += `-------------------------------------------\n`;
-  txt += `🔥 РОЗРАХУНОК МЕТАЛУ НА КОЖНУ ОПОКУ ОКРЕМО:\n`;
-  txt += `(Кожна опока плавиться окремо, метал не змішується)\n\n`;
+  txt += `-------------------------------------------------------\n`;
+  txt += `📋 2. СПЕЦИФІКАЦІЯ ОПОК ТА РОЗРАХУНОК МЕТАЛУ (ПЛАВКА):\n`;
+  txt += `(Кожна опока плавиться окремо, метал не змішується)\n`;
+  txt += `-------------------------------------------------------\n\n`;
 
   state.batch.forEach((item, i) => {
-    txt += `Опока #${i+1} [⌀${item.d}x${item.h} мм]:\n`;
-    txt += ` - Сплав: ${item.metal.name}\n`;
-    txt += ` - Модель: ${item.modelW} г (Ливник: +${item.sprueMargin}%)\n`;
-    txt += ` - Формомаса: ${Math.round(item.powderWeight)} г | Вода: ${Math.round(item.waterVolume)} мл\n`;
-    txt += ` - Всього металу на опоку: ${item.totalMetalNeeded.toFixed(2)} г\n`;
+    txt += `[ ОПОКА #${i + 1} ] ⌀${item.d} × ${item.h} мм — ${item.metal.name}\n`;
+    txt += `  • Вага моделі:        ${item.modelW} г (густина: ${item.polyDensity} г/см³)\n`;
+    txt += `  • Ливникова система:  +${item.sprueMargin}%\n`;
+    txt += `  • Формомаса на опоку: ${Math.round(item.powderWeight)} г порошку + ${Math.round(item.waterVolume)} мл води\n`;
+    txt += `  • ВСЬОГО МЕТАЛУ:      ${item.totalMetalNeeded.toFixed(2)} г\n`;
     if (item.existingMetal > 0) {
-      txt += ` - Наявний метал: ${item.existingMetal.toFixed(2)} г (доплавка: ${item.remainingMetalNeeded.toFixed(2)} г)\n`;
+      txt += `  • Наявний метал/брухт: -${item.existingMetal.toFixed(2)} г (доплавка: ${item.remainingMetalNeeded.toFixed(2)} г)\n`;
     }
     if (item.metal.targetPurity < 1000 && item.remainingMetalNeeded > 0) {
-      txt += ` - Шихтовка доплавки: Чистота 999.9 = ${item.pureMetalToAdd.toFixed(2)} г | Лігатура = ${item.alloyToAdd.toFixed(2)} г\n`;
+      txt += `  • ШИХТОВКА ДОПЛАВКИ:   Чистота 999.9 = ${item.pureMetalToAdd.toFixed(2)} г | Лігатура = ${item.alloyToAdd.toFixed(2)} г\n`;
     } else {
-      txt += ` - Чистий метал: ${item.remainingMetalNeeded.toFixed(2)} г\n`;
+      txt += `  • ШИХТОВКА:            Чистий метал = ${item.remainingMetalNeeded.toFixed(2)} г\n`;
     }
     txt += `\n`;
   });
 
-  txt += `===========================================\n`;
+  txt += `=======================================================\n`;
+  txt += `Casting Calc — Ювелірний калькулятор розрахунку литва\n`;
+  return { txt, dateStr, readableDate };
+}
+
+function downloadTXT() {
+  if (state.batch.length === 0) {
+    alert("Кошик замісу порожній!");
+    return;
+  }
+  const { txt, dateStr } = getFormattedTextReport();
+  const filename = `Заміс_опок_${dateStr}.txt`;
+  
+  // Додаємо UTF-8 BOM (\uFEFF) для коректного відкриття у всіх програмах і мобільних
+  const blob = new Blob(["\uFEFF" + txt], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function exportTXT() {
+  if (state.batch.length === 0) {
+    alert("Кошик замісу порожній!");
+    return;
+  }
+
+  const { txt } = getFormattedTextReport();
 
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(txt).then(() => {
-      alert("Текстовий звіт скопійовано в буфер обміну!");
+      alert("Текстовий звіт розрахунку успішно скопійовано!");
     }).catch(() => {
       fallbackCopyText(txt);
     });
@@ -761,63 +762,11 @@ function fallbackCopyText(text) {
   ta.select();
   try {
     document.execCommand("copy");
-    alert("Текстовий звіт скопійовано в буфер обміну!");
+    alert("Текстовий звіт розрахунку успішно скопійовано!");
   } catch (e) {
     alert("Не вдалося скопіювати звіт.");
   }
   document.body.removeChild(ta);
-}
-
-function exportPDF() {
-  if (state.batch.length === 0) {
-    alert("Кошик замісу порожній!");
-    return;
-  }
-
-  const dateStr = getFormattedDate();
-  document.getElementById("pdf-date").innerText = `Дата та час формування: ${dateStr.replace('_', ' ')}`;
-
-  const pdfTable = document.getElementById("pdf-batch-table");
-  pdfTable.innerHTML = state.batch.map((item, i) => {
-    let composition = `${item.pureMetalToAdd.toFixed(2)}г (999.9) + ${item.alloyToAdd.toFixed(2)}г (ліг.)`;
-    if (item.metal.targetPurity >= 1000) {
-      composition = `${item.remainingMetalNeeded.toFixed(2)}г (100%)`;
-    }
-    if (item.existingMetal > 0) {
-      composition += ` [Наявн: ${item.existingMetal.toFixed(2)}г]`;
-    }
-
-    return `
-      <tr>
-        <td>#${i + 1}</td>
-        <td>⌀${item.d}х${item.h} мм</td>
-        <td>${item.modelW} г</td>
-        <td>${item.metal.name}</td>
-        <td>${Math.round(item.powderWeight)} г</td>
-        <td>${Math.round(item.waterVolume)} мл</td>
-        <td><strong>${item.totalMetalNeeded.toFixed(2)} г</strong></td>
-        <td>${composition}</td>
-      </tr>
-    `;
-  }).join("");
-
-  const pdfSummary = document.getElementById("pdf-summary-content");
-  pdfSummary.innerHTML = document.getElementById("batch-summary").innerHTML;
-
-  const element = document.getElementById("pdf-template");
-  element.style.display = "block";
-
-  const opt = {
-    margin:       10,
-    filename:     `Заміс_опок_${dateStr}.pdf`,
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2 },
-    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-
-  html2pdf().set(opt).from(element).save().then(() => {
-    element.style.display = "none";
-  });
 }
 </script>
 

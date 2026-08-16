@@ -8,7 +8,15 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 3000;
 
-app.use(express.static(__dirname));
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  res.set('Surrogate-Control', 'no-store');
+  next();
+});
+
+app.use(express.static(__dirname, { etag: false, maxAge: 0 }));
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
