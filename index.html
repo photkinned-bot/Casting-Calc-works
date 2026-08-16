@@ -65,9 +65,18 @@
 
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; padding: 12px; }
     .modal-content { background: var(--bg-card); width: 100%; max-width: 500px; border-radius: 12px; padding: 20px; border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; }
+
+    .quick-chip { background-color: var(--bg-input); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 4px 8px; font-size: 0.78rem; cursor: pointer; transition: all 0.15s; }
+    .quick-chip:hover { border-color: var(--accent); color: #fff; background-color: rgba(217,119,6,0.2); }
+
+    .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+    .toast { background-color: var(--bg-card); color: var(--text); border: 1px solid var(--accent); padding: 10px 16px; border-radius: 8px; font-size: 0.88rem; box-shadow: 0 4px 12px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 8px; animation: slideUp 0.25s ease-out; pointer-events: auto; }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   </style>
 </head>
 <body>
+
+<div id="toast-container" class="toast-container"></div>
 
 <div class="container">
   <header>
@@ -145,7 +154,10 @@
   <div class="card" id="batch-card">
     <div class="card-title">
       <span>Специфікація замісу (<span id="batch-count">0</span> опок)</span>
-      <button class="btn btn-danger btn-sm" id="btn-clear-batch" onclick="clearBatch()">Очистити кошик</button>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="btn btn-secondary btn-sm" id="btn-recalc-batch-all" onclick="openRecalcModal(0)" title="Покроковий перерахунок наявного металу та шихтовки для всіх опок">⚡ Перерахунок металу</button>
+        <button class="btn btn-danger btn-sm" id="btn-clear-batch" onclick="clearBatch()">Очистити кошик</button>
+      </div>
     </div>
 
     <div class="table-responsive">
@@ -158,7 +170,7 @@
             <th>Формомаса (г)</th>
             <th>Вода (мл)</th>
             <th>Метал на опоку</th>
-            <th>Дія</th>
+            <th>Дії</th>
           </tr>
         </thead>
         <tbody id="batch-table-body">
@@ -174,6 +186,88 @@
     <div class="grid" style="margin-top: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));" id="export-buttons">
       <button class="btn btn-secondary" id="btn-download-txt" onclick="downloadTXT()">Зберегти TXT файл</button>
       <button class="btn btn-secondary" id="btn-export-txt" onclick="exportTXT()">Копіювати текст</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модальне вікно перерахунку металу та шихтовки для опоки у кошику -->
+<div class="modal" id="recalcMetalModal">
+  <div class="modal-content" id="recalc-modal-content">
+    <div class="card-title">
+      <span id="recalc-modal-title">⚡ Перерахунок металу: Опока #1</span>
+      <button class="btn btn-secondary btn-sm" id="btn-close-recalc-modal" onclick="closeRecalcModal()">✕</button>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <!-- Інфо про поточну опоку -->
+      <div style="background: rgba(15,23,42,0.6); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span style="font-weight: 600; color: var(--accent); font-size: 0.95rem;" id="recalc-flask-dimensions">Опока ⌀60×100 мм</span>
+          <span class="badge" id="recalc-flask-metal-badge">Срібло 925</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted);">
+          <span>Вага воску/полімеру: <strong id="recalc-model-weight" style="color: var(--text);">2.5 г</strong></span>
+          <span>Ливник: <strong id="recalc-sprue-val" style="color: var(--text);">+15%</strong></span>
+        </div>
+      </div>
+
+      <!-- Загальна потреба в металі (базова вага залишається незмінною) -->
+      <div style="background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.88rem; color: #bae6fd;">🔥 Всього металу на опоку:</span>
+        <span style="font-size: 1.15rem; font-weight: 700; color: #38bdf8;" id="recalc-total-metal">0.00 г</span>
+      </div>
+
+      <!-- Ввід нового наявного металу -->
+      <div class="form-group">
+        <label for="recalc-existing-input" style="font-weight: 600; color: var(--text);">
+          Наявний метал для цієї опоки (г):
+        </label>
+        <input type="number" id="recalc-existing-input" step="0.01" min="0" placeholder="0.00" oninput="updateRecalcLivePreview()" style="font-size: 1.1rem; font-weight: 600; color: #fde047;">
+        
+        <!-- Швидкі кнопки для підстановки ваги -->
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px;">
+          <button type="button" class="quick-chip" id="chip-metal-0" onclick="setRecalcExisting(0)">0 г (з нуля)</button>
+          <button type="button" class="quick-chip" id="chip-metal-5" onclick="addRecalcExisting(5)">+5 г</button>
+          <button type="button" class="quick-chip" id="chip-metal-10" onclick="addRecalcExisting(10)">+10 г</button>
+          <button type="button" class="quick-chip" id="chip-metal-20" onclick="addRecalcExisting(20)">+20 г</button>
+          <button type="button" class="quick-chip" id="chip-metal-all" onclick="setRecalcExistingAll()" title="Використати 100% наявного металу">Весь метал</button>
+        </div>
+      </div>
+
+      <!-- Додаткове налаштування ливника (якщо треба скоригувати) -->
+      <div class="form-group">
+        <label for="recalc-sprue-input" style="font-size: 0.8rem; color: var(--text-muted);">
+          Запас на ливникову систему (%):
+        </label>
+        <input type="number" id="recalc-sprue-input" step="1" min="0" max="100" oninput="updateRecalcLivePreview()" style="font-size: 0.9rem;">
+      </div>
+
+      <!-- Результат онлайн-перерахунку -->
+      <div class="results-box" style="margin-top: 0; background: rgba(15, 23, 42, 0.85); border-color: var(--accent);">
+        <div style="font-size: 0.82rem; font-weight: 600; color: var(--accent); margin-bottom: 6px; text-transform: uppercase;">
+          Результат перерахунку шихтовки:
+        </div>
+        <div class="results-row">
+          <span>Наявний метал (відраховано):</span>
+          <span class="val" id="recalc-res-existing" style="color: #94a3b8;">0.00 г</span>
+        </div>
+        <div class="results-row">
+          <span>Потрібно доплавити (чистота + лігатура):</span>
+          <span class="val" id="recalc-res-remaining" style="color: #38bdf8;">0.00 г</span>
+        </div>
+        <div class="results-row" style="background: rgba(253, 224, 71, 0.1); padding: 6px 8px; border-radius: 6px; margin-top: 4px;">
+          <span style="font-weight: 600; color: #fde047;">🧪 Шихтовка:</span>
+          <span class="val" id="recalc-res-formula" style="color: #fde047; font-size: 0.95rem;">999.9: 0.00 г | Ліг: 0.00 г</span>
+        </div>
+      </div>
+
+      <!-- Кнопки збереження та навігації між опоками -->
+      <div style="display: flex; gap: 8px; margin-top: 8px;">
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-recalc-prev" onclick="navigateRecalcModal(-1)" style="flex: 1;">⬅ Попередня</button>
+        <button type="button" class="btn btn-sm" id="btn-recalc-save" onclick="saveRecalcModal(false)" style="flex: 2;">💾 Зберегти</button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-recalc-next" onclick="navigateRecalcModal(1)" style="flex: 1;">Наступна ➡</button>
+      </div>
+      <button type="button" class="btn btn-secondary btn-sm" id="btn-recalc-save-and-close" onclick="saveRecalcModal(true)" style="width: 100%;">💾 Зберегти і закрити</button>
     </div>
   </div>
 </div>
@@ -259,6 +353,24 @@ let state = {
   investments: JSON.parse(localStorage.getItem("cc_investments")) || DEFAULT_INVESTMENTS,
   batch: JSON.parse(localStorage.getItem("cc_batch")) || []
 };
+
+let currentRecalcIndex = -1;
+
+// --- ТОСТ-СПОВІЩЕННЯ (замість блокуючих alert) ---
+function showToast(message, duration = 2800) {
+  const container = document.getElementById("toast-container");
+  if (!container) return;
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.innerHTML = `<span>✨</span> <span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateY(10px)";
+    toast.style.transition = "all 0.25s ease-out";
+    setTimeout(() => toast.remove(), 250);
+  }, duration);
+}
 
 // --- ІНІЦІАЛІЗАЦІЯ ---
 window.addEventListener("DOMContentLoaded", () => {
@@ -528,24 +640,191 @@ function calculateSingle() {
   `;
 }
 
+// --- ПЕРЕРАХУНОК МЕТАЛУ ТА ШИХТОВКИ ДЛЯ ОПОКИ В КОШИКУ ---
+function recomputeFlaskItem(item, newExistingMetal = null, newSprueMargin = null) {
+  if (newSprueMargin !== null && !isNaN(newSprueMargin) && newSprueMargin >= 0) {
+    item.sprueMargin = parseFloat(newSprueMargin);
+  }
+  if (newExistingMetal !== null && !isNaN(newExistingMetal)) {
+    item.existingMetal = Math.max(0, parseFloat(newExistingMetal));
+  } else if (item.existingMetal === undefined) {
+    item.existingMetal = 0;
+  }
+
+  // Перевірка об'єму моделі та густини
+  const polyDensity = item.polyDensity || 1.1;
+  const modelVolume = item.modelVolume !== undefined ? item.modelVolume : (item.modelW / polyDensity);
+  item.modelVolume = modelVolume;
+  item.polyDensity = polyDensity;
+
+  // Базовий та повний метал з урахуванням ливника
+  const baseMetalNeeded = item.modelVolume * item.metal.density;
+  item.totalMetalNeeded = baseMetalNeeded * (1 + (item.sprueMargin || 0) / 100);
+  item.remainingMetalNeeded = Math.max(0, item.totalMetalNeeded - item.existingMetal);
+
+  // Шихтовка (Чистота 999.9 та Лігатура)
+  if (item.metal.targetPurity < 1000 && item.remainingMetalNeeded > 0) {
+    const targetFraction = item.metal.targetPurity / 1000;
+    item.pureMetalToAdd = item.remainingMetalNeeded * targetFraction;
+    item.alloyToAdd = item.remainingMetalNeeded * (1 - targetFraction);
+  } else {
+    item.pureMetalToAdd = item.remainingMetalNeeded;
+    item.alloyToAdd = 0;
+  }
+
+  return item;
+}
+
+function openRecalcModal(index) {
+  if (state.batch.length === 0) {
+    showToast("Кошик замісу порожній! Додайте спочатку опоку в кошик.");
+    return;
+  }
+
+  if (index < 0 || index >= state.batch.length) {
+    index = 0;
+  }
+  currentRecalcIndex = index;
+  const item = state.batch[currentRecalcIndex];
+
+  document.getElementById("recalc-modal-title").innerText = `⚡ Перерахунок металу: Опока #${currentRecalcIndex + 1}`;
+  document.getElementById("recalc-flask-dimensions").innerText = `Опока ⌀${item.d} × ${item.h} мм`;
+  document.getElementById("recalc-flask-metal-badge").innerText = item.metal.name;
+  document.getElementById("recalc-model-weight").innerText = `${item.modelW} г`;
+  document.getElementById("recalc-sprue-val").innerText = `+${item.sprueMargin}%`;
+  document.getElementById("recalc-existing-input").value = item.existingMetal > 0 ? item.existingMetal : "";
+  document.getElementById("recalc-sprue-input").value = item.sprueMargin !== undefined ? item.sprueMargin : 15;
+
+  // Оновлення стану кнопок навігації
+  document.getElementById("btn-recalc-prev").disabled = (currentRecalcIndex === 0);
+  document.getElementById("btn-recalc-prev").style.opacity = (currentRecalcIndex === 0) ? "0.4" : "1";
+  document.getElementById("btn-recalc-next").disabled = (currentRecalcIndex === state.batch.length - 1);
+  document.getElementById("btn-recalc-next").style.opacity = (currentRecalcIndex === state.batch.length - 1) ? "0.4" : "1";
+
+  updateRecalcLivePreview();
+  document.getElementById("recalcMetalModal").style.display = "flex";
+}
+
+function closeRecalcModal() {
+  document.getElementById("recalcMetalModal").style.display = "none";
+}
+
+function updateRecalcLivePreview() {
+  if (currentRecalcIndex < 0 || currentRecalcIndex >= state.batch.length) return;
+  const item = state.batch[currentRecalcIndex];
+
+  const existingInput = parseFloat(document.getElementById("recalc-existing-input").value) || 0;
+  const sprueInput = parseFloat(document.getElementById("recalc-sprue-input").value) || 0;
+
+  const polyDensity = item.polyDensity || 1.1;
+  const modelVolume = item.modelVolume !== undefined ? item.modelVolume : (item.modelW / polyDensity);
+  const baseMetal = modelVolume * item.metal.density;
+  const totalMetal = baseMetal * (1 + sprueInput / 100);
+  const remaining = Math.max(0, totalMetal - existingInput);
+
+  let pureToAdd = 0;
+  let alloyToAdd = 0;
+  if (item.metal.targetPurity < 1000 && remaining > 0) {
+    const fraction = item.metal.targetPurity / 1000;
+    pureToAdd = remaining * fraction;
+    alloyToAdd = remaining * (1 - fraction);
+  } else {
+    pureToAdd = remaining;
+    alloyToAdd = 0;
+  }
+
+  document.getElementById("recalc-total-metal").innerText = `${totalMetal.toFixed(2)} г`;
+  document.getElementById("recalc-res-existing").innerText = `-${existingInput.toFixed(2)} г`;
+  document.getElementById("recalc-res-remaining").innerText = `${remaining.toFixed(2)} г`;
+
+  if (item.metal.targetPurity < 1000 && remaining > 0) {
+    document.getElementById("recalc-res-formula").innerText = `999.9: ${pureToAdd.toFixed(2)} г | Лігатура: ${alloyToAdd.toFixed(2)} г`;
+  } else {
+    document.getElementById("recalc-res-formula").innerText = `Чистий сплав: ${remaining.toFixed(2)} г`;
+  }
+}
+
+function setRecalcExisting(val) {
+  document.getElementById("recalc-existing-input").value = val;
+  updateRecalcLivePreview();
+}
+
+function addRecalcExisting(delta) {
+  const cur = parseFloat(document.getElementById("recalc-existing-input").value) || 0;
+  document.getElementById("recalc-existing-input").value = (cur + delta).toFixed(2);
+  updateRecalcLivePreview();
+}
+
+function setRecalcExistingAll() {
+  if (currentRecalcIndex < 0 || currentRecalcIndex >= state.batch.length) return;
+  const item = state.batch[currentRecalcIndex];
+  const sprueInput = parseFloat(document.getElementById("recalc-sprue-input").value) || item.sprueMargin || 0;
+  const polyDensity = item.polyDensity || 1.1;
+  const modelVolume = item.modelVolume !== undefined ? item.modelVolume : (item.modelW / polyDensity);
+  const totalMetal = (modelVolume * item.metal.density) * (1 + sprueInput / 100);
+  document.getElementById("recalc-existing-input").value = totalMetal.toFixed(2);
+  updateRecalcLivePreview();
+}
+
+function saveRecalcModal(closeAfter = false) {
+  if (currentRecalcIndex < 0 || currentRecalcIndex >= state.batch.length) return;
+  const item = state.batch[currentRecalcIndex];
+
+  const existingInput = parseFloat(document.getElementById("recalc-existing-input").value) || 0;
+  const sprueInput = parseFloat(document.getElementById("recalc-sprue-input").value) || item.sprueMargin;
+
+  recomputeFlaskItem(item, existingInput, sprueInput);
+  localStorage.setItem("cc_batch", JSON.stringify(state.batch));
+  renderBatch();
+
+  showToast(`Опоку #${currentRecalcIndex + 1} успішно перераховано!`);
+
+  if (closeAfter) {
+    closeRecalcModal();
+  }
+}
+
+function navigateRecalcModal(step) {
+  if (currentRecalcIndex < 0) return;
+  
+  // Автоматично зберігаємо поточну опоку перед переходом
+  const item = state.batch[currentRecalcIndex];
+  const existingInput = parseFloat(document.getElementById("recalc-existing-input").value) || 0;
+  const sprueInput = parseFloat(document.getElementById("recalc-sprue-input").value) || item.sprueMargin;
+  recomputeFlaskItem(item, existingInput, sprueInput);
+  localStorage.setItem("cc_batch", JSON.stringify(state.batch));
+  renderBatch();
+
+  const newIndex = currentRecalcIndex + step;
+  if (newIndex >= 0 && newIndex < state.batch.length) {
+    openRecalcModal(newIndex);
+  }
+}
+
 // --- РОБОТА З КОШИКОМ (МУЛЬТИ-ОПОКИ) ---
 function addToBatch() {
   const calc = getSingleCalculations();
   state.batch.push(calc);
   localStorage.setItem("cc_batch", JSON.stringify(state.batch));
   renderBatch();
+  showToast(`Опоку #${state.batch.length} додано у кошик замісу`);
 }
 
 function removeFromBatch(index) {
-  state.batch.splice(index, 1);
-  localStorage.setItem("cc_batch", JSON.stringify(state.batch));
-  renderBatch();
+  if (index >= 0 && index < state.batch.length) {
+    state.batch.splice(index, 1);
+    localStorage.setItem("cc_batch", JSON.stringify(state.batch));
+    renderBatch();
+    showToast("Опоку видалено з кошика");
+  }
 }
 
 function clearBatch() {
+  if (state.batch.length === 0) return;
   state.batch = [];
   localStorage.setItem("cc_batch", JSON.stringify(state.batch));
   renderBatch();
+  showToast("Кошик замісу очищено");
 }
 
 function renderBatch() {
@@ -562,12 +841,17 @@ function renderBatch() {
   }
 
   tbody.innerHTML = state.batch.map((item, i) => {
+    // Безпечний перерахунок у разі завантаження старих даних
+    recomputeFlaskItem(item);
+
     let metalDetail = `<span style="font-weight: 600; color: #38bdf8;">${item.totalMetalNeeded.toFixed(2)} г</span>`;
     if (item.metal.targetPurity < 1000 && item.remainingMetalNeeded > 0) {
       metalDetail += `<div style="font-size: 0.75rem; color: #fde047; margin-top: 2px;">999.9: ${item.pureMetalToAdd.toFixed(2)}г + Ліг: ${item.alloyToAdd.toFixed(2)}г</div>`;
+    } else if (item.remainingMetalNeeded > 0) {
+      metalDetail += `<div style="font-size: 0.75rem; color: #fde047; margin-top: 2px;">Сплав: ${item.remainingMetalNeeded.toFixed(2)}г</div>`;
     }
     if (item.existingMetal > 0) {
-      metalDetail += `<div style="font-size: 0.72rem; color: var(--text-muted);">(Наявний: -${item.existingMetal.toFixed(2)}г)</div>`;
+      metalDetail += `<div style="font-size: 0.72rem; color: #94a3b8;">(Наявний: -${item.existingMetal.toFixed(2)}г)</div>`;
     }
 
     return `
@@ -578,7 +862,12 @@ function renderBatch() {
         <td><span style="color: #a7f3d0; font-weight: 600;">${Math.round(item.powderWeight)} г</span></td>
         <td><span style="color: #38bdf8; font-weight: 600;">${Math.round(item.waterVolume)} мл</span></td>
         <td>${metalDetail}</td>
-        <td><button class="btn btn-danger btn-sm" id="btn-remove-batch-${i}" onclick="removeFromBatch(${i})" title="Видалити опоку з кошика">✕</button></td>
+        <td>
+          <div style="display: flex; gap: 4px; align-items: center;">
+            <button class="btn btn-secondary btn-sm" id="btn-recalc-flask-${i}" onclick="openRecalcModal(${i})" title="Перерахувати наявний метал та шихтовку для цієї опоки" style="padding: 4px 8px; font-size: 0.75rem; border-color: var(--accent); color: var(--accent);">⚡ Перерахунок</button>
+            <button class="btn btn-danger btn-sm" id="btn-remove-batch-${i}" onclick="removeFromBatch(${i})" title="Видалити опоку з кошика" style="padding: 4px 8px; font-size: 0.75rem;">✕</button>
+          </div>
+        </td>
       </tr>
     `;
   }).join("");
@@ -597,21 +886,28 @@ function renderBatch() {
     let composition = '';
     if (item.metal.targetPurity < 1000 && item.remainingMetalNeeded > 0) {
       composition = `<span style="color: #fde047;">➜ Чистота 999.9: <strong>${item.pureMetalToAdd.toFixed(2)} г</strong> | Лігатура: <strong>${item.alloyToAdd.toFixed(2)} г</strong></span>`;
-    } else {
+    } else if (item.remainingMetalNeeded > 0) {
       composition = `<span style="color: #fde047;">➜ Чистий метал / сплав: <strong>${item.remainingMetalNeeded.toFixed(2)} г</strong></span>`;
+    } else {
+      composition = `<span style="color: #a7f3d0;">➜ 100% закрито наявним металом (доплавка не потрібна)</span>`;
     }
 
     return `
-      <div style="margin-top: 8px; padding: 10px; background: rgba(15,23,42,0.7); border-radius: 8px; border: 1px solid var(--border);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 4px;">
-          <span style="font-weight: 600; color: var(--accent); font-size: 0.92rem;">Опока #${i + 1} (⌀${item.d}×${item.h} мм) — ${item.metal.name}</span>
-          <span style="font-weight: 700; color: #38bdf8; font-size: 0.95rem;">Метал на опоку: ${item.totalMetalNeeded.toFixed(2)} г</span>
+      <div style="margin-top: 8px; padding: 12px; background: rgba(15,23,42,0.75); border-radius: 8px; border: 1px solid var(--border);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
+          <div>
+            <span style="font-weight: 600; color: var(--accent); font-size: 0.95rem;">Опока #${i + 1} (⌀${item.d}×${item.h} мм) — ${item.metal.name}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-weight: 700; color: #38bdf8; font-size: 0.98rem;">Метал: ${item.totalMetalNeeded.toFixed(2)} г</span>
+            <button class="btn btn-secondary btn-sm" id="btn-recalc-summary-${i}" onclick="openRecalcModal(${i})" title="Перерахувати наявний метал для опоки #${i + 1}" style="padding: 3px 8px; font-size: 0.75rem; border-color: var(--accent); color: var(--accent);">⚡ Перерахувати</button>
+          </div>
         </div>
-        <div style="font-size: 0.83rem; color: var(--text-muted); margin-bottom: 4px;">
+        <div style="font-size: 0.83rem; color: var(--text-muted); margin-bottom: 6px;">
           Вага моделі: ${item.modelW} г (густина: ${item.polyDensity} г/см³) | Ливник: +${item.sprueMargin}%
-          ${item.existingMetal > 0 ? `| Наявний метал: ${item.existingMetal.toFixed(2)} г (доплавка: ${item.remainingMetalNeeded.toFixed(2)} г)` : ''}
+          ${item.existingMetal > 0 ? `| <span style="color: #fde047;">Наявний метал: ${item.existingMetal.toFixed(2)} г</span> (доплавка: ${item.remainingMetalNeeded.toFixed(2)} г)` : '| <span style="color: #94a3b8;">Наявного металу: 0 г (повна доплавка)</span>'}
         </div>
-        <div style="font-size: 0.86rem;">
+        <div style="font-size: 0.88rem; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 6px; border-left: 3px solid var(--accent);">
           ${composition}
         </div>
       </div>
@@ -642,9 +938,10 @@ function renderBatch() {
     <div style="margin-top: 12px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 4px;">
         <span style="font-size: 0.88rem; font-weight: 600; color: #fde047;">🔥 РОЗРАХУНОК МЕТАЛУ ОКРЕМО НА КОЖНУ ОПОКУ (ПЛАВКА):</span>
+        <button class="btn btn-secondary btn-sm" id="btn-recalc-all-summary" onclick="openRecalcModal(0)" style="font-size: 0.75rem; padding: 3px 8px; border-color: var(--accent); color: var(--accent);">⚡ Перерахувати метал по черзі</button>
       </div>
       <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px;">
-        ⚠️ Метал не підсумовується в загальну масу, оскільки кожна опока відливається окремо зі своєю шихтовкою.
+        ⚠️ Метал не підсумовується в загальну масу, оскільки кожна опока відливається окремо зі своєю шихтовкою. Якщо після відливки першої опоки змінився наявний метал — скористайтеся кнопкою <strong>«⚡ Перерахувати»</strong>.
       </div>
       ${perFlaskMetalsHTML}
     </div>
@@ -703,8 +1000,10 @@ function getFormattedTextReport() {
     }
     if (item.metal.targetPurity < 1000 && item.remainingMetalNeeded > 0) {
       txt += `  • ШИХТОВКА ДОПЛАВКИ:   Чистота 999.9 = ${item.pureMetalToAdd.toFixed(2)} г | Лігатура = ${item.alloyToAdd.toFixed(2)} г\n`;
+    } else if (item.remainingMetalNeeded > 0) {
+      txt += `  • ШИХТОВКА:            Чистий сплав = ${item.remainingMetalNeeded.toFixed(2)} г\n`;
     } else {
-      txt += `  • ШИХТОВКА:            Чистий метал = ${item.remainingMetalNeeded.toFixed(2)} г\n`;
+      txt += `  • ШИХТОВКА:            100% закрито наявним металом\n`;
     }
     txt += `\n`;
   });
@@ -716,7 +1015,7 @@ function getFormattedTextReport() {
 
 function downloadTXT() {
   if (state.batch.length === 0) {
-    alert("Кошик замісу порожній!");
+    showToast("Кошик замісу порожній!");
     return;
   }
   const { txt, dateStr } = getFormattedTextReport();
@@ -732,11 +1031,12 @@ function downloadTXT() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  showToast("Файл звіту збережено!");
 }
 
 function exportTXT() {
   if (state.batch.length === 0) {
-    alert("Кошик замісу порожній!");
+    showToast("Кошик замісу порожній!");
     return;
   }
 
@@ -744,7 +1044,7 @@ function exportTXT() {
 
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(txt).then(() => {
-      alert("Текстовий звіт розрахунку успішно скопійовано!");
+      showToast("Текстовий звіт розрахунку успішно скопійовано!");
     }).catch(() => {
       fallbackCopyText(txt);
     });
@@ -762,9 +1062,9 @@ function fallbackCopyText(text) {
   ta.select();
   try {
     document.execCommand("copy");
-    alert("Текстовий звіт розрахунку успішно скопійовано!");
+    showToast("Текстовий звіт розрахунку успішно скопійовано!");
   } catch (e) {
-    alert("Не вдалося скопіювати звіт.");
+    showToast("Не вдалося скопіювати звіт.");
   }
   document.body.removeChild(ta);
 }
