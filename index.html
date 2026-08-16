@@ -87,6 +87,19 @@
     .quick-chip { background-color: var(--bg-input); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 4px 8px; font-size: 0.78rem; cursor: pointer; transition: all 0.15s; }
     .quick-chip:hover { border-color: var(--accent); color: #fff; background-color: rgba(217,119,6,0.2); }
 
+    /* Ергономічний розкривний віджет Опоки */
+    .flask-toggle-box { background-color: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s; }
+    .flask-toggle-box:hover { border-color: var(--accent); }
+    .flask-toggle-header { padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; transition: background-color 0.15s; gap: 8px; flex-wrap: wrap; }
+    .flask-toggle-header:hover { background-color: rgba(255, 255, 255, 0.03); }
+    .flask-toggle-body { border-top: 1px dashed var(--border); background-color: rgba(15, 23, 42, 0.4); padding: 12px; }
+
+    /* Поле введення з кнопкою швидкого очищення */
+    .input-clear-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
+    .input-clear-wrapper input { width: 100%; padding-right: 34px; }
+    .input-clear-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem; line-height: 1; padding: 4px 6px; border-radius: 4px; transition: color 0.15s, background-color 0.15s; }
+    .input-clear-btn:hover { color: #f8fafc; background-color: rgba(255,255,255,0.1); }
+
     .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
     .toast { background-color: var(--bg-card); color: var(--text); border: 1px solid var(--accent); padding: 10px 16px; border-radius: 8px; font-size: 0.88rem; box-shadow: 0 4px 12px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 8px; animation: slideUp 0.25s ease-out; pointer-events: auto; }
     @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -134,33 +147,70 @@
   <div class="card">
     <div class="card-title">Розрахунок одиночної опоки</div>
     <div class="grid">
+      <!-- Компактне розкривне віконце Опока з відображенням пресету / ручного введення -->
+      <div class="form-group" style="grid-column: 1 / -1;">
+        <div class="flask-toggle-box" id="flask-toggle-box">
+          <div class="flask-toggle-header" id="flask-toggle-header" onclick="toggleFlaskDimensions()" title="Натисніть щоб розкрити або згорнути ручне введення розмірів опоки">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span style="font-weight: 600; font-size: 0.95rem; color: var(--text);">🏺 Опока:</span>
+              <span id="flask-status-badge" class="badge" style="font-size: 0.82rem; padding: 3px 8px; font-weight: 600;">
+                Пресет: Опока 60х100 (⌀60×100 мм)
+              </span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span id="flask-toggle-action-text" style="font-size: 0.8rem; color: var(--accent);">Розкрити / Ручне введення</span>
+              <span id="flask-toggle-icon" style="font-size: 0.85rem; color: var(--accent); transition: transform 0.2s;">▼</span>
+            </div>
+          </div>
+
+          <div class="flask-toggle-body" id="flask-toggle-body" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+              <span style="font-size: 0.82rem; color: var(--text-muted);">
+                Введіть точні розміри опоки вручну:
+              </span>
+              <button type="button" class="quick-chip" id="btn-reset-to-preset" onclick="resetFlaskToCurrentPreset()" style="display: none;">
+                ↩ Відновити значення пресету
+              </button>
+            </div>
+            <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div class="form-group">
+                <label for="flask-diameter">Діаметр опоки (мм)</label>
+                <input type="number" id="flask-diameter" value="60" min="1" step="1" oninput="onFlaskDimensionsManualInput()">
+              </div>
+              <div class="form-group">
+                <label for="flask-height">Висота опоки (мм)</label>
+                <input type="number" id="flask-height" value="100" min="1" step="1" oninput="onFlaskDimensionsManualInput()">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="form-group">
-        <label>Діаметр опоки (мм)</label>
-        <input type="number" id="flask-diameter" value="60" oninput="calculateSingle()">
+        <label for="model-weight">Вага фотополімеру / ялинки (г)</label>
+        <input type="number" id="model-weight" value="0" step="0.1" min="0" oninput="calculateSingle()">
       </div>
       <div class="form-group">
-        <label>Висота опоки (мм)</label>
-        <input type="number" id="flask-height" value="100" oninput="calculateSingle()">
-      </div>
-      <div class="form-group">
-        <label>Вага фотополімеру / ялинки (г)</label>
-        <input type="number" id="model-weight" value="2.5" step="0.1" oninput="calculateSingle()">
-      </div>
-      <div class="form-group">
-        <label>Густина полімеру (г/см³)</label>
+        <label for="polymer-density">Густина полімеру (г/см³)</label>
         <input type="number" id="polymer-density" value="1.1" step="0.01" oninput="calculateSingle()">
       </div>
       <div class="form-group">
-        <label>Запас на ливникову систему (%)</label>
-        <input type="number" id="sprue-margin" value="15" oninput="calculateSingle()">
+        <label for="sprue-margin">Запас на ливникову систему (%)</label>
+        <input type="number" id="sprue-margin" value="15" min="0" oninput="calculateSingle()">
       </div>
       <div class="form-group">
-        <label>Наявний метал (г)</label>
-        <input type="number" id="existing-metal" value="0" step="0.1" oninput="calculateSingle()">
+        <label for="existing-metal">Наявний метал (г)</label>
+        <input type="number" id="existing-metal" value="0" step="0.1" min="0" oninput="calculateSingle()">
       </div>
       <div class="form-group" style="grid-column: 1 / -1;">
-        <label>Примітка до опоки (необов'язково)</label>
-        <input type="text" id="flask-note" placeholder="напр. Золоті обручки №14, терміново / Клієнт Олексій" oninput="calculateSingle()">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+          <label for="flask-note">Примітка до опоки (необов'язково)</label>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-clear-flask-note" onclick="clearFlaskNote()" style="padding: 2px 8px; font-size: 0.75rem;" title="Очистити поле примітки">✕ Очистити</button>
+        </div>
+        <div class="input-clear-wrapper">
+          <input type="text" id="flask-note" placeholder="напр. Золоті обручки №14, терміново / Клієнт Олексій" oninput="onNoteInput()">
+          <button type="button" class="input-clear-btn" id="btn-icon-clear-note" onclick="clearFlaskNote()" title="Очистити примітку" style="display: none;">✕</button>
+        </div>
       </div>
     </div>
 
@@ -245,10 +295,16 @@
 
       <!-- Редагування примітки для опоки -->
       <div class="form-group">
-        <label for="recalc-note-input" style="font-size: 0.82rem; color: var(--text-muted);">
-          📝 Примітка до цієї опоки:
-        </label>
-        <input type="text" id="recalc-note-input" class="note-input" placeholder="напр. Замовлення #14, золоті каблучки" style="font-size: 0.9rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+          <label for="recalc-note-input" style="font-size: 0.82rem; color: var(--text-muted);">
+            📝 Примітка до цієї опоки:
+          </label>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-clear-recalc-note" onclick="clearRecalcNote()" style="padding: 2px 6px; font-size: 0.72rem;">✕ Очистити</button>
+        </div>
+        <div class="input-clear-wrapper">
+          <input type="text" id="recalc-note-input" class="note-input" placeholder="напр. Замовлення #14, золоті каблучки" style="font-size: 0.9rem;" oninput="onRecalcNoteInput()">
+          <button type="button" class="input-clear-btn" id="btn-icon-clear-recalc-note" onclick="clearRecalcNote()" title="Очистити примітку" style="display: none;">✕</button>
+        </div>
       </div>
 
       <!-- Загальна потреба в металі (базова вага залишається незмінною) -->
@@ -395,6 +451,8 @@ let state = {
 };
 
 let currentRecalcIndex = -1;
+let isFlaskManual = false;
+let isFlaskExpanded = false;
 
 // --- ТОСТ-СПОВІЩЕННЯ (замість блокуючих alert) ---
 function showToast(message, duration = 2800) {
@@ -415,8 +473,10 @@ function showToast(message, duration = 2800) {
 // --- ІНІЦІАЛІЗАЦІЯ ---
 window.addEventListener("DOMContentLoaded", () => {
   renderPresetSelects();
+  applyFlaskPreset();
   calculateSingle();
   renderBatch();
+  onNoteInput();
   
   // Очищення застарілого кешу Service Worker для негайного оновлення застосунку
   if ('serviceWorker' in navigator) {
@@ -432,6 +492,127 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+// --- РОЗКРИВНЕ ВІКОНЦЕ ОПОКА & РУЧНЕ ВВЕДЕННЯ ---
+function toggleFlaskDimensions() {
+  const body = document.getElementById("flask-toggle-body");
+  const icon = document.getElementById("flask-toggle-icon");
+  const actionText = document.getElementById("flask-toggle-action-text");
+  
+  isFlaskExpanded = !isFlaskExpanded;
+  if (isFlaskExpanded) {
+    body.style.display = "block";
+    icon.innerText = "▲";
+    actionText.innerText = "Згорнути";
+  } else {
+    body.style.display = "none";
+    icon.innerText = "▼";
+    actionText.innerText = "Розкрити / Ручне введення";
+  }
+}
+
+function updateFlaskHeaderDisplay() {
+  const badge = document.getElementById("flask-status-badge");
+  const resetBtn = document.getElementById("btn-reset-to-preset");
+  const sel = document.getElementById("preset-flask");
+  const idx = sel ? parseInt(sel.value, 10) : -1;
+  const currentPreset = (idx >= 0 && state.flasks[idx]) ? state.flasks[idx] : null;
+
+  const d = parseFloat(document.getElementById("flask-diameter").value) || 0;
+  const h = parseFloat(document.getElementById("flask-height").value) || 0;
+
+  if (isFlaskManual) {
+    badge.className = "badge badge-pending";
+    badge.style.backgroundColor = "rgba(245, 158, 11, 0.2)";
+    badge.style.color = "#fbbf24";
+    badge.style.borderColor = "#f59e0b";
+    badge.innerText = `Ручне введення (⌀${d}×${h} мм)`;
+    if (resetBtn) {
+      if (currentPreset) {
+        resetBtn.style.display = "inline-block";
+        resetBtn.innerText = `↩ Повернути до пресету (${currentPreset.name})`;
+      } else {
+        resetBtn.style.display = "none";
+      }
+    }
+  } else {
+    badge.className = "badge";
+    badge.style.backgroundColor = "var(--bg-input)";
+    badge.style.color = "var(--accent)";
+    badge.style.borderColor = "var(--accent)";
+    if (currentPreset) {
+      badge.innerText = `Пресет: ${currentPreset.name} (⌀${currentPreset.d}×${currentPreset.h} мм)`;
+    } else {
+      badge.innerText = `Ручне введення (⌀${d}×${h} мм)`;
+    }
+    if (resetBtn) resetBtn.style.display = "none";
+  }
+}
+
+function onFlaskDimensionsManualInput() {
+  const sel = document.getElementById("preset-flask");
+  const idx = sel ? parseInt(sel.value, 10) : -1;
+  const currentPreset = (idx >= 0 && state.flasks[idx]) ? state.flasks[idx] : null;
+
+  const d = parseFloat(document.getElementById("flask-diameter").value) || 0;
+  const h = parseFloat(document.getElementById("flask-height").value) || 0;
+
+  if (currentPreset && d === currentPreset.d && h === currentPreset.h) {
+    isFlaskManual = false;
+  } else {
+    isFlaskManual = true;
+  }
+  updateFlaskHeaderDisplay();
+  calculateSingle();
+}
+
+function resetFlaskToCurrentPreset() {
+  applyFlaskPreset();
+  showToast("Відновлено параметри пресету опоки");
+}
+
+// --- КЕРУВАННЯ ПРИМІТКАМИ ТА ШВИДКЕ ОЧИЩЕННЯ ---
+function clearFlaskNote() {
+  const noteEl = document.getElementById("flask-note");
+  if (noteEl) {
+    noteEl.value = "";
+    onNoteInput();
+    calculateSingle();
+    showToast("Примітку очищено");
+  }
+}
+
+function onNoteInput() {
+  const noteEl = document.getElementById("flask-note");
+  const iconBtn = document.getElementById("btn-icon-clear-note");
+  const clearTextBtn = document.getElementById("btn-clear-flask-note");
+  if (noteEl) {
+    const hasVal = noteEl.value.trim().length > 0;
+    if (iconBtn) iconBtn.style.display = hasVal ? "block" : "none";
+    if (clearTextBtn) clearTextBtn.style.opacity = hasVal ? "1" : "0.5";
+  }
+  calculateSingle();
+}
+
+function clearRecalcNote() {
+  const noteEl = document.getElementById("recalc-note-input");
+  if (noteEl) {
+    noteEl.value = "";
+    onRecalcNoteInput();
+    showToast("Примітку очищено");
+  }
+}
+
+function onRecalcNoteInput() {
+  const noteEl = document.getElementById("recalc-note-input");
+  const iconBtn = document.getElementById("btn-icon-clear-recalc-note");
+  const clearTextBtn = document.getElementById("btn-clear-recalc-note");
+  if (noteEl) {
+    const hasVal = noteEl.value.trim().length > 0;
+    if (iconBtn) iconBtn.style.display = hasVal ? "block" : "none";
+    if (clearTextBtn) clearTextBtn.style.opacity = hasVal ? "1" : "0.5";
+  }
+}
 
 // --- РОБОТА З ПРЕСЕТАМИ ---
 function renderPresetSelects() {
@@ -463,6 +644,8 @@ function renderPresetSelects() {
   if (prevMetalVal !== "" && parseInt(prevMetalVal, 10) < METALS.length) {
     metalSel.value = prevMetalVal;
   }
+
+  updateFlaskHeaderDisplay();
 }
 
 function renderPresetModalLists() {
@@ -503,11 +686,13 @@ function renderPresetModalLists() {
 
 function applyFlaskPreset() {
   const sel = document.getElementById("preset-flask");
-  const idx = parseInt(sel.value, 10);
+  const idx = sel ? parseInt(sel.value, 10) : -1;
   if (idx >= 0 && state.flasks[idx]) {
     const f = state.flasks[idx];
     document.getElementById("flask-diameter").value = f.d;
     document.getElementById("flask-height").value = f.h;
+    isFlaskManual = false;
+    updateFlaskHeaderDisplay();
     calculateSingle();
   }
 }
@@ -792,6 +977,7 @@ function openRecalcModal(index) {
   document.getElementById("recalc-sprue-input").value = item.sprueMargin !== undefined ? item.sprueMargin : 15;
   document.getElementById("recalc-note-input").value = item.note || "";
   document.getElementById("recalc-completed-input").checked = !!item.completed;
+  onRecalcNoteInput();
 
   // Оновлення стану кнопок навігації
   document.getElementById("btn-recalc-prev").disabled = (currentRecalcIndex === 0);
@@ -928,7 +1114,10 @@ function addToBatch() {
   
   // Очищаємо поле примітки після додавання для зручності введення наступної
   const noteEl = document.getElementById("flask-note");
-  if (noteEl) noteEl.value = "";
+  if (noteEl) {
+    noteEl.value = "";
+    onNoteInput();
+  }
   
   renderBatch();
   showToast(`Опоку #${state.batch.length} додано у кошик замісу`);
