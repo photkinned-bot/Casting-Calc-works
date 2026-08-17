@@ -418,6 +418,65 @@
       border-color: #f87171;
       box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
     }
+
+    /* Панель пресетів цін матеріалів */
+    .preset-toolbar-inline {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .preset-select-sm {
+      flex: 1;
+      min-width: 140px;
+      padding: 6px 10px;
+      font-size: 0.82rem;
+      border-radius: 6px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-preset-action {
+      padding: 5px 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .btn-preset-action:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Секція розрахунку бензину та НБУ курсів */
+    .calc-subpanel {
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-top: 8px;
+    }
+    .nbu-metal-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.76rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: var(--text);
+    }
   </style>
 </head>
 <body>
@@ -523,7 +582,6 @@
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <label for="project-title-input">
             Назва проекту / номер замовлення:
-            <button type="button" class="help-btn" onclick="openHelpModal('project_json')" title="Довідка: Назва та ідентифікація проекту">?</button>
           </label>
           <span id="project-last-saved-text" style="font-size: 0.74rem; color: var(--text-muted);"></span>
         </div>
@@ -1208,13 +1266,27 @@
         <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
           <!-- 1. Формомаса і вода -->
           <div class="burnout-feature-box" style="border-color: rgba(52,211,153,0.3);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 4px;">
               <div style="display: flex; align-items: center; gap: 6px;">
                 <span style="font-weight: 700; color: #a7f3d0; font-size: 0.95rem;">1. Формомаса і вода</span>
                 <button type="button" class="help-btn help-btn-green" onclick="openHelpModal('cost_materials')" title="Довідка: Собівартість формомаси та води">?</button>
               </div>
               <span class="badge badge-success" style="font-size: 0.7rem;">З кошика</span>
             </div>
+
+            <!-- Пресети цін формомаси та води -->
+            <div class="preset-toolbar-inline" style="margin-top: 4px;">
+              <select id="material-price-preset-select" class="preset-select-sm" onchange="applyMaterialPricePreset()" title="Виберіть збережений пресет цін або створіть новий">
+                <!-- Опції пресетів генеруються динамічно -->
+              </select>
+              <button type="button" class="btn-preset-action" id="btn-save-material-preset" onclick="promptSaveMaterialPricePreset()" title="Зберегти поточні ціни порошку та води як пресет">
+                💾 Зберегти
+              </button>
+              <button type="button" class="btn-preset-action" id="btn-delete-material-preset" onclick="deleteCurrentMaterialPricePreset()" title="Видалити поточний пресет">
+                🗑️
+              </button>
+            </div>
+
             <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px;">
               Порошок: <strong style="color: #f8fafc;" id="cost-powder-weight-disp">0 кг</strong> | Вода: <strong style="color: #f8fafc;" id="cost-water-vol-disp">0 л</strong>
             </div>
@@ -1224,14 +1296,14 @@
                   Ціна порошку (грн/кг):
                   <button type="button" class="help-btn" onclick="openHelpModal('cost_powder_kg')" title="Довідка: Ціна формомаси за кг">?</button>
                 </label>
-                <input type="number" id="price-powder-kg" value="160" step="5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
+                <input type="number" id="price-powder-kg" value="160" step="5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onMaterialPriceManualInput()">
               </div>
               <div class="form-group" style="min-width: 0;">
                 <label for="price-water-l" style="font-size: 0.76rem; line-height: 1.2;">
                   Ціна води (грн/л):
                   <button type="button" class="help-btn" onclick="openHelpModal('cost_water_l')" title="Довідка: Ціна води за літр">?</button>
                 </label>
-                <input type="number" id="price-water-l" value="8" step="1" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
+                <input type="number" id="price-water-l" value="8" step="1" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onMaterialPriceManualInput()">
               </div>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 0.85rem;">
@@ -1262,60 +1334,153 @@
           </div>
 
           <!-- 3. Плавка, бензин, компресор та чад -->
-          <div class="burnout-feature-box" style="border-color: rgba(239,68,68,0.3);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+          <div class="burnout-feature-box" style="border-color: rgba(239,68,68,0.3); grid-column: 1 / -1;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
               <div style="display: flex; align-items: center; gap: 6px;">
                 <span style="font-weight: 700; color: #f87171; font-size: 0.95rem;">3. Плавка та чад металу</span>
                 <button type="button" class="help-btn help-btn-danger" onclick="openHelpModal('cost_melting_loss')" title="Довідка: Плавка, бензин, компресор та угар">?</button>
               </div>
-              <span class="badge" style="font-size: 0.7rem; background: rgba(239,68,68,0.2); color: #f87171; border-color: #ef4444;">Пальник & чад</span>
+              <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                <span class="badge" style="font-size: 0.7rem; background: rgba(239,68,68,0.2); color: #f87171; border-color: #ef4444;">Пальник & чад</span>
+              </div>
             </div>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 4px;">
+
+            <!-- Базові тарифи: Робота ливарника та Компресор -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 4px;">
               <div class="form-group" style="min-width: 0;">
-                <label for="price-melting-flask" style="font-size: 0.76rem; line-height: 1.2;">
-                  Плавка (робота, грн/оп):
+                <label for="price-melting-flask" style="font-size: 0.78rem; line-height: 1.2;">
+                  Робота ливарника (грн / опока):
                   <button type="button" class="help-btn" onclick="openHelpModal('cost_melting_work')" title="Довідка: Робота ливарника">?</button>
                 </label>
                 <input type="number" id="price-melting-flask" value="45" step="5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
               </div>
-              <div class="form-group" style="min-width: 0;">
-                <label for="price-gasoline-flask" style="font-size: 0.76rem; line-height: 1.2;" title="Вартість бензину «Калоша»/Б-70 для пальника на 1 опоку">
-                  ⛽ Бензин (грн/опока):
-                  <button type="button" class="help-btn" onclick="openHelpModal('cost_gasoline')" title="Довідка: Вартість бензину для пальника">?</button>
-                </label>
-                <input type="number" id="price-gasoline-flask" value="15" step="1" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
-              </div>
-            </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 6px;">
               <div class="form-group" style="min-width: 0;">
-                <label for="price-compressor-flask" style="font-size: 0.76rem; line-height: 1.2;" title="Вартість роботи компресора повітря для бензинового пальника на 1 опоку">
-                  💨 Компресор (грн/оп):
+                <label for="price-compressor-flask" style="font-size: 0.78rem; line-height: 1.2;" title="Вартість роботи компресора повітря для бензинового пальника на 1 опоку">
+                  💨 Компресор (грн / опока):
                   <button type="button" class="help-btn" onclick="openHelpModal('cost_compressor')" title="Довідка: Компресор повітря">?</button>
                 </label>
                 <input type="number" id="price-compressor-flask" value="5" step="1" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
               </div>
-              <div class="form-group" style="min-width: 0;">
-                <label for="metal-loss-percent" style="font-size: 0.76rem; line-height: 1.2;">
-                  Норма чаду (%):
-                  <button type="button" class="help-btn" onclick="openHelpModal('cost_metal_loss_rate')" title="Довідка: Норма безповоротних втрат металу">?</button>
-                </label>
-                <input type="number" id="metal-loss-percent" value="1.0" step="0.1" min="0" max="5" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
+            </div>
+
+            <!-- Розрахунок вартості бензину: Ціна за літр + Витрата на плавку (мл) -->
+            <div class="calc-subpanel" style="border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.04);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="font-weight: 600; color: #fbbf24; font-size: 0.85rem;">⛽ Бензин для пальника («Калоша» / Б-70 / Нефрас):</span>
+                  <button type="button" class="help-btn help-btn-amber" onclick="openHelpModal('cost_gasoline')" title="Довідка: Вартість бензину та розрахунок витрати">?</button>
+                </div>
+                <div style="font-size: 0.82rem; color: #fde68a;">
+                  На 1 опоку: <strong id="gasoline-cost-per-flask-calc" style="color: #fbbf24; font-size: 0.95rem;">14.40 грн</strong>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px;">
+                <div class="form-group" style="min-width: 0;">
+                  <label for="gasoline-price-liter" style="font-size: 0.74rem;">
+                    Ціна бензину (грн / літр):
+                  </label>
+                  <input type="number" id="gasoline-price-liter" value="180" step="5" min="0" style="font-size: 0.88rem; padding: 6px 8px;" oninput="onGasolineParamsChange()">
+                  <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+                    <button type="button" class="quick-chip" onclick="setGasolinePriceLiter(150)">150 грн/л</button>
+                    <button type="button" class="quick-chip" onclick="setGasolinePriceLiter(180)">180 грн/л (Б-70)</button>
+                    <button type="button" class="quick-chip" onclick="setGasolinePriceLiter(220)">220 грн/л</button>
+                  </div>
+                </div>
+
+                <div class="form-group" style="min-width: 0;">
+                  <label for="gasoline-ml-flask" style="font-size: 0.74rem;">
+                    Витрата на 1 опоку (мл):
+                  </label>
+                  <input type="number" id="gasoline-ml-flask" value="80" step="5" min="0" style="font-size: 0.88rem; padding: 6px 8px;" oninput="onGasolineParamsChange()">
+                  <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+                    <button type="button" class="quick-chip" onclick="setGasolineMl(50)">50 мл</button>
+                    <button type="button" class="quick-chip" onclick="setGasolineMl(80)">80 мл (Стандарт)</button>
+                    <button type="button" class="quick-chip" onclick="setGasolineMl(120)">120 мл (Масивне)</button>
+                  </div>
+                </div>
+
+                <div class="form-group" style="min-width: 0;">
+                  <label for="price-gasoline-flask" style="font-size: 0.74rem;">
+                    Разом бензин (грн / оп):
+                  </label>
+                  <input type="number" id="price-gasoline-flask" value="14.40" step="0.5" min="0" style="font-size: 0.88rem; padding: 6px 8px; font-weight: 600; color: #fbbf24;" oninput="onGasolineDirectPriceChange()">
+                  <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">
+                    Формула: (Витрата / 1000) × Ціна/л
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div class="form-group" style="margin-top: 6px; min-width: 0;">
-              <label for="metal-price-gram" style="font-size: 0.76rem; line-height: 1.2;">
-                Ціна чистоти/сплаву (грн/г) для оцінки чаду:
-                <button type="button" class="help-btn" onclick="openHelpModal('cost_metal_price_gram')" title="Довідка: Ринкова ціна металу для оцінки чаду">?</button>
-              </label>
-              <input type="number" id="metal-price-gram" value="2600" step="50" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
+            <!-- Автоматизація чаду металу з прив'язкою до сплавів у кошику та банківських курсів НБУ -->
+            <div class="calc-subpanel" style="border-color: rgba(56, 189, 248, 0.35); background: rgba(15, 23, 42, 0.85); margin-top: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="font-weight: 700; color: #38bdf8; font-size: 0.88rem;">⚖️ Чад металу (Угар) та офіційні курси НБУ:</span>
+                  <button type="button" class="help-btn" onclick="openHelpModal('cost_metal_loss_rate')" title="Довідка: Норми угару та курси НБУ">?</button>
+                </div>
+                <button type="button" class="btn-preset-action" id="btn-fetch-nbu" onclick="fetchNBUMetalRates(true)" style="border-color: #38bdf8; color: #38bdf8; background: rgba(56, 189, 248, 0.1);">
+                  <span id="nbu-loading-icon">🌐</span> Оновити курси НБУ
+                </button>
+              </div>
+
+              <!-- Інформаційна плашка актуальних курсів металів -->
+              <div id="nbu-rates-bar" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; font-size: 0.78rem;">
+                <span class="nbu-metal-badge" id="nbu-badge-gold">🟡 Au 999.9: <strong>3 875.50 грн/г</strong></span>
+                <span class="nbu-metal-badge" id="nbu-badge-silver">🔘 Ag 999.9: <strong>46.80 грн/г</strong></span>
+                <span class="nbu-metal-badge" id="nbu-badge-plat">💎 Pt 999.9: <strong>1 360.00 грн/г</strong></span>
+                <span id="nbu-status-indicator" style="font-size: 0.72rem; color: var(--text-muted); align-self: center; margin-left: auto;"></span>
+              </div>
+
+              <!-- Блок сплавів у поточному кошику замісу -->
+              <div id="batch-metal-sync-box" style="background: rgba(56, 189, 248, 0.06); border: 1px dashed rgba(56, 189, 248, 0.3); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
+                <!-- Динамічний опис складу металу кошика та кнопка застосування -->
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px;">
+                <div class="form-group" style="min-width: 0;">
+                  <label for="metal-loss-percent" style="font-size: 0.74rem;">
+                    Норма чаду металу (%):
+                    <button type="button" class="help-btn" onclick="openHelpModal('cost_metal_loss_rate')" title="Довідка: Норма безповоротних втрат">?</button>
+                  </label>
+                  <input type="number" id="metal-loss-percent" value="1.0" step="0.1" min="0" max="10" style="width: 100%; min-width: 0; padding: 6px 8px; font-size: 0.88rem;" oninput="calculateTotalProductionCost()">
+                  <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+                    <button type="button" class="quick-chip" onclick="setMetalLossPercent(0.8)">0.8% (Au нове)</button>
+                    <button type="button" class="quick-chip" onclick="setMetalLossPercent(1.0)">1.0% (Au станд)</button>
+                    <button type="button" class="quick-chip" onclick="setMetalLossPercent(1.2)">1.2% (Ag 925)</button>
+                    <button type="button" class="quick-chip" onclick="setMetalLossPercent(1.5)">1.5% (Брухт)</button>
+                  </div>
+                </div>
+
+                <div class="form-group" style="min-width: 0;">
+                  <label for="metal-price-preset-select" style="font-size: 0.74rem;">
+                    Швидкий вибір сплаву (за курсом НБУ):
+                  </label>
+                  <select id="metal-price-preset-select" class="preset-select-sm" style="width: 100%; padding: 6px 8px;" onchange="applySelectedMetalAlloyRate()">
+                    <!-- Динамічні опції -->
+                  </select>
+                  <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">
+                    Розраховано від чистоти 999.9 з урахуванням проби
+                  </div>
+                </div>
+
+                <div class="form-group" style="min-width: 0;">
+                  <label for="metal-price-gram" style="font-size: 0.74rem;">
+                    Розрахункова ціна металу (грн / г):
+                    <button type="button" class="help-btn" onclick="openHelpModal('cost_metal_price_gram')" title="Довідка: Ринкова ціна металу для оцінки чаду">?</button>
+                  </label>
+                  <input type="number" id="metal-price-gram" value="2600" step="20" min="0" style="width: 100%; min-width: 0; padding: 6px 8px; font-size: 0.95rem; font-weight: 700; color: #fde047;" oninput="calculateTotalProductionCost()">
+                  <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">
+                    Можна змінювати вручну або застосувати з кошика
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 0.85rem;">
-              <span>Плавка, бензин, компресор + чад:</span>
-              <strong style="color: #f87171;" id="cost-melting-total">65.00 грн</strong>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 0.88rem;">
+              <span>Разом плавка, бензин, компресор та угар:</span>
+              <strong style="color: #f87171; font-size: 1rem;" id="cost-melting-total">65.00 грн</strong>
             </div>
           </div>
         </div>
@@ -2936,6 +3101,9 @@ function renderBatch() {
   renderBatchSummary();
   updateProjectHeader();
   updateBurnoutCartPreview();
+  if (typeof renderBatchMetalSyncBox === "function") {
+    renderBatchMetalSyncBox();
+  }
 }
 
 function renderBatchSummary() {
@@ -3673,7 +3841,9 @@ function initBurnoutCalculator() {
             powderKg: 160,
             waterL: 8,
             meltingFlask: 45,
-            gasolineFlask: 15,
+            gasolineFlask: 14.40,
+            gasolinePriceLiter: 180,
+            gasolineMlFlask: 80,
             compressorFlask: 5,
             metalLossPercent: 1.0,
             metalPriceGram: 2600
@@ -3685,10 +3855,12 @@ function initBurnoutCalculator() {
     }
   }
 
+  initMaterialPricePresets();
   syncBurnoutInputsToUI();
   renderBurnoutStepsTable();
   calculateBurnoutCycle();
   calculateTotalProductionCost();
+  fetchNBUMetalRates(false);
 }
 
 function syncBurnoutInputsToUI() {
@@ -3720,6 +3892,8 @@ function syncBurnoutInputsToUI() {
   const priceWater = document.getElementById("price-water-l");
   const priceMelting = document.getElementById("price-melting-flask");
   const priceGasoline = document.getElementById("price-gasoline-flask");
+  const gasolinePriceLit = document.getElementById("gasoline-price-liter");
+  const gasolineMl = document.getElementById("gasoline-ml-flask");
   const priceCompressor = document.getElementById("price-compressor-flask");
   const metalLoss = document.getElementById("metal-loss-percent");
   const metalPrice = document.getElementById("metal-price-gram");
@@ -3727,11 +3901,19 @@ function syncBurnoutInputsToUI() {
   if (pricePowder && burnoutConfig.prices) pricePowder.value = burnoutConfig.prices.powderKg ?? 160;
   if (priceWater && burnoutConfig.prices) priceWater.value = burnoutConfig.prices.waterL ?? 8;
   if (priceMelting && burnoutConfig.prices) priceMelting.value = burnoutConfig.prices.meltingFlask ?? 45;
-  if (priceGasoline && burnoutConfig.prices) priceGasoline.value = burnoutConfig.prices.gasolineFlask ?? 15;
+  if (gasolinePriceLit && burnoutConfig.prices) gasolinePriceLit.value = burnoutConfig.prices.gasolinePriceLiter ?? 180;
+  if (gasolineMl && burnoutConfig.prices) gasolineMl.value = burnoutConfig.prices.gasolineMlFlask ?? 80;
+  if (priceGasoline && burnoutConfig.prices) {
+    const calcGas = ((burnoutConfig.prices.gasolineMlFlask ?? 80) / 1000) * (burnoutConfig.prices.gasolinePriceLiter ?? 180);
+    priceGasoline.value = burnoutConfig.prices.gasolineFlask ?? (calcGas > 0 ? calcGas.toFixed(2) : 14.40);
+    const gasCalcBadge = document.getElementById("gasoline-cost-per-flask-calc");
+    if (gasCalcBadge) gasCalcBadge.innerText = `${parseFloat(priceGasoline.value).toFixed(2)} грн / опока`;
+  }
   if (priceCompressor && burnoutConfig.prices) priceCompressor.value = burnoutConfig.prices.compressorFlask ?? 5;
   if (metalLoss && burnoutConfig.prices) metalLoss.value = burnoutConfig.prices.metalLossPercent ?? 1.0;
   if (metalPrice && burnoutConfig.prices) metalPrice.value = burnoutConfig.prices.metalPriceGram ?? 2600;
 
+  renderMaterialPricePresetOptions();
   setTariffMode(burnoutConfig.tariffType || "single", false);
 }
 
@@ -4731,7 +4913,9 @@ function calculateTotalProductionCost() {
   const pricePowderKg = parseFloat(document.getElementById("price-powder-kg")?.value) || 160;
   const priceWaterL = parseFloat(document.getElementById("price-water-l")?.value) || 8;
   const priceMeltingFlask = parseFloat(document.getElementById("price-melting-flask")?.value) || 45;
-  const priceGasolineFlask = parseFloat(document.getElementById("price-gasoline-flask")?.value) || 15;
+  const priceGasolineFlask = parseFloat(document.getElementById("price-gasoline-flask")?.value) || 14.40;
+  const gasolinePriceLit = parseFloat(document.getElementById("gasoline-price-liter")?.value) || 180;
+  const gasolineMl = parseFloat(document.getElementById("gasoline-ml-flask")?.value) || 80;
   const priceCompressorFlask = parseFloat(document.getElementById("price-compressor-flask")?.value) || 5;
   const metalLossPercent = parseFloat(document.getElementById("metal-loss-percent")?.value) || 1.0;
   const metalPriceGram = parseFloat(document.getElementById("metal-price-gram")?.value) || 2600;
@@ -4741,6 +4925,8 @@ function calculateTotalProductionCost() {
     waterL: priceWaterL,
     meltingFlask: priceMeltingFlask,
     gasolineFlask: priceGasolineFlask,
+    gasolinePriceLiter: gasolinePriceLit,
+    gasolineMlFlask: gasolineMl,
     compressorFlask: priceCompressorFlask,
     metalLossPercent: metalLossPercent,
     metalPriceGram: metalPriceGram
@@ -4799,6 +4985,392 @@ function calculateTotalProductionCost() {
   if (sumMelting) sumMelting.innerText = `${costMeltingConsumables.toFixed(2)} грн (${flasksCount} оп. × ${priceMeltingFlask}+${priceGasolineFlask}+${priceCompressorFlask} грн)`;
   if (sumLoss) sumLoss.innerText = `${costMetalLoss.toFixed(2)} грн (${metalLostG.toFixed(2)} г угару при ${metalLossPercent}%)`;
   if (sumPerGram) sumPerGram.innerText = totalMetalG > 0 ? `${costPerGram.toFixed(2)} грн/г (на ${totalMetalG.toFixed(2)} г металу)` : `0.00 грн/г`;
+
+  renderBatchMetalSyncBox();
+}
+
+// -------------------------------------------------------------
+// ПРЕСЕТИ МАТЕРІАЛІВ (ФОРМОМАСА ТА ДИСТИЛЬОВАНА ВОДА)
+// -------------------------------------------------------------
+const DEFAULT_MATERIAL_PRESETS = {
+  satin_cast_20: {
+    id: "satin_cast_20",
+    name: "Satin Cast 20 + Дистилят (160 грн/кг | 8 грн/л)",
+    powderKg: 160,
+    waterL: 8
+  },
+  gold_star_omega: {
+    id: "gold_star_omega",
+    name: "Gold Star Omega + Вода (185 грн/кг | 8 грн/л)",
+    powderKg: 185,
+    waterL: 8
+  },
+  kerr_diamond: {
+    id: "kerr_diamond",
+    name: "Kerr Satin Cast Diamond (210 грн/кг | 10 грн/л)",
+    powderKg: 210,
+    waterL: 10
+  },
+  budget_mix: {
+    id: "budget_mix",
+    name: "Бюджетна формомаса (130 грн/кг | 5 грн/л)",
+    powderKg: 130,
+    waterL: 5
+  }
+};
+
+function getMaterialPricePresets() {
+  const saved = localStorage.getItem("cc_material_presets");
+  let custom = {};
+  if (saved) {
+    try {
+      custom = JSON.parse(saved) || {};
+    } catch (e) {
+      console.warn("Could not parse custom material presets", e);
+    }
+  }
+  return { ...DEFAULT_MATERIAL_PRESETS, ...custom };
+}
+
+function initMaterialPricePresets() {
+  renderMaterialPricePresetOptions();
+}
+
+function renderMaterialPricePresetOptions() {
+  const select = document.getElementById("material-price-preset-select");
+  if (!select) return;
+
+  const presets = getMaterialPricePresets();
+  const currentPowder = parseFloat(document.getElementById("price-powder-kg")?.value) || 160;
+  const currentWater = parseFloat(document.getElementById("price-water-l")?.value) || 8;
+
+  let currentKey = "custom";
+  for (const key in presets) {
+    if (presets[key].powderKg === currentPowder && presets[key].waterL === currentWater) {
+      currentKey = key;
+      break;
+    }
+  }
+
+  let html = `<option value="" disabled>-- Оберіть шаблон цін --</option>`;
+  html += `<optgroup label="⭐ Заводські та популярні матеріали">`;
+  Object.keys(DEFAULT_MATERIAL_PRESETS).forEach(k => {
+    const p = DEFAULT_MATERIAL_PRESETS[k];
+    const isSel = k === currentKey ? "selected" : "";
+    html += `<option value="${k}" ${isSel}>${escapeHtml(p.name)}</option>`;
+  });
+  html += `</optgroup>`;
+
+  const saved = localStorage.getItem("cc_material_presets");
+  if (saved) {
+    try {
+      const custom = JSON.parse(saved) || {};
+      const customKeys = Object.keys(custom);
+      if (customKeys.length > 0) {
+        html += `<optgroup label="💾 Ваші власні збережені пресети">`;
+        customKeys.forEach(k => {
+          const p = custom[k];
+          const isSel = k === currentKey ? "selected" : "";
+          html += `<option value="${k}" ${isSel}>💾 ${escapeHtml(p.name)}</option>`;
+        });
+        html += `</optgroup>`;
+      }
+    } catch (e) {}
+  }
+
+  html += `<optgroup label="✏️ Ручний режим">`;
+  html += `<option value="custom" ${currentKey === 'custom' ? 'selected' : ''}>✏️ Користувацькі ціни</option>`;
+  html += `</optgroup>`;
+
+  select.innerHTML = html;
+
+  // Відображення кнопки видалення якщо активний користувацький пресет
+  const btnDel = document.getElementById("btn-delete-mat-preset");
+  if (btnDel) {
+    const isCustomSaved = saved && JSON.parse(saved || "{}")[currentKey];
+    btnDel.style.display = isCustomSaved ? "inline-flex" : "none";
+  }
+}
+
+function applyMaterialPricePreset() {
+  const select = document.getElementById("material-price-preset-select");
+  if (!select) return;
+
+  const key = select.value;
+  if (key === "custom") return;
+
+  const presets = getMaterialPricePresets();
+  const preset = presets[key];
+  if (preset) {
+    const powderInput = document.getElementById("price-powder-kg");
+    const waterInput = document.getElementById("price-water-l");
+    if (powderInput) powderInput.value = preset.powderKg;
+    if (waterInput) waterInput.value = preset.waterL;
+    calculateTotalProductionCost();
+    renderMaterialPricePresetOptions();
+    showToast(`✅ Застосовано ціновий пресет: ${preset.name.split('(')[0]}`);
+  }
+}
+
+function onMaterialPriceManualInput() {
+  const select = document.getElementById("material-price-preset-select");
+  if (select) select.value = "custom";
+  const btnDel = document.getElementById("btn-delete-mat-preset");
+  if (btnDel) btnDel.style.display = "none";
+  calculateTotalProductionCost();
+}
+
+function promptSaveMaterialPricePreset() {
+  const powderVal = parseFloat(document.getElementById("price-powder-kg")?.value) || 160;
+  const waterVal = parseFloat(document.getElementById("price-water-l")?.value) || 8;
+  const defaultName = `Пресет (${powderVal} грн/кг | ${waterVal} грн/л)`;
+
+  const name = prompt("Введіть назву для нового пресету цін формомаси та води:", defaultName);
+  if (!name || !name.trim()) return;
+
+  const saved = localStorage.getItem("cc_material_presets");
+  let custom = {};
+  if (saved) {
+    try { custom = JSON.parse(saved) || {}; } catch (e) {}
+  }
+
+  const presetId = "mat_preset_" + Date.now();
+  custom[presetId] = {
+    id: presetId,
+    name: name.trim(),
+    powderKg: powderVal,
+    waterL: waterVal
+  };
+
+  localStorage.setItem("cc_material_presets", JSON.stringify(custom));
+  renderMaterialPricePresetOptions();
+  const select = document.getElementById("material-price-preset-select");
+  if (select) select.value = presetId;
+  renderMaterialPricePresetOptions();
+  showToast(`💾 Пресет цін "${name.trim()}" успішно збережено!`);
+}
+
+function deleteCurrentMaterialPricePreset() {
+  const select = document.getElementById("material-price-preset-select");
+  if (!select) return;
+  const key = select.value;
+  if (!key || key === "custom" || DEFAULT_MATERIAL_PRESETS[key]) {
+    showToast("⚠️ Цей шаблон є базовим і не може бути видалений.");
+    return;
+  }
+
+  const saved = localStorage.getItem("cc_material_presets");
+  if (!saved) return;
+  try {
+    const custom = JSON.parse(saved) || {};
+    const name = custom[key]?.name || "Пресет";
+    if (confirm(`Ви впевнені, що бажаєте видалити пресет "${name}"?`)) {
+      delete custom[key];
+      localStorage.setItem("cc_material_presets", JSON.stringify(custom));
+      renderMaterialPricePresetOptions();
+      showToast(`🗑️ Пресет "${name}" видалено.`);
+    }
+  } catch (e) {}
+}
+
+// -------------------------------------------------------------
+// КАЛЬКУЛЯТОР ВИТРАТИ БЕНЗИНУ ДЛЯ ПАЛЬНИКА
+// -------------------------------------------------------------
+function onGasolineParamsChange() {
+  const priceLit = parseFloat(document.getElementById("gasoline-price-liter")?.value) || 180;
+  const ml = parseFloat(document.getElementById("gasoline-ml-flask")?.value) || 80;
+  const costPerFlask = (ml / 1000) * priceLit;
+
+  const priceFlaskInput = document.getElementById("price-gasoline-flask");
+  if (priceFlaskInput) priceFlaskInput.value = costPerFlask.toFixed(2);
+
+  const calcBadge = document.getElementById("gasoline-cost-per-flask-calc");
+  if (calcBadge) calcBadge.innerText = `${costPerFlask.toFixed(2)} грн / опока`;
+
+  calculateTotalProductionCost();
+}
+
+function onGasolineDirectPriceChange() {
+  const priceFlask = parseFloat(document.getElementById("price-gasoline-flask")?.value) || 14.40;
+  const calcBadge = document.getElementById("gasoline-cost-per-flask-calc");
+  if (calcBadge) calcBadge.innerText = `${priceFlask.toFixed(2)} грн / опока`;
+
+  calculateTotalProductionCost();
+}
+
+function setGasolinePriceLiter(val) {
+  const input = document.getElementById("gasoline-price-liter");
+  if (input) {
+    input.value = val;
+    onGasolineParamsChange();
+  }
+}
+
+function setGasolineMl(val) {
+  const input = document.getElementById("gasoline-ml-flask");
+  if (input) {
+    input.value = val;
+    onGasolineParamsChange();
+  }
+}
+
+// -------------------------------------------------------------
+// КУРСИ БАНКІВСЬКИХ МЕТАЛІВ НБУ ТА РОЗРАХУНОК УГАРУ
+// -------------------------------------------------------------
+let nbuMetalRates = {
+  gold: 3875.50,
+  silver: 46.80,
+  platinum: 1360.00,
+  updatedAt: "Довідковий курс НБУ",
+  isLive: false
+};
+
+async function fetchNBUMetalRates(manual = false) {
+  const updateBtn = document.getElementById("btn-fetch-nbu-rates");
+  if (updateBtn) updateBtn.innerText = "⏳ Оновлення...";
+
+  try {
+    const res = await fetch("/api/nbu-metals");
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.metals) {
+        nbuMetalRates.gold = data.metals.gold || 3875.50;
+        nbuMetalRates.silver = data.metals.silver || 46.80;
+        nbuMetalRates.platinum = data.metals.platinum || 1360.00;
+        nbuMetalRates.updatedAt = data.date ? `${data.date} (НБУ)` : "Офіційний курс НБУ";
+        nbuMetalRates.isLive = true;
+        if (manual) showToast("✅ Офіційні курси банківських металів НБУ оновлено!");
+      }
+    }
+  } catch (err) {
+    console.warn("Could not fetch live NBU rates, using reference values", err);
+    if (manual) showToast("⚠️ Використано довідкові курси металів НБУ");
+  } finally {
+    if (updateBtn) updateBtn.innerText = "🔄 Оновити з НБУ";
+    renderNBURatesBar();
+    renderMetalPricePresetOptions();
+    renderBatchMetalSyncBox();
+  }
+}
+
+function renderNBURatesBar() {
+  const auEl = document.getElementById("nbu-gold-rate");
+  const agEl = document.getElementById("nbu-silver-rate");
+  const ptEl = document.getElementById("nbu-pt-rate");
+  const dateEl = document.getElementById("nbu-rates-updated-date");
+
+  if (auEl) auEl.innerText = `${Math.round(nbuMetalRates.gold).toLocaleString('uk-UA')} грн/г`;
+  if (agEl) agEl.innerText = `${nbuMetalRates.silver.toFixed(2)} грн/г`;
+  if (ptEl) ptEl.innerText = `${Math.round(nbuMetalRates.platinum).toLocaleString('uk-UA')} грн/г`;
+  if (dateEl) dateEl.innerText = nbuMetalRates.updatedAt;
+}
+
+function renderMetalPricePresetOptions() {
+  const select = document.getElementById("metal-price-preset-select");
+  if (!select) return;
+
+  const au = nbuMetalRates.gold;
+  const ag = nbuMetalRates.silver;
+  const pt = nbuMetalRates.platinum;
+
+  const au585 = Math.round(au * 0.587);
+  const au750 = Math.round(au * 0.752);
+  const au375 = Math.round(au * 0.377);
+  const ag925 = (ag * 0.930).toFixed(2);
+  const pt950 = Math.round(pt * 0.955);
+
+  let html = `<option value="" disabled selected>-- Швидкий вибір сплаву за курсом НБУ --</option>`;
+  html += `<option value="${au585}">🥇 Золото 585 (Au 585) — ~${au585} грн/г</option>`;
+  html += `<option value="${au750}">🥇 Золото 750 (Au 750) — ~${au750} грн/г</option>`;
+  html += `<option value="${au375}">🥇 Золото 375 (Au 375) — ~${au375} грн/г</option>`;
+  html += `<option value="${Math.round(au)}">🏆 Чистота Золото 999.9 — ${Math.round(au)} грн/г</option>`;
+  html += `<option value="${ag925}">🥈 Срібло 925 (Ag 925) — ${ag925} грн/г</option>`;
+  html += `<option value="${ag.toFixed(2)}">🥈 Чистота Срібло 999.9 — ${ag.toFixed(2)} грн/г</option>`;
+  html += `<option value="${pt950}">⚪ Платина 950 (Pt 950) — ~${pt950} грн/г</option>`;
+  html += `<option value="15">🟡 Латунь / Бронза ливарна — 15 грн/г</option>`;
+
+  select.innerHTML = html;
+}
+
+function applySelectedMetalAlloyRate() {
+  const select = document.getElementById("metal-price-preset-select");
+  if (!select || !select.value) return;
+
+  const val = parseFloat(select.value);
+  if (!isNaN(val) && val > 0) {
+    const input = document.getElementById("metal-price-gram");
+    if (input) input.value = val;
+    calculateTotalProductionCost();
+    showToast(`✅ Встановлено оціночну ціну металу: ${val} грн/г`);
+  }
+}
+
+function renderBatchMetalSyncBox() {
+  const box = document.getElementById("batch-metals-sync-box");
+  const listEl = document.getElementById("batch-detected-metals-list");
+  const badgeEl = document.getElementById("batch-weighted-metal-price-badge");
+  const applyBtn = document.getElementById("btn-apply-batch-metal-rate");
+  if (!box || !listEl) return;
+
+  if (!state.batch || state.batch.length === 0) {
+    box.style.display = "none";
+    return;
+  }
+
+  let totalWeight = 0;
+  let weightedSum = 0;
+  const metalMap = {};
+
+  state.batch.forEach(item => {
+    recomputeFlaskItem(item);
+    const mName = item.metal.name || "Сплав";
+    const mWeight = item.totalMetalNeeded || 0;
+    totalWeight += mWeight;
+
+    // Розрахунок ціни за грам на основі НБУ
+    let rateGram = 2600;
+    const p = item.metal.targetPurity || 585;
+    const mId = (item.metal.id || "").toLowerCase();
+
+    if (mId.includes("ag") || mName.toLowerCase().includes("срібл") || p === 925) {
+      rateGram = nbuMetalRates.silver * (p / 1000);
+    } else if (mId.includes("pt") || mName.toLowerCase().includes("платин") || p === 950) {
+      rateGram = nbuMetalRates.platinum * (p / 1000);
+    } else if (mId.includes("brass") || mName.toLowerCase().includes("латун") || mName.toLowerCase().includes("бронз")) {
+      rateGram = 15;
+    } else {
+      // Золото
+      rateGram = nbuMetalRates.gold * (p / 1000);
+    }
+
+    weightedSum += (mWeight * rateGram);
+
+    if (!metalMap[mName]) {
+      metalMap[mName] = { weight: 0, rateGram: rateGram, icon: item.metal.icon || "💎" };
+    }
+    metalMap[mName].weight += mWeight;
+  });
+
+  const avgPriceGram = totalWeight > 0 ? (weightedSum / totalWeight) : 2600;
+  window._batchWeightedMetalPrice = avgPriceGram;
+
+  let metalsText = Object.keys(metalMap).map(k => {
+    return `<strong>${escapeHtml(k)}</strong>: ${metalMap[k].weight.toFixed(1)} г (~${Math.round(metalMap[k].rateGram)} грн/г)`;
+  }).join(" • ");
+
+  listEl.innerHTML = metalsText;
+  if (badgeEl) badgeEl.innerText = `${Math.round(avgPriceGram).toLocaleString('uk-UA')} грн/г`;
+  box.style.display = "block";
+}
+
+function applyBatchWeightedMetalRate() {
+  const avg = window._batchWeightedMetalPrice || 2600;
+  const input = document.getElementById("metal-price-gram");
+  if (input) {
+    input.value = Math.round(avg);
+    calculateTotalProductionCost();
+    showToast(`✅ Застосовано середньозважену ціну металів замісу: ${Math.round(avg)} грн/г`);
+  }
 }
 
 function saveBurnoutConfigLocal() {
@@ -4959,23 +5531,177 @@ function escapeHtml(str) {
 // 📚 ДОВІДКОВИЙ ДОВІДНИК ТА ПІДКАЗКИ ФОРМУЛ (HELP_TOPICS)
 // ==========================================
 const HELP_TOPICS = {
+  // ---------------- Вкладка 1: Литва і формомаса ----------------
+  preset_manager: {
+    title: "Менеджер типових пресетів майстерні",
+    badge: "Конфігурація майстерні",
+    category: "Пресет-менеджер",
+    formula: "База параметрів: Опоки (D×H) + Формомаси (W/P) + Сплави (ρ)",
+    desc: "Централізована панель керування збереженими типорозмірами гільз опок, пропорціями замісу пакувальних мас та ювелірними сплавами. Дозволяє створювати нові пресети, редагувати поточні, видаляти застарілі та миттєво відновлювати заводські параметри.",
+    impact: "Уніфікує технологічні карти ювелірної майстерні, прискорює заповнення даних та унеможливлює помилки персоналу при щоденній підготовці до литва.",
+    tip: "Натисніть кнопку «Керування пресетами», щоб додати власні нестандартні гільзи або спеціальні марки формомаси."
+  },
+  preset_flask: {
+    title: "Пресет типорозміру опоки",
+    badge: "Габарити гільзи",
+    category: "Пресет-менеджер",
+    formula: "D (мм) × H (мм) -> V_циліндра = π · (D/2)² · H",
+    desc: "Швидкий вибір стандартної циліндричної металевої опоки з вашого виробничого арсеналу (наприклад, 60х100, 80х120, 100х150 мм). Автоматично заповнює габарити форми та перераховує необхідну кількість сухої формомаси й води.",
+    impact: "Позбавляє необхідності щоразу вручну вимірювати та вводити діаметр і висоту гільзи штангельциркулем.",
+    tip: "Якщо ви використовуєте нестандартну гільзу, натисніть «Розкрити / Ручне введення» в блоці опоки нижче."
+  },
+  flask_presets: {
+    title: "Пресет типорозміру опоки",
+    badge: "Габарити гільзи",
+    category: "Пресет-менеджер",
+    formula: "D (мм) × H (мм) -> V_циліндра = π · (D/2)² · H",
+    desc: "Швидкий вибір стандартної циліндричної металевої опоки з вашого виробничого арсеналу (наприклад, 60х100, 80х120, 100х150 мм). Автоматично заповнює габарити форми та перераховує необхідну кількість сухої формомаси й води.",
+    impact: "Позбавляє необхідності щоразу вручну вимірювати та вводити діаметр і висоту гільзи штангельциркулем.",
+    tip: "Якщо ви використовуєте нестандартну гільзу, натисніть «Розкрити / Ручне введення» в блоці опоки нижче."
+  },
+  preset_investment: {
+    title: "Пресет формомаси та пропорції W/P",
+    badge: "Технологія суміші",
+    category: "Пресет-менеджер",
+    formula: "W/P = мл води на 100 г сухого порошку (напр. 38:100 або 40:100)",
+    desc: "Вибір типу та бренду пакувальної маси (Satin Cast 20, Gold Star Omega, Kerr Diamond, Prestige тощо) з попередньо встановленим співвідношенням вода/порошок (Water-to-Powder ratio).",
+    impact: "Визначає текучість рідкої маси при вакуумуванні та механічну міцність прокаленої гіпсової форми під час заливки рідкого розплаву під тиском чи центрифугою.",
+    tip: "Для масивних виробів обирайте пропорцію 35–37 мл/100г для максимальної міцності, а для тонкої ажурної філіграні — 38–40 мл/100г для максимальної текучості."
+  },
+  investment_presets: {
+    title: "Пресет формомаси та пропорції W/P",
+    badge: "Технологія суміші",
+    category: "Пресет-менеджер",
+    formula: "W/P = мл води на 100 г сухого порошку (напр. 38:100 або 40:100)",
+    desc: "Вибір типу та бренду пакувальної маси (Satin Cast 20, Gold Star Omega, Kerr Diamond, Prestige тощо) з попередньо встановленим співвідношенням вода/порошок (Water-to-Powder ratio).",
+    impact: "Визначає текучість рідкої маси при вакуумуванні та механічну міцність прокаленої гіпсової форми під час заливки рідкого розплаву під тиском чи центрифугою.",
+    tip: "Для масивних виробів обирайте пропорцію 35–37 мл/100г для максимальної міцності, а для тонкої ажурної філіграні — 38–40 мл/100г для максимальної текучості."
+  },
+  preset_metal: {
+    title: "Пресет ювелірного сплаву та густини (ρ)",
+    badge: "Металургія сплавів",
+    category: "Пресет-менеджер",
+    formula: "ρ (г/см³): Au 585 (13.50) | Au 750 (15.50) | Ag 925 (10.36) | Pt 950 (20.70) | Brass (8.50)",
+    desc: "Встановлює фізико-хімічні властивості металу: пробу, колір (червоне, біле, жовте золото, срібло, платина, латунь) та точну питому густину сплаву для розрахунку переведення з воску/полімеру в метал.",
+    impact: "Безпосередньо визначає коефіцієнт переводу воску або полімеру в метал. Наприклад, для золота 585 коефіцієнт становить ~14.2, а для срібла 925 — ~10.9.",
+    tip: "Зверніть увагу на колірний бейдж: біле золото з паладієм або нікелем має іншу питому вагу, ніж класичне червоне золото 585."
+  },
+  single_calc: {
+    title: "Калькулятор одиночної опоки",
+    badge: "Одиничний розрахунок",
+    category: "Опока і розрахунок",
+    formula: "Формомаса = V × k_густ | Метал = M_моделі × (ρ_металу / ρ_полімеру) × (1 + Sprue%) - Наявний",
+    desc: "Оперативний модуль для миттєвого індивідуального прорахунку окремої ялинки. Обчислює масу порошку, об'єм води, сумарну потребу в металі та точну шихтовку (чистота 999.9 + лігатура).",
+    impact: "Дозволяє ливарнику за 5 секунд оцінити параметри однієї конкретної опоки перед додаванням її у зведений виробничий план садки.",
+    tip: "Після перевірки результатів натисніть «+ Додати опоку в заміс», щоб включити її у загальний виробничий кошик та садки печі."
+  },
   flask_dimensions: {
     title: "Розміри опоки (Діаметр D та Висота H)",
     badge: "Геометрія опоки",
-    category: "Литва і формомаса",
+    category: "Опока і розрахунок",
     formula: "V = π · (D/2)² · H = π · r² · h (см³ або мл)",
     desc: "Визначає внутрішній корисний об'єм металевої опоки циліндричної форми. На основі об'єму калькулятор розраховує точну масу сухої суміші формомаси та об'єм води для її замішування.",
     impact: "Безпосередньо визначає витрати формомаси на заміс. Неправильно вказані розміри призведуть або до нестачі суміші (не покриє восковку), або до її надлишку та невиправданих фінансових втрат.",
     tip: "Завжди вимірюйте саме внутрішній діаметр гільзи штангельциркулем. Якщо використовуєте перфоровані опоки, враховуйте товщину паперового скотчу."
   },
-  flask_presets: {
-    title: "Швидкі пресети опок",
-    badge: "Швидкий вибір",
-    category: "Литва і формомаса",
-    formula: "D × H (мм) -> збережений профіль",
-    desc: "Збережений набір стандартних діаметрів та висот гільз, які найчастіше використовуються у вашій майстерні (наприклад, 60х100, 80х120, 100х150).",
-    impact: "Прискорює роботу оператора, виключає помилки ручного введення розмірів перед замісом.",
-    tip: "Додайте у пресети всі ваші наявні гільзи через модальне вікно пресетів, щоб вибирати їх одним кліком."
+  flask_diameter: {
+    title: "Внутрішній діаметр гільзи опоки (D, мм)",
+    badge: "Геометрія форми",
+    category: "Опока і розрахунок",
+    formula: "Радіус r = D / 2 (мм) | Площа основи S = π · r²",
+    desc: "Точний внутрішній діаметр металевої або перфорованої гільзи опоки в міліметрах.",
+    impact: "Оскільки об'єм циліндра залежить від квадрата радіуса (D²), навіть похибка в 5 мм суттєво змінить об'єм формомаси (на 15–20%).",
+    tip: "Вимірюйте саме внутрішній діаметр гільзи без урахування товщини сталевих стінок."
+  },
+  flask_height: {
+    title: "Висота гільзи опоки (H, мм)",
+    badge: "Геометрія форми",
+    category: "Опока і розрахунок",
+    formula: "Об'єм циліндра V = S · H = π · (D/2)² · H",
+    desc: "Висота сталевої гільзи опоки від гумового башмака до верхнього зрізу в міліметрах.",
+    impact: "Визначає загальну місткість форми та безпечну відстань від верхівки воскової ялинки до верхнього краю формомаси (мінімум 10–15 мм).",
+    tip: "Для запобігання переливу формомаси під час кипіння у вакуумній камері рівень заливки повинен бути на 5–10 мм нижче краю гільзи."
+  },
+  model_weight: {
+    title: "Вага воскової моделі / фотополімеру (г)",
+    badge: "Вхідна маса моделі",
+    category: "Розрахунок металу",
+    formula: "M_чистого_металу = M_моделі × (ρ_металу / ρ_полімеру)",
+    desc: "Маса готової воскової ялинки або вирощених 3D-фотополімерних моделей разом із центральним стояком і живильниками (ливниками).",
+    impact: "Базовий аргумент для розрахунку всієї маси розплавленого металу. Заниження ваги призведе до недоливу деталей, завищення — до перевитрати металу.",
+    tip: "Зважуйте ялинку на точних ювелірних вагах з дискретністю 0.01 г без гумової основи (башмака)."
+  },
+  model_wax_weight: {
+    title: "Вага воскової моделі / ялинки (г)",
+    badge: "Вхідна маса моделі",
+    category: "Розрахунок металу",
+    formula: "M_чистого_металу = M_воску × (ρ_металу / ρ_воску) = M_воску × (ρ_металу / 0.95)",
+    desc: "Маса готової воскової композиції (вироби + центральний стояк + живильники) у грамах. Калькулятор помножує її на коефіцієнт питомої густини обраного металу.",
+    impact: "Головний параметр для розрахунку ваги металу на плавку. Помилка у зважуванні призведе до недоливу ялинки або зайвого надлишку в ливниковій чаші.",
+    tip: "Зважуйте восковку на точних ювелірних вагах (з точністю до 0.01 г) обов'язково після припаювання всіх ливників, але без гумового башмака."
+  },
+  polymer_density: {
+    title: "Густина полімеру / воску (г/см³)",
+    badge: "Фізичні константи",
+    category: "Розрахунок металу",
+    formula: "ρ_воску ≈ 0.92–0.96 г/см³ | ρ_фотополімеру 3D ≈ 1.08–1.15 г/см³",
+    desc: "Питома маса матеріалу, з якого виготовлена випалювана модель. Традиційний ливарний віск має густину ~0.95 г/см³, тоді як photopolymer для 3D-друку значно важчий (~1.10–1.15 г/см³).",
+    impact: "Критично важливий параметр при литві з 3D-принтера! Якщо не скоригувати густину з 0.95 на 1.10, калькулятор помилково нарахує на 15% більше металу, ніж реально необхідно.",
+    tip: "Для класичних восковок залишайте 0.95 г/см³, для 3D-полімерів LCD/DLP встановлюйте 1.10 г/см³."
+  },
+  sprue_margin: {
+    title: "Технологічний запас на ливникову систему (%)",
+    badge: "Ливниковий ґудзик",
+    category: "Розрахунок металу",
+    formula: "M_запас = M_виробів × (Запас% / 100) | Зазвичай +15% ... +25%",
+    desc: "Додаткова маса металу, необхідна для формування живильної ливникової чаші (ґудзика) та компенсації об'ємної кристалізаційної усадки металу при застиганні.",
+    impact: "Запобігає утворенню усадкових пор, каверн та недоливів у верхніх виробах ялинки за рахунок гідростатичного тиску рідкого металу.",
+    tip: "Для вакуумного литва стандартний запас становить +15%, для відцентрового (центрифуга) — +20–25%."
+  },
+  sprue_ratio: {
+    title: "Запас на ливникову систему та чашу (%)",
+    badge: "Технологічний ливник",
+    category: "Розрахунок металу",
+    formula: "M_ливник = M_виробів × (Sprue% / 100) | Зазвичай від +10% до +25%",
+    desc: "Додаткова кількість розплавленого металу, яка залишається у ливниковій чаші (ґудзику) та стояку.",
+    impact: "Забезпечує гідростатичний тиск під час кристалізації сплаву і живить усадкові раковини у виливках. Якщо запас малий — у виробах виникне пористість та недолив.",
+    tip: "Для вакуумного литва достатньо +15–20% запасу, для відцентрового (центрифуги) рекомендується +25–30% для створення потужного ґудзика."
+  },
+  existing_metal: {
+    title: "Наявний метал для відрахування (г)",
+    badge: "Вторинний метал",
+    category: "Розрахунок металу",
+    formula: "Метал до замовлення/варіння = Потреба на опоку - Наявний метал",
+    desc: "Кількість готового сплаву (наприклад, обрізки ливників від минулої плавки або брухт клієнта відповідної проби), яка вже є в наявності ливарника.",
+    impact: "Автоматично зменшує кількість металу, яку необхідно зварити з банківського злитка 999.9 та лігатури, економлячи дорогоцінні ресурси.",
+    tip: "Якщо весь метал надано замовником, введіть повну вагу опоки — калькулятор покаже, що доплавляти чистоту не потрібно (0.00 г)."
+  },
+  flask_note: {
+    title: "Примітка та маркування опоки",
+    badge: "Ідентифікація",
+    category: "Виробничий облік",
+    formula: "Текстовий ярлик для кошика та звітів",
+    desc: "Довільний текстовий коментар (наприклад, «Замовлення #24 Ковальчук», «Біле золото обручки», «Терміново на ранок»).",
+    impact: "Зберігається в JSON-проекті, відображається у зведених таблицях, фінансових та виробничих текстових звітах для ливарників та монтувальників.",
+    tip: "Використовуйте кнопку «✕ Очистити» праворуч для швидкого очищення поля перед введенням нової опоки."
+  },
+  batch_basket: {
+    title: "Специфікація замісу (Кошик мульти-опок)",
+    badge: "Виробнича садка",
+    category: "Кошик замісу",
+    formula: "Зведена відомість: Σ Порошок, Σ Вода, Σ Метал по всіх N опоках садки",
+    desc: "Інтерактивний виробничий кошик, який об'єднує всі опоки поточної зміни. Дозволяє вести облік статусу кожної опоки (В черзі / Відлито), дублювати опоки, видаляти їх та проводити точний перерахунок шихти.",
+    impact: "Дає можливість замісити єдину велику порцію формомаси у вакуумному міксері на всю садку та за один раз підготувати метал для всіх плавок.",
+    tip: "Ви можете легко експортувати всю специфікацію в файл .JSON або скопіювати зведений звіт для майстрів."
+  },
+  batch_cart: {
+    title: "Зведений кошик замісу (Специфікація садки)",
+    badge: "Виробничий план",
+    category: "Кошик замісу",
+    formula: "Σ Порошок, Σ Вода, Σ Метал для всіх N опок",
+    desc: "Центральний вузол збору даних: об'єднує всі опоки поточної зміни, підсумовує загальну вагу формомаси, води та металу для одночасного або послідовного литва.",
+    impact: "Дозволяє замісити всю формомасу в одній великій вакуумній мішалці та розрахувати загальну шихту металу на плавку.",
+    tip: "Ви можете змінювати статус кожної опоки (В черзі / Відлито), дублювати опоки або швидко коригувати шихту через кнопку перерахунку."
   },
   calc_model_flask: {
     title: "Модель розрахунку об'єму форми",
@@ -5004,24 +5730,6 @@ const HELP_TOPICS = {
     impact: "Занадто густа суміш призводить до повітряних бульбашок на восковках. Занадто рідка — знижує газопроникність і міцність форми, спричиняючи тріщини та водяні жили (water marks) на виливках.",
     tip: "Використовуйте тільки дистильовану або деіонізовану воду кімнатної температури (20–22°C). Звичайна вода з-під крана скорочує час текучості."
   },
-  investment_presets: {
-    title: "Пресети формомаси (Satin Cast, Kerr, Gold Star)",
-    badge: "Брендові стандарти",
-    category: "Литва і формомаса",
-    formula: "Пропорція мл води на 100 г порошку",
-    desc: "Збережені заводські рекомендації виробників пакувальних мас для золота, срібла, латуні або філіграні.",
-    impact: "Гарантує повторюваність ливарного процесу та відповідність часу застигання технологічній карті.",
-    tip: "Для масивних виробів підходить густіший заміс (35–36:100), для тонкої ажурної філіграні — пластичніший (38–40:100)."
-  },
-  model_wax_weight: {
-    title: "Вага воскової моделі / ялинки (г)",
-    badge: "Вхідна маса моделі",
-    category: "Розрахунок металу",
-    formula: "M_чистого_металу = M_воску × (ρ_металу / ρ_воску) = M_воску × (ρ_металу / 0.95)",
-    desc: "Маса готової воскової композиції (вироби + центральний стояк + живильники) у грамах. Калькулятор помножує її на коефіцієнт питомої густини обраного металу.",
-    impact: "Головний параметр для розрахунку ваги металу на плавку. Помилка у зважуванні призведе до недоливу ялинки або зайвого надлишку в ливниковій чаші.",
-    tip: "Зважуйте восковку на точних ювелірних вагах (з точністю до 0.01 г) обов'язково після припаювання всіх ливників, але без гумового башмака."
-  },
   metal_type: {
     title: "Сплав металу та питома густина (ρ)",
     badge: "Фізичні властивості",
@@ -5039,15 +5747,6 @@ const HELP_TOPICS = {
     desc: "Відображає вміст чистого дорогоцінного металу (999.9) на 1000 вагових частин готового ювелірного сплаву.",
     impact: "Визначає вартість шихти та відповідність виливків нормам Пробірного контролю України.",
     tip: "Для гарантованого проходження державної пробірної експертизи завжди використовуйте технологічну поправку."
-  },
-  sprue_ratio: {
-    title: "Запас на ливникову систему та чашу (%)",
-    badge: "Технологічний ливник",
-    category: "Розрахунок металу",
-    formula: "M_ливник = M_виробів × (Sprue% / 100) | Зазвичай від +10% до +25%",
-    desc: "Додаткова кількість розплавленого металу, яка залишається у ливниковій чаші (ґудзику) та стояку.",
-    impact: "Забезпечує гідростатичний тиск під час кристалізації сплаву і живить усадкові раковини у виливках. Якщо запас малий — у виробах виникне пористість та недолив.",
-    tip: "Для вакуумного литва достатньо +15–20% запасу, для відцентрового (центрифуги) рекомендується +25–30% для створення потужного ґудзика."
   },
   purity_shift: {
     title: "Технологічна поправка проби (Ремедіум)",
@@ -5075,15 +5774,6 @@ const HELP_TOPICS = {
     desc: "Автоматично додає щойно розраховану опоку у зведений заміс поточної плавки без необхідності натискати додаткові кнопки.",
     impact: "Економить час ливарника при формуванні великої садки печі з декількох різнотипних опок.",
     tip: "Вимкніть цю опцію, якщо хочете просто швидко прикинути параметри окремої опоки без зміни поточного кошика."
-  },
-  batch_cart: {
-    title: "Зведений кошик замісу (Специфікація садки)",
-    badge: "Виробничий план",
-    category: "Кошик замісу",
-    formula: "Σ Порошок, Σ Вода, Σ Метал для всіх N опок",
-    desc: "Центральний вузол збору даних: об'єднує всі опоки поточної зміни, підсумовує загальну вагу формомаси, води та металу для одночасного або послідовного литва.",
-    impact: "Дозволяє замісити всю формомасу в одній великій вакуумній мішалці та розрахувати загальну шихту металу на плавку.",
-    tip: "Ви можете змінювати статус кожної опоки (В черзі / Відлито), дублювати опоки або швидко коригувати шихту через кнопку перерахунку."
   },
   mix_summary: {
     title: "Підсумок замісу (Загальні матеріали)",
@@ -5349,12 +6039,12 @@ const HELP_TOPICS = {
     tip: "Встановіть внутрішній тариф вашої майстерні (наприклад, 40–60 грн за опоку)."
   },
   cost_gasoline: {
-    title: "Бензин для пальника (грн / опока)",
+    title: "Бензин для пальника («Калоша» / Б-70 / Нефрас)",
     badge: "Пальне пальника",
     category: "Зведена собівартість",
-    formula: "Витрата бензину «Калоша»/Б-70 (л) × Ціна/л на 1 опоку",
-    desc: "Вартість спеціального очищеного бензину (марки Б-70, «Калоша» або Нефрас), який використовується в ювелірних карбюраторних бензинових пальниках для розплавлення металу.",
-    impact: "Оскільки різні майстерні використовують різне за якістю та ціною пальне (імпортний бензин високої очистки, аптечний або технічний нефрас), це поле дозволяє точно врахувати реальну вартість пального на кожну вилиту опоку.",
+    formula: "Вартість на опоку = (Витрата мл / 1000) × Ціна/л",
+    desc: "Вартість спеціального очищеного бензину (марки Б-70, «Калоша» або Нефрас С2-80/120), який використовується в ювелірних карбюраторних бензинових пальниках для розплавлення металу.",
+    impact: "Дозволяє розрахувати реальну собівартість спаленого рідкого палива з урахуванням об'єму плавки та поточної ціни за 1 літр.",
     tip: "Використовуйте тільки якісний бензин Б-70 без маслянистих домішок, щоб забезпечити максимальну температуру полум'я (до 1150°C) та захистити метал від навуглецьовування."
   },
   cost_compressor: {
@@ -5380,9 +6070,9 @@ const HELP_TOPICS = {
     badge: "Оцінка металу",
     category: "Зведена собівартість",
     formula: "Поточна вартість 1 грама сплаву або чистоти 999.9",
-    desc: "Вартість грама металу на ювелірному ринку, за якою розраховується грошовий еквівалент технологічних втрат (угару).",
+    desc: "Вартість грама металу на ювелірному ринку, за якою розраховується грошовий еквівалент технологічних втрат (угару). Автоматично може синхронізуватися з курсом НБУ або складом сплавів з кошика.",
     impact: "Переводить фізичні грами згорілого металу в реальні гривні собівартості.",
-    tip: "Вказуйте реальну ринкову ціну закупівлі металу або банківського злитка."
+    tip: "Використовуйте кнопку «🌐 Оновити курси НБУ» для завантаження актуальних банківських котирувань золота, срібла та платини."
   },
   cost_grand_total: {
     title: "Повна собівартість технологічного циклу (РАЗОМ)",
