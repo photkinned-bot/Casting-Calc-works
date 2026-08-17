@@ -350,6 +350,74 @@
     .drag-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.94); z-index: 10000; border: 4px dashed var(--accent); justify-content: center; align-items: center; pointer-events: auto; }
     .drag-overlay-box { background: var(--bg-card); border: 2px solid var(--accent); border-radius: 16px; padding: 32px; text-align: center; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+
+    /* Кнопки-знаки запитання для виклику контекстної довідки (?) */
+    .help-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 17px;
+      height: 17px;
+      min-width: 17px;
+      min-height: 17px;
+      border-radius: 50%;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #38bdf8;
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      padding: 0;
+      margin-left: 4px;
+      vertical-align: middle;
+      line-height: 1;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+      user-select: none;
+      flex-shrink: 0;
+    }
+    .help-btn:hover, .help-btn:focus {
+      background: #38bdf8;
+      color: #0f172a;
+      border-color: #38bdf8;
+      transform: scale(1.22);
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.7);
+      outline: none;
+    }
+    .help-btn-amber {
+      background: rgba(245, 158, 11, 0.14);
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #fbbf24;
+    }
+    .help-btn-amber:hover, .help-btn-amber:focus {
+      background: #fbbf24;
+      color: #0f172a;
+      border-color: #fbbf24;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
+    }
+    .help-btn-green {
+      background: rgba(16, 185, 129, 0.14);
+      border-color: rgba(16, 185, 129, 0.45);
+      color: #34d399;
+    }
+    .help-btn-green:hover, .help-btn-green:focus {
+      background: #34d399;
+      color: #0f172a;
+      border-color: #34d399;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+    }
+    .help-btn-danger {
+      background: rgba(239, 68, 68, 0.14);
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #f87171;
+    }
+    .help-btn-danger:hover, .help-btn-danger:focus {
+      background: #f87171;
+      color: #0f172a;
+      border-color: #f87171;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
+    }
   </style>
 </head>
 <body>
@@ -442,6 +510,7 @@
     <div class="card-title" style="margin-bottom: 8px;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <span>📦 Проект литва (JSON)</span>
+        <button type="button" class="help-btn" onclick="openHelpModal('project_json')" title="Довідка: Проект литва та JSON">?</button>
         <span id="project-flasks-badge" class="badge" style="font-size: 0.78rem;">0 опок</span>
       </div>
       <div style="display: flex; gap: 6px; align-items: center;">
@@ -452,7 +521,10 @@
     <div style="display: flex; flex-direction: column; gap: 10px;">
       <div class="form-group">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <label for="project-title-input">Назва проекту / номер замовлення:</label>
+          <label for="project-title-input">
+            Назва проекту / номер замовлення:
+            <button type="button" class="help-btn" onclick="openHelpModal('project_json')" title="Довідка: Назва та ідентифікація проекту">?</button>
+          </label>
           <span id="project-last-saved-text" style="font-size: 0.74rem; color: var(--text-muted);"></span>
         </div>
         <div class="input-clear-wrapper">
@@ -482,25 +554,37 @@
   <!-- Блок керування пресетами -->
   <div class="card">
     <div class="card-title">
-      <span>Пресет-менеджер</span>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span>Пресет-менеджер</span>
+        <button type="button" class="help-btn" onclick="openHelpModal('preset_manager')" title="Довідка: Пресет-менеджер">?</button>
+      </div>
       <button class="btn btn-secondary btn-sm" onclick="openPresetModal()">Керування пресетами</button>
     </div>
     <div class="grid">
       <div class="form-group">
-        <label>Опока (Пресет)</label>
+        <label>
+          Опока (Пресет)
+          <button type="button" class="help-btn" onclick="openHelpModal('preset_flask')" title="Довідка: Пресети опок">?</button>
+        </label>
         <select id="preset-flask" onchange="applyFlaskPreset()">
           <!-- Динамічні варіанти -->
         </select>
       </div>
       <div class="form-group">
-        <label>Формомаса W/P (Пресет)</label>
+        <label>
+          Формомаса W/P (Пресет)
+          <button type="button" class="help-btn" onclick="openHelpModal('preset_investment')" title="Довідка: Пресети формомаси W/P">?</button>
+        </label>
         <select id="preset-investment" onchange="applyInvestmentPreset()">
           <!-- Динамічні варіанти -->
         </select>
       </div>
       <div class="form-group">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <label for="preset-metal">Сплав металу (Пресет)</label>
+          <label for="preset-metal">
+            Сплав металу (Пресет)
+            <button type="button" class="help-btn" onclick="openHelpModal('preset_metal')" title="Довідка: Сплави металів та лігатури">?</button>
+          </label>
           <span id="preset-metal-color-badge" class="badge" style="font-size: 0.72rem; padding: 1px 6px;"></span>
         </div>
         <select id="preset-metal" onchange="applyMetalPreset()">
@@ -517,7 +601,12 @@
 
   <!-- Робочий калькулятор одиночної опоки -->
   <div class="card">
-    <div class="card-title">Розрахунок одиночної опоки</div>
+    <div class="card-title">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span>Розрахунок одиночної опоки</span>
+        <button type="button" class="help-btn" onclick="openHelpModal('single_calc')" title="Довідка: Розрахунок одиночної опоки">?</button>
+      </div>
+    </div>
     <div class="grid">
       <!-- Компактне розкривне віконце Опока з відображенням пресету / ручного введення -->
       <div class="form-group" style="grid-column: 1 / -1;">
@@ -528,6 +617,7 @@
               <span id="flask-status-badge" class="badge" style="font-size: 0.82rem; padding: 3px 8px; font-weight: 600;">
                 Пресет: Опока 60х100 (⌀60×100 мм)
               </span>
+              <button type="button" class="help-btn" onclick="event.stopPropagation(); openHelpModal('flask_dimensions')" title="Довідка: Розміри опоки">?</button>
             </div>
             <div style="display: flex; align-items: center; gap: 6px;">
               <span id="flask-toggle-action-text" style="font-size: 0.8rem; color: var(--accent);">Розкрити / Ручне введення</span>
@@ -546,11 +636,17 @@
             </div>
             <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
               <div class="form-group">
-                <label for="flask-diameter">Діаметр опоки (мм)</label>
+                <label for="flask-diameter">
+                  Діаметр опоки (мм)
+                  <button type="button" class="help-btn" onclick="openHelpModal('flask_diameter')" title="Довідка: Діаметр опоки">?</button>
+                </label>
                 <input type="number" id="flask-diameter" value="60" min="1" step="1" oninput="onFlaskDimensionsManualInput()">
               </div>
               <div class="form-group">
-                <label for="flask-height">Висота опоки (мм)</label>
+                <label for="flask-height">
+                  Висота опоки (мм)
+                  <button type="button" class="help-btn" onclick="openHelpModal('flask_height')" title="Довідка: Висота опоки">?</button>
+                </label>
                 <input type="number" id="flask-height" value="100" min="1" step="1" oninput="onFlaskDimensionsManualInput()">
               </div>
             </div>
@@ -559,24 +655,39 @@
       </div>
 
       <div class="form-group">
-        <label for="model-weight">Вага фотополімеру / ялинки (г)</label>
+        <label for="model-weight">
+          Вага фотополімеру / ялинки (г)
+          <button type="button" class="help-btn" onclick="openHelpModal('model_weight')" title="Довідка: Вага моделі/воску">?</button>
+        </label>
         <input type="number" id="model-weight" value="0" step="0.1" min="0" oninput="calculateSingle()">
       </div>
       <div class="form-group">
-        <label for="polymer-density">Густина полімеру (г/см³)</label>
+        <label for="polymer-density">
+          Густина полімеру (г/см³)
+          <button type="button" class="help-btn" onclick="openHelpModal('polymer_density')" title="Довідка: Густина полімеру/воску">?</button>
+        </label>
         <input type="number" id="polymer-density" value="1.1" step="0.01" oninput="calculateSingle()">
       </div>
       <div class="form-group">
-        <label for="sprue-margin">Запас на ливникову систему (%)</label>
+        <label for="sprue-margin">
+          Запас на ливникову систему (%)
+          <button type="button" class="help-btn" onclick="openHelpModal('sprue_margin')" title="Довідка: Запас на ливник">?</button>
+        </label>
         <input type="number" id="sprue-margin" value="15" min="0" oninput="calculateSingle()">
       </div>
       <div class="form-group">
-        <label for="existing-metal">Наявний метал (г)</label>
+        <label for="existing-metal">
+          Наявний метал (г)
+          <button type="button" class="help-btn" onclick="openHelpModal('existing_metal')" title="Довідка: Наявний метал для відрахування">?</button>
+        </label>
         <input type="number" id="existing-metal" value="0" step="0.1" min="0" oninput="calculateSingle()">
       </div>
       <div class="form-group" style="grid-column: 1 / -1;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-          <label for="flask-note">Примітка до опоки (необов'язково)</label>
+          <label for="flask-note">
+            Примітка до опоки (необов'язково)
+            <button type="button" class="help-btn" onclick="openHelpModal('flask_note')" title="Довідка: Примітка">?</button>
+          </label>
           <button type="button" class="btn btn-secondary btn-sm" id="btn-clear-flask-note" onclick="clearFlaskNote()" style="padding: 2px 8px; font-size: 0.75rem;" title="Очистити поле примітки">✕ Очистити</button>
         </div>
         <div class="input-clear-wrapper">
@@ -597,7 +708,10 @@
   <!-- Модуль мульти-опок / Кошик замісу -->
   <div class="card" id="batch-card">
     <div class="card-title">
-      <span>Специфікація замісу (<span id="batch-count">0</span> опок)</span>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span>Специфікація замісу (<span id="batch-count">0</span> опок)</span>
+        <button type="button" class="help-btn" onclick="openHelpModal('batch_basket')" title="Довідка: Кошик замісу та мульти-опоки">?</button>
+      </div>
       <div style="display: flex; gap: 8px; flex-wrap: wrap;">
         <button class="btn btn-secondary btn-sm" id="btn-recalc-batch-all" onclick="openRecalcModal(0)" title="Покроковий перерахунок наявного металу та шихтовки для всіх опок">⚡ Перерахунок металу</button>
         <button class="btn btn-danger btn-sm" id="btn-clear-batch" onclick="clearBatch()">Очистити кошик</button>
@@ -645,6 +759,7 @@
       <div class="card-title" style="margin-bottom: 8px;">
         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
           <span style="font-size: 1.15rem; font-weight: 700; color: #fbbf24;">🌡️ Калькулятор випалювання опок та собівартості виробництва</span>
+          <button type="button" class="help-btn help-btn-amber" onclick="openHelpModal('burnout_general')" title="Довідка: Випалювання опок та розрахунок собівартості">?</button>
           <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border-color: #f59e0b; font-size: 0.76rem;">Двофазний розрахунок</span>
         </div>
         <div style="display: flex; gap: 8px; align-items: center;">
@@ -663,6 +778,7 @@
       <div class="card-title" style="font-size: 1rem;">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>🛒 Дані з кошика замісу (Автосинхронізація)</span>
+          <button type="button" class="help-btn" onclick="openHelpModal('burnout_sync')" title="Довідка: Автосинхронізація з кошиком замісу">?</button>
           <span id="burnout-batch-badge" class="badge" style="font-size: 0.78rem;">0 опок</span>
         </div>
         <div style="display: flex; gap: 6px;">
@@ -707,6 +823,7 @@
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="burnout-collapse-arrow" id="arrow-burnout-block1">▼</span>
           <span>⚡ Блок 1. Налаштування обладнання та тарифу електроенергії</span>
+          <button type="button" class="help-btn" onclick="event.stopPropagation(); openHelpModal('furnace_power')" title="Довідка: Потужність та тарифи печі">?</button>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="badge" style="font-size: 0.75rem; background: rgba(56,189,248,0.15); color: #38bdf8; border-color: #38bdf8;">Вхідні параметри</span>
@@ -719,14 +836,20 @@
           <!-- Параметри печі -->
           <div class="burnout-tariff-card">
             <div style="font-weight: 700; color: #fbbf24; margin-bottom: 10px; font-size: 0.92rem; display: flex; align-items: center; justify-content: space-between;">
-              <span>🔥 Параметри муфельної печі</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span>🔥 Параметри муфельної печі</span>
+                <button type="button" class="help-btn help-btn-amber" onclick="openHelpModal('furnace_power')" title="Довідка: Потужність печі">?</button>
+              </div>
               <span id="burnout-effective-power-badge" class="badge badge-pending" style="font-size: 0.75rem;">1.98 кВт (з похибкою)</span>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 10px;">
               <div class="form-group">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <label for="burnout-furnace-power">Номінальна потужність печі (кВт):</label>
+                  <label for="burnout-furnace-power">
+                    Номінальна потужність печі (кВт):
+                    <button type="button" class="help-btn" onclick="openHelpModal('furnace_power')" title="Довідка: Номінальна потужність печі">?</button>
+                  </label>
                   <span style="font-weight: 700; color: #38bdf8;" id="burnout-power-display">1.8 кВт</span>
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center;">
@@ -737,7 +860,10 @@
 
               <div class="form-group">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <label for="burnout-power-reserve">Запас потужності / Похибка (%):</label>
+                  <label for="burnout-power-reserve">
+                    Запас потужності / Похибка (%):
+                    <button type="button" class="help-btn" onclick="openHelpModal('furnace_overhead')" title="Довідка: Запас потужності та похибка ТЕНів">?</button>
+                  </label>
                   <span style="font-weight: 600; color: #fde047;" id="burnout-reserve-display">+10%</span>
                 </div>
                 <input type="number" id="burnout-power-reserve" value="10" step="1" min="0" max="50" oninput="onBurnoutConfigChange()">
@@ -751,7 +877,10 @@
 
               <div class="form-group">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <label for="burnout-flasks-count">Кількість опок у садці печі (шт):</label>
+                  <label for="burnout-flasks-count">
+                    Кількість опок у садці печі (шт):
+                    <button type="button" class="help-btn" onclick="openHelpModal('furnace_flasks_count')" title="Довідка: Кількість опок у садці">?</button>
+                  </label>
                   <button type="button" class="quick-chip" onclick="syncFlasksCountFromBatch()" style="font-size: 0.72rem;">Взяти з кошика</button>
                 </div>
                 <input type="number" id="burnout-flasks-count" value="1" min="1" step="1" oninput="onBurnoutConfigChange()">
@@ -762,7 +891,10 @@
           <!-- Тарифна сітка -->
           <div class="burnout-tariff-card">
             <div style="font-weight: 700; color: #38bdf8; margin-bottom: 10px; font-size: 0.92rem; display: flex; align-items: center; justify-content: space-between;">
-              <span>💡 Тарифна сітка електроенергії</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span>💡 Тарифна сітка електроенергії</span>
+                <button type="button" class="help-btn" onclick="openHelpModal('tariff_dual')" title="Довідка: Тарифна сітка">?</button>
+              </div>
               <span id="burnout-tariff-mode-badge" class="badge badge-pending" style="font-size: 0.75rem;">Побутовий фіксований</span>
             </div>
 
@@ -783,7 +915,10 @@
               <!-- Поля для фіксованого тарифу -->
               <div id="tariff-fields-single" style="display: flex; flex-direction: column; gap: 8px;">
                 <div class="form-group">
-                  <label for="burnout-tariff-single">Тариф електроенергії (грн/кВт·год):</label>
+                  <label for="burnout-tariff-single">
+                    Тариф електроенергії (грн/кВт·год):
+                    <button type="button" class="help-btn" onclick="openHelpModal('tariff_dual')" title="Довідка: Тариф електроенергії">?</button>
+                  </label>
                   <input type="number" id="burnout-tariff-single" value="4.32" step="0.01" min="0" oninput="onBurnoutConfigChange()">
                 </div>
               </div>
@@ -792,18 +927,27 @@
               <div id="tariff-fields-dual" style="display: none; flex-direction: column; gap: 8px;">
                 <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 8px;">
                   <div class="form-group">
-                    <label for="burnout-tariff-day" style="color: #fbbf24;">☀️ Денний тариф (07–23):</label>
+                    <label for="burnout-tariff-day" style="color: #fbbf24;">
+                      ☀️ Денний тариф (07–23):
+                      <button type="button" class="help-btn help-btn-amber" onclick="openHelpModal('tariff_dual')" title="Довідка: Денний тариф">?</button>
+                    </label>
                     <input type="number" id="burnout-tariff-day" value="4.32" step="0.01" min="0" oninput="onBurnoutConfigChange()">
                   </div>
                   <div class="form-group">
-                    <label for="burnout-tariff-night" style="color: #a5b4fc;">🌙 Нічний коеф. 0.5 (23–07):</label>
+                    <label for="burnout-tariff-night" style="color: #a5b4fc;">
+                      🌙 Нічний коеф. 0.5 (23–07):
+                      <button type="button" class="help-btn" onclick="openHelpModal('tariff_dual')" title="Довідка: Нічний тариф (коеф 0.5)">?</button>
+                    </label>
                     <input type="number" id="burnout-tariff-night" value="2.16" step="0.01" min="0" oninput="onBurnoutConfigChange()">
                   </div>
                 </div>
 
                 <div class="form-group">
                   <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <label for="burnout-start-time">⏰ Час старту випалювання (для розрахунку Ніч/День):</label>
+                    <label for="burnout-start-time">
+                      ⏰ Час старту випалювання (для розрахунку Ніч/День):
+                      <button type="button" class="help-btn" onclick="openHelpModal('burnout_start_time')" title="Довідка: Час старту випалювання">?</button>
+                    </label>
                     <span style="font-size: 0.75rem; color: var(--text-muted);" id="burnout-finish-time-preview">Фініш: ~05:39</span>
                   </div>
                   <div style="display: flex; gap: 6px; align-items: center;">
@@ -818,7 +962,10 @@
               <!-- Поля для комерційного тарифу -->
               <div id="tariff-fields-commercial" style="display: none; flex-direction: column; gap: 8px;">
                 <div class="form-group">
-                  <label for="burnout-tariff-commercial">Тариф для бізнесу / ФОП (грн/кВт·год):</label>
+                  <label for="burnout-tariff-commercial">
+                    Тариф для бізнесу / ФОП (грн/кВт·год):
+                    <button type="button" class="help-btn" onclick="openHelpModal('tariff_commercial')" title="Довідка: Комерційний тариф">?</button>
+                  </label>
                   <input type="number" id="burnout-tariff-commercial" value="9.60" step="0.01" min="0" oninput="onBurnoutConfigChange()">
                 </div>
               </div>
@@ -847,6 +994,7 @@
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="burnout-collapse-arrow" id="arrow-burnout-block2">▼</span>
           <span>📈 Блок 2. Редактор температурного профілю (Графік випалювання)</span>
+          <button type="button" class="help-btn" onclick="event.stopPropagation(); openHelpModal('burnout_profile')" title="Довідка: Графік випалювання">?</button>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="badge badge-pending" style="font-size: 0.75rem;">Графік & Пресети</span>
@@ -873,7 +1021,10 @@
         <!-- Селектор та кнопки швидкого збереження/видалення пресетів -->
         <div class="form-group" style="margin-bottom: 12px; background: rgba(15,23,42,0.6); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
-            <label for="burnout-preset-select" style="font-weight: 600; color: #fbbf24;">Шаблони температурного графіка (Пресети):</label>
+            <label for="burnout-preset-select" style="font-weight: 600; color: #fbbf24;">
+              Шаблони температурного графіка (Пресети):
+              <button type="button" class="help-btn help-btn-amber" onclick="openHelpModal('burnout_presets')" title="Довідка: Пресети температурних графіків">?</button>
+            </label>
             <span style="font-size: 0.74rem; color: #a7f3d0;" id="burnout-preset-info-badge">8 кроків | ~6 год 39 хв</span>
           </div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
@@ -894,6 +1045,7 @@
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
             <div style="display: flex; align-items: center; gap: 8px;">
               <span style="font-weight: 700; color: #f8fafc; font-size: 0.88rem;">📊 Термограма циклу випалювання опок:</span>
+              <button type="button" class="help-btn help-btn-green" onclick="openHelpModal('burnout_chart')" title="Довідка: Термограма та криві випалювання">?</button>
               <span class="badge" style="font-size: 0.72rem; background: rgba(16,185,129,0.15); color: #34d399; border-color: #10b981;">Динамічна крива</span>
             </div>
             <div style="display: flex; gap: 10px; font-size: 0.72rem; color: var(--text-muted); flex-wrap: wrap;">
@@ -942,8 +1094,9 @@
           <button type="button" class="btn btn-secondary btn-sm" onclick="addBurnoutStep()" style="font-size: 0.8rem;">
             ➕ Додати новий крок до таблиці
           </button>
-          <span style="font-size: 0.78rem; color: var(--text-muted);">
+          <span style="font-size: 0.78rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: 4px;">
             💡 Значення <strong>Навантаження %</strong> відображає роботу терморегулятора (100% при наборі, 30–50% при витримці).
+            <button type="button" class="help-btn" onclick="openHelpModal('burnout_duty_cycle')" title="Довідка: Режими навантаження ТЕНів">?</button>
           </span>
         </div>
       </div>
@@ -955,6 +1108,7 @@
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="burnout-collapse-arrow" id="arrow-burnout-block3">▼</span>
           <span>💰 Блок 3. Підсумковий розрахунок вартості випалювання (Output)</span>
+          <button type="button" class="help-btn help-btn-green" onclick="event.stopPropagation(); openHelpModal('burnout_output_cost')" title="Довідка: Розрахунок вартості випалювання">?</button>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="badge badge-success" style="font-size: 0.75rem;">Результати калькуляції</span>
@@ -972,19 +1126,28 @@
           </div>
 
           <div class="burnout-stat-card">
-            <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">⚡ Споживання електроенергії</span>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">⚡ Споживання електроенергії</span>
+              <button type="button" class="help-btn" onclick="openHelpModal('burnout_kwh')" title="Довідка: Споживання кВт·год">?</button>
+            </div>
             <span style="font-size: 1.35rem; font-weight: 700; color: #38bdf8;" id="burnout-res-total-kwh">6.44 кВт·год</span>
             <span style="font-size: 0.74rem; color: var(--text-muted);" id="burnout-res-nominal-kwh">Номінал: 5.85 кВт·год (+10%)</span>
           </div>
 
           <div class="burnout-stat-card" style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(15,23,42,0.85)); border-color: rgba(16,185,129,0.4);">
-            <span style="font-size: 0.75rem; color: #34d399; text-transform: uppercase; font-weight: 700;">💰 Вартість випалювання</span>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.75rem; color: #34d399; text-transform: uppercase; font-weight: 700;">💰 Вартість випалювання</span>
+              <button type="button" class="help-btn help-btn-green" onclick="openHelpModal('burnout_output_cost')" title="Довідка: Вартість електроенергії">?</button>
+            </div>
             <span style="font-size: 1.45rem; font-weight: 800; color: #10b981;" id="burnout-res-total-cost">13.91 грн</span>
             <span style="font-size: 0.74rem; color: #a7f3d0;" id="burnout-res-cost-sub">За весь цикл печі</span>
           </div>
 
           <div class="burnout-stat-card">
-            <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">🏺 Собівартість на 1 опоку</span>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">🏺 Собівартість на 1 опоку</span>
+              <button type="button" class="help-btn" onclick="openHelpModal('burnout_cost_per_flask')" title="Довідка: Собівартість на 1 опоку">?</button>
+            </div>
             <span style="font-size: 1.35rem; font-weight: 700; color: #fde047;" id="burnout-res-cost-per-flask">13.91 грн/опока</span>
             <span style="font-size: 0.74rem; color: var(--text-muted);" id="burnout-res-flasks-sub">Для 1 опоки в садці</span>
           </div>
@@ -996,6 +1159,7 @@
             <div style="display: flex; align-items: center; gap: 8px;">
               <span class="burnout-collapse-arrow" id="arrow-burnout-zones">▼</span>
               <span style="font-weight: 700; color: #38bdf8; font-size: 0.88rem;">🌙 Формули та розподіл за зонами лічильника (День / Ніч)</span>
+              <button type="button" class="help-btn" onclick="event.stopPropagation(); openHelpModal('burnout_zones_breakdown')" title="Довідка: Розподіл зон лічильника">?</button>
             </div>
             <div style="display: flex; align-items: center; gap: 6px;">
               <span id="burnout-night-saving-badge" class="badge badge-success" style="font-size: 0.74rem;">Економія: -50% на нічних годинах</span>
@@ -1027,6 +1191,7 @@
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="burnout-collapse-arrow" id="arrow-burnout-block4">▼</span>
           <span>📦 Блок 4. Зведена собівартість технологічних процесів замісу</span>
+          <button type="button" class="help-btn" onclick="event.stopPropagation(); openHelpModal('cost_block4_summary')" title="Довідка: Зведена собівартість замісу">?</button>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="badge" style="background: rgba(56,189,248,0.2); color: #38bdf8; border-color: #38bdf8; font-size: 0.75rem;">Повний виробничий розрахунок</span>
@@ -1044,7 +1209,10 @@
           <!-- 1. Формомаса і вода -->
           <div class="burnout-feature-box" style="border-color: rgba(52,211,153,0.3);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-              <span style="font-weight: 700; color: #a7f3d0; font-size: 0.95rem;">1. Формомаса і вода</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-weight: 700; color: #a7f3d0; font-size: 0.95rem;">1. Формомаса і вода</span>
+                <button type="button" class="help-btn help-btn-green" onclick="openHelpModal('cost_materials')" title="Довідка: Собівартість формомаси та води">?</button>
+              </div>
               <span class="badge badge-success" style="font-size: 0.7rem;">З кошика</span>
             </div>
             <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px;">
@@ -1052,11 +1220,17 @@
             </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 4px;">
               <div class="form-group" style="min-width: 0;">
-                <label for="price-powder-kg" style="font-size: 0.76rem; line-height: 1.2;">Ціна порошку (грн/кг):</label>
+                <label for="price-powder-kg" style="font-size: 0.76rem; line-height: 1.2;">
+                  Ціна порошку (грн/кг):
+                  <button type="button" class="help-btn" onclick="openHelpModal('cost_powder_kg')" title="Довідка: Ціна формомаси за кг">?</button>
+                </label>
                 <input type="number" id="price-powder-kg" value="160" step="5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
               </div>
               <div class="form-group" style="min-width: 0;">
-                <label for="price-water-l" style="font-size: 0.76rem; line-height: 1.2;">Ціна води (грн/л):</label>
+                <label for="price-water-l" style="font-size: 0.76rem; line-height: 1.2;">
+                  Ціна води (грн/л):
+                  <button type="button" class="help-btn" onclick="openHelpModal('cost_water_l')" title="Довідка: Ціна води за літр">?</button>
+                </label>
                 <input type="number" id="price-water-l" value="8" step="1" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
               </div>
             </div>
@@ -1069,7 +1243,10 @@
           <!-- 2. Випалювання печі -->
           <div class="burnout-feature-box" style="border-color: rgba(245,158,11,0.3);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-              <span style="font-weight: 700; color: #fbbf24; font-size: 0.95rem;">2. Випалювання опок</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-weight: 700; color: #fbbf24; font-size: 0.95rem;">2. Випалювання опок</span>
+                <button type="button" class="help-btn help-btn-amber" onclick="openHelpModal('cost_burnout_item')" title="Довідка: Витрати на випалювання">?</button>
+              </div>
               <span class="badge" style="font-size: 0.7rem; background: rgba(245,158,11,0.2); color: #fbbf24; border-color: #f59e0b;">З калькулятора</span>
             </div>
             <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px;">
@@ -1087,34 +1264,52 @@
           <!-- 3. Плавка, бензин, компресор та чад -->
           <div class="burnout-feature-box" style="border-color: rgba(239,68,68,0.3);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-              <span style="font-weight: 700; color: #f87171; font-size: 0.95rem;">3. Плавка та чад металу</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-weight: 700; color: #f87171; font-size: 0.95rem;">3. Плавка та чад металу</span>
+                <button type="button" class="help-btn help-btn-danger" onclick="openHelpModal('cost_melting_loss')" title="Довідка: Плавка, бензин, компресор та угар">?</button>
+              </div>
               <span class="badge" style="font-size: 0.7rem; background: rgba(239,68,68,0.2); color: #f87171; border-color: #ef4444;">Пальник & чад</span>
             </div>
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 4px;">
               <div class="form-group" style="min-width: 0;">
-                <label for="price-melting-flask" style="font-size: 0.76rem; line-height: 1.2;">Плавка (робота, грн/оп):</label>
+                <label for="price-melting-flask" style="font-size: 0.76rem; line-height: 1.2;">
+                  Плавка (робота, грн/оп):
+                  <button type="button" class="help-btn" onclick="openHelpModal('cost_melting_work')" title="Довідка: Робота ливарника">?</button>
+                </label>
                 <input type="number" id="price-melting-flask" value="45" step="5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
               </div>
               <div class="form-group" style="min-width: 0;">
-                <label for="price-gasoline-flask" style="font-size: 0.76rem; line-height: 1.2;" title="Вартість бензину «Калоша»/Б-70 для пальника на 1 опоку">⛽ Бензин (грн/опока):</label>
+                <label for="price-gasoline-flask" style="font-size: 0.76rem; line-height: 1.2;" title="Вартість бензину «Калоша»/Б-70 для пальника на 1 опоку">
+                  ⛽ Бензин (грн/опока):
+                  <button type="button" class="help-btn" onclick="openHelpModal('cost_gasoline')" title="Довідка: Вартість бензину для пальника">?</button>
+                </label>
                 <input type="number" id="price-gasoline-flask" value="15" step="1" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
               </div>
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 6px;">
               <div class="form-group" style="min-width: 0;">
-                <label for="price-compressor-flask" style="font-size: 0.76rem; line-height: 1.2;" title="Вартість роботи компресора повітря для бензинового пальника на 1 опоку">💨 Компресор (грн/оп):</label>
+                <label for="price-compressor-flask" style="font-size: 0.76rem; line-height: 1.2;" title="Вартість роботи компресора повітря для бензинового пальника на 1 опоку">
+                  💨 Компресор (грн/оп):
+                  <button type="button" class="help-btn" onclick="openHelpModal('cost_compressor')" title="Довідка: Компресор повітря">?</button>
+                </label>
                 <input type="number" id="price-compressor-flask" value="5" step="1" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
               </div>
               <div class="form-group" style="min-width: 0;">
-                <label for="metal-loss-percent" style="font-size: 0.76rem; line-height: 1.2;">Норма чаду (%):</label>
+                <label for="metal-loss-percent" style="font-size: 0.76rem; line-height: 1.2;">
+                  Норма чаду (%):
+                  <button type="button" class="help-btn" onclick="openHelpModal('cost_metal_loss_rate')" title="Довідка: Норма безповоротних втрат металу">?</button>
+                </label>
                 <input type="number" id="metal-loss-percent" value="1.0" step="0.1" min="0" max="5" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
               </div>
             </div>
 
             <div class="form-group" style="margin-top: 6px; min-width: 0;">
-              <label for="metal-price-gram" style="font-size: 0.76rem; line-height: 1.2;">Ціна чистоти/сплаву (грн/г) для оцінки чаду:</label>
+              <label for="metal-price-gram" style="font-size: 0.76rem; line-height: 1.2;">
+                Ціна чистоти/сплаву (грн/г) для оцінки чаду:
+                <button type="button" class="help-btn" onclick="openHelpModal('cost_metal_price_gram')" title="Довідка: Ринкова ціна металу для оцінки чаду">?</button>
+              </label>
               <input type="number" id="metal-price-gram" value="2600" step="50" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
             </div>
 
@@ -1130,7 +1325,10 @@
       <div class="burnout-cost-summary-card" style="margin-top: 14px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
           <div>
-            <span style="font-size: 1.1rem; font-weight: 800; color: #10b981;">💎 РАЗОМ: Повна собівартість технологічного циклу</span>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 1.1rem; font-weight: 800; color: #10b981;">💎 РАЗОМ: Повна собівартість технологічного циклу</span>
+              <button type="button" class="help-btn help-btn-green" onclick="openHelpModal('cost_grand_total')" title="Довідка: Повна собівартість циклу">?</button>
+            </div>
             <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
               Формомаса + Вода + Випалювання + Плавка (робота, бензин, компресор) + Чад
             </div>
@@ -1159,7 +1357,10 @@
             <span class="val" style="color: #fde047;" id="summary-cost-loss">0.00 грн</span>
           </div>
           <div class="results-row" style="background: rgba(16,185,129,0.1); padding: 6px 10px; border-radius: 6px; margin-top: 4px;">
-            <span style="font-weight: 700; color: #f8fafc;">Собівартість на 1 грам відлитого металу:</span>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-weight: 700; color: #f8fafc;">Собівартість на 1 грам відлитого металу:</span>
+              <button type="button" class="help-btn" onclick="openHelpModal('cost_per_gram')" title="Довідка: Собівартість на 1 грам металу">?</button>
+            </div>
             <strong style="color: #38bdf8; font-size: 1rem;" id="summary-cost-per-gram">0.00 грн/г</strong>
           </div>
         </div>
@@ -1465,6 +1666,61 @@
           + Зберегти поточний як пресет
         </button>
         <button type="button" class="btn btn-sm" onclick="closeManageBurnoutPresetsModal()">Закрити</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Модальне вікно інтерактивної довідки та роз'яснення формул і параметрів (?) -->
+<div class="modal" id="helpModal" style="display: none;">
+  <div class="modal-content" id="help-modal-content" style="max-width: 580px; border-color: rgba(56, 189, 248, 0.4);">
+    <div class="card-title" style="margin-bottom: 10px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.25rem;">💡</span>
+        <span id="help-modal-title" style="font-size: 1.05rem; font-weight: 700; color: #38bdf8;">Технологічна довідка</span>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="closeHelpModal()" style="font-size: 0.85rem; padding: 4px 9px;">✕</button>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <!-- Тег категорії та бейдж -->
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;">
+        <span id="help-modal-badge" class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border-color: #38bdf8; font-size: 0.74rem;">Параметр розрахунку</span>
+        <span id="help-modal-category" style="font-size: 0.76rem; color: var(--text-muted);">Ювелірне литво & Економіка</span>
+      </div>
+
+      <!-- Блок формули або позначення (якщо є) -->
+      <div id="help-modal-formula-box" style="display: none; background: rgba(15, 23, 42, 0.85); border: 1px solid var(--border); border-left: 3px solid #38bdf8; border-radius: 6px; padding: 8px 12px;">
+        <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 2px;">Формула розрахунку:</div>
+        <div id="help-modal-formula" class="formula-code" style="font-size: 0.86rem; color: #a7f3d0;"></div>
+      </div>
+
+      <!-- Основний опис: Що це робить -->
+      <div style="background: rgba(15, 23, 42, 0.5); border-radius: 8px; padding: 12px; border: 1px solid var(--border);">
+        <div style="font-weight: 600; color: #f8fafc; font-size: 0.88rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+          <span>🔍 Що цей пункт рахує і робить:</span>
+        </div>
+        <div id="help-modal-desc" style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.55;"></div>
+      </div>
+
+      <!-- На що це впливає (Технологія & Економіка) -->
+      <div style="background: rgba(245, 158, 11, 0.08); border-radius: 8px; padding: 12px; border: 1px solid rgba(245, 158, 11, 0.25);">
+        <div style="font-weight: 600; color: #fbbf24; font-size: 0.88rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+          <span>⚠️ На що це впливає:</span>
+        </div>
+        <div id="help-modal-impact" style="font-size: 0.84rem; color: #fde68a; line-height: 1.5;"></div>
+      </div>
+
+      <!-- Порада експерта -->
+      <div id="help-modal-tip-box" style="background: rgba(16, 185, 129, 0.08); border-radius: 8px; padding: 10px 12px; border: 1px solid rgba(16, 185, 129, 0.25);">
+        <div style="font-size: 0.82rem; color: #a7f3d0; line-height: 1.45;">
+          <strong style="color: #34d399;">💡 Порада майстра:</strong> <span id="help-modal-tip"></span>
+        </div>
+      </div>
+
+      <!-- Нижня кнопка закриття -->
+      <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
+        <button type="button" class="btn btn-sm" onclick="closeHelpModal()" style="font-size: 0.82rem; padding: 6px 16px;">Зрозуміло</button>
       </div>
     </div>
   </div>
@@ -4698,6 +4954,534 @@ function escapeHtml(str) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
 }
+
+// ==========================================
+// 📚 ДОВІДКОВИЙ ДОВІДНИК ТА ПІДКАЗКИ ФОРМУЛ (HELP_TOPICS)
+// ==========================================
+const HELP_TOPICS = {
+  flask_dimensions: {
+    title: "Розміри опоки (Діаметр D та Висота H)",
+    badge: "Геометрія опоки",
+    category: "Литва і формомаса",
+    formula: "V = π · (D/2)² · H = π · r² · h (см³ або мл)",
+    desc: "Визначає внутрішній корисний об'єм металевої опоки циліндричної форми. На основі об'єму калькулятор розраховує точну масу сухої суміші формомаси та об'єм води для її замішування.",
+    impact: "Безпосередньо визначає витрати формомаси на заміс. Неправильно вказані розміри призведуть або до нестачі суміші (не покриє восковку), або до її надлишку та невиправданих фінансових втрат.",
+    tip: "Завжди вимірюйте саме внутрішній діаметр гільзи штангельциркулем. Якщо використовуєте перфоровані опоки, враховуйте товщину паперового скотчу."
+  },
+  flask_presets: {
+    title: "Швидкі пресети опок",
+    badge: "Швидкий вибір",
+    category: "Литва і формомаса",
+    formula: "D × H (мм) -> збережений профіль",
+    desc: "Збережений набір стандартних діаметрів та висот гільз, які найчастіше використовуються у вашій майстерні (наприклад, 60х100, 80х120, 100х150).",
+    impact: "Прискорює роботу оператора, виключає помилки ручного введення розмірів перед замісом.",
+    tip: "Додайте у пресети всі ваші наявні гільзи через модальне вікно пресетів, щоб вибирати їх одним кліком."
+  },
+  calc_model_flask: {
+    title: "Модель розрахунку об'єму форми",
+    badge: "Алгоритм заповнення",
+    category: "Литва і формомаса",
+    formula: "V_корисний = V_опоки × k_заповнення",
+    desc: "Визначає рівень заповнення опоки формомасою: повний об'єм (100%) або з технологічним недоливом (5-10 мм до верхнього краю гільзи для запобігання переливу під час вакуумування).",
+    impact: "Забезпечує мінімально необхідну товщину формомаси над верхівкою ялинки (не менше 10–15 мм) для витримування тиску вакууму або відцентрової сили.",
+    tip: "Для вакуумного литва шар маси над верхівкою восковки повинен бути не менше 12 мм, інакше дно форми може пробити рідким металом."
+  },
+  custom_volume: {
+    title: "Прямий розрахунок за об'ємом (мл)",
+    badge: "Нестандартні форми",
+    category: "Литва і формомаса",
+    formula: "V = об'єм у мілілітрах (см³)",
+    desc: "Дозволяє задати довільний об'єм форми, якщо використовується прямокутна, конусна або нестандартна гумова основа.",
+    impact: "Дає можливість точно замішувати масу для індивідуальних спеціальних форм без підгонки під циліндр.",
+    tip: "Для визначення точного об'єму складної форми можна залити її водою та зважити на електронних вагах (1 г води = 1 мл)."
+  },
+  investment_type: {
+    title: "Формомаса та пропорція W/P (Вода/Порошок)",
+    badge: "Технологія замісу",
+    category: "Литва і формомаса",
+    formula: "M_порошок = V × k_щільн (напр. 1.45 г/мл) | V_води = M_порошок × (W/100)",
+    desc: "Співвідношення дистильованої води до сухого порошку формомаси (наприклад, 35:100, 38:100, 40:100). Визначає плинність суміші при вакуумуванні та кінцеву міцність гіпсової форми.",
+    impact: "Занадто густа суміш призводить до повітряних бульбашок на восковках. Занадто рідка — знижує газопроникність і міцність форми, спричиняючи тріщини та водяні жили (water marks) на виливках.",
+    tip: "Використовуйте тільки дистильовану або деіонізовану воду кімнатної температури (20–22°C). Звичайна вода з-під крана скорочує час текучості."
+  },
+  investment_presets: {
+    title: "Пресети формомаси (Satin Cast, Kerr, Gold Star)",
+    badge: "Брендові стандарти",
+    category: "Литва і формомаса",
+    formula: "Пропорція мл води на 100 г порошку",
+    desc: "Збережені заводські рекомендації виробників пакувальних мас для золота, срібла, латуні або філіграні.",
+    impact: "Гарантує повторюваність ливарного процесу та відповідність часу застигання технологічній карті.",
+    tip: "Для масивних виробів підходить густіший заміс (35–36:100), для тонкої ажурної філіграні — пластичніший (38–40:100)."
+  },
+  model_wax_weight: {
+    title: "Вага воскової моделі / ялинки (г)",
+    badge: "Вхідна маса моделі",
+    category: "Розрахунок металу",
+    formula: "M_чистого_металу = M_воску × (ρ_металу / ρ_воску) = M_воску × (ρ_металу / 0.95)",
+    desc: "Маса готової воскової композиції (вироби + центральний стояк + живильники) у грамах. Калькулятор помножує її на коефіцієнт питомої густини обраного металу.",
+    impact: "Головний параметр для розрахунку ваги металу на плавку. Помилка у зважуванні призведе до недоливу ялинки або зайвого надлишку в ливниковій чаші.",
+    tip: "Зважуйте восковку на точних ювелірних вагах (з точністю до 0.01 г) обов'язково після припаювання всіх ливників, але без гумового башмака."
+  },
+  metal_type: {
+    title: "Сплав металу та питома густина (ρ)",
+    badge: "Фізичні властивості",
+    category: "Розрахунок металу",
+    formula: "Густина ρ (г/см³): Au 585 = 13.5 | Au 750 = 15.5 | Ag 925 = 10.36 | Pt 950 = 20.7",
+    desc: "Вказує тип дорогоцінного або базового металу, його колір (червоне, жовте, біле золото, срібло, платина, латунь) та питому густину.",
+    impact: "Визначає кратність перерахунку з воску в метал: наприклад, 1 г воску відповідає ~14 г золота 585 або ~11 г срібла 925.",
+    tip: "Колірні сплави білого золота на основі нікелю або паладію мають дещо іншу густину, ніж класичне червоне золото 585."
+  },
+  metal_purity: {
+    title: "Проба та розрахунковий склад сплаву",
+    badge: "Метрична проба",
+    category: "Розрахунок металу",
+    formula: "Вміст чистого металу: Au 585 = 58.5%, Ag 925 = 92.5%, Pt 950 = 95.0%",
+    desc: "Відображає вміст чистого дорогоцінного металу (999.9) на 1000 вагових частин готового ювелірного сплаву.",
+    impact: "Визначає вартість шихти та відповідність виливків нормам Пробірного контролю України.",
+    tip: "Для гарантованого проходження державної пробірної експертизи завжди використовуйте технологічну поправку."
+  },
+  sprue_ratio: {
+    title: "Запас на ливникову систему та чашу (%)",
+    badge: "Технологічний ливник",
+    category: "Розрахунок металу",
+    formula: "M_ливник = M_виробів × (Sprue% / 100) | Зазвичай від +10% до +25%",
+    desc: "Додаткова кількість розплавленого металу, яка залишається у ливниковій чаші (ґудзику) та стояку.",
+    impact: "Забезпечує гідростатичний тиск під час кристалізації сплаву і живить усадкові раковини у виливках. Якщо запас малий — у виробах виникне пористість та недолив.",
+    tip: "Для вакуумного литва достатньо +15–20% запасу, для відцентрового (центрифуги) рекомендується +25–30% для створення потужного ґудзика."
+  },
+  purity_shift: {
+    title: "Технологічна поправка проби (Ремедіум)",
+    badge: "Захист проби",
+    category: "Розрахунок металу",
+    formula: "Розрахунок 587 замість 585 (+2 одиниці) | Розрахунок 930 замість 925 (+5 одиниць)",
+    desc: "Невеликий технологічний запас чистоти дорогоцінного металу, який закладається при шихтовці для компенсації вигорання лігатури, окислення цинку та міді при плавці.",
+    impact: "Гарантує, що після плавки та фінішної обробки виріб на 100% витримає клеймування у Пробірній палаті та не потрапить у брак.",
+    tip: "Завжди тримайте цю опцію увімкненою при використанні вторинного брухту."
+  },
+  loss_allowance: {
+    title: "Безповоротні технологічні втрати / Угар (%)",
+    badge: "Норма угару",
+    category: "Розрахунок металу",
+    formula: "M_втрат = M_загальна × (Угар% / 100)",
+    desc: "Нормативне вигорання металу під дією полум'я пальника або захисного газу (для золота зазвичай 0.8–1.0%, для срібла 1.2–1.5%).",
+    impact: "Дозволяє коректно списати матеріальні цінності у виробничому обліку та не втратити чистий прибуток майстерні.",
+    tip: "При плавці чистим пальником з флюсом (бурою) угар золота становить близько 0.8%, при багатократному переплавленні брухту — до 1.5%."
+  },
+  auto_batch_add: {
+    title: "Автоматичне додавання опоки до кошика замісу",
+    badge: "Автоматизація",
+    category: "Кошик замісу",
+    formula: "Кошик = [Опока 1, Опока 2, ..., Опока N]",
+    desc: "Автоматично додає щойно розраховану опоку у зведений заміс поточної плавки без необхідності натискати додаткові кнопки.",
+    impact: "Економить час ливарника при формуванні великої садки печі з декількох різнотипних опок.",
+    tip: "Вимкніть цю опцію, якщо хочете просто швидко прикинути параметри окремої опоки без зміни поточного кошика."
+  },
+  batch_cart: {
+    title: "Зведений кошик замісу (Специфікація садки)",
+    badge: "Виробничий план",
+    category: "Кошик замісу",
+    formula: "Σ Порошок, Σ Вода, Σ Метал для всіх N опок",
+    desc: "Центральний вузол збору даних: об'єднує всі опоки поточної зміни, підсумовує загальну вагу формомаси, води та металу для одночасного або послідовного литва.",
+    impact: "Дозволяє замісити всю формомасу в одній великій вакуумній мішалці та розрахувати загальну шихту металу на плавку.",
+    tip: "Ви можете змінювати статус кожної опоки (В черзі / Відлито), дублювати опоки або швидко коригувати шихту через кнопку перерахунку."
+  },
+  mix_summary: {
+    title: "Підсумок замісу (Загальні матеріали)",
+    badge: "Зведена відомість",
+    category: "Кошик замісу",
+    formula: "Порошок (кг) = Σ M_порошку | Вода (л) = Σ V_води | Метал (г) = Σ M_металу",
+    desc: "Підсумкова картка з точними значеннями сухої суміші (г та кг), дистильованої води (мл та л) і сумарного металу для всіх доданих опок.",
+    impact: "Пряма інструкція для ливарника перед увімкненням вакуумного міксера. Виключає помилки при зважуванні великих об'ємів формомаси.",
+    tip: "Звірте сумарну кількість води перед заливанням у чашу міксера."
+  },
+  recalc_metal: {
+    title: "Шихтовка та перерахунок металу для опоки",
+    badge: "Ювелірна металургія",
+    category: "Шихтовка металу",
+    formula: "M_чистоти = M_всього × (Проба_ціль / 999.9) | M_лігатури = M_всього - M_чистоти",
+    desc: "Модуль точного розрахунку компонентів шихти: дозволяє зібрати метал на плавку з банківського злитка 999.9 + лігатури, або скомбінувати наявний брухт із чистотою.",
+    impact: "Гарантує точне попадання в пробу з урахуванням кольору (червоне, жовте або біле золото) та захищає від перелігатурення сплаву.",
+    tip: "При використанні брухту завжди ретельно очищайте його магнітом від залишків сталевих пилок і пружин замків."
+  },
+  recalc_scrap: {
+    title: "Частка брухту у шихті (г)",
+    badge: "Вторинний метал",
+    category: "Шихтовка металу",
+    formula: "M_брухту + M_доливу_999 = M_всього",
+    desc: "Кількість наявного чистого брухту відповідної проби, який пускається у переплавку для даної опоки.",
+    impact: "Зменшує витрати дорогоцінного банківського металу шляхом використання обрізків ливників та відходів виробництва.",
+    tip: "Рекомендується додавати не менше 30–50% свіжого металу (чистоти з лігатурою) до старого брухту для запобігання пористості."
+  },
+  recalc_pure: {
+    title: "Долив чистого металу 999.9 (г)",
+    badge: "Банківський метал",
+    category: "Шихтовка металу",
+    formula: "M_999 = (M_сплаву × Проба_ціль) / 999.9",
+    desc: "Маса чистого золота або срібла найвищої проби, яка додається для варіння сплаву.",
+    impact: "Забезпечує високу пластичність і чистоту кристалічної решітки сплаву.",
+    tip: "Використовуйте тільки сертифіковані банківські гранули або злитки."
+  },
+  recalc_ligature: {
+    title: "Спеціальна лігатура (г)",
+    badge: "Легуючі елементи",
+    category: "Шихтовка металу",
+    formula: "M_лігатури = M_сплаву - M_чистоти",
+    desc: "Суміш міді, срібла, цинку, нікелю або паладію для надання золоту потрібного кольору, міцності, текучості та блиску.",
+    impact: "Якісна безкиснева лігатура з розкислювачами (кремній, бор) значно покращує поверхню виливки та усуває пори.",
+    tip: "Завжди дотримуйтесь температурного режиму виробника лігатури при плавці."
+  },
+  recalc_status: {
+    title: "Статус виконання опоки (В черзі / Відлито)",
+    badge: "Виробничий трекінг",
+    category: "Кошик замісу",
+    formula: "Статус: pending -> completed",
+    desc: "Фіксація завершення технологічного процесу литва конкретної опоки з кошика.",
+    impact: "Дозволяє оператору візуально контролювати, які опоки вже залиті металом, а які ще очікують своєї черги в печі.",
+    tip: "Відмічайте опоку як готову одразу після заливки, щоб вести точну виробничу статистику."
+  },
+
+  // ---------------- Вкладка 2: Випалювання і вартість ----------------
+  burnout_general: {
+    title: "Випалювання опок та собівартість виробництва",
+    badge: "Термічна деструкція",
+    category: "Випалювання печі",
+    formula: "Цикл печі: Нагрів (100%) + Полиці витримки (30-50%) + Охолодження (0%)",
+    desc: "Повний розрахунок термічного циклу прокалки гіпсових форм у муфельній печі. Розраховує витрати електроенергії за зонами лічильника та зводить повну собівартість литва.",
+    impact: "Правильний температурний графік гарантує повне витоплювання та вигорання воску без залишків попелу, запобігає термоудару та тріщинам у формомасі.",
+    tip: "Ніколи не форсуйте нагрів на ранніх етапах (до 200°C), щоб пара, що утворюється з вологи, не розірвала форму."
+  },
+  burnout_sync: {
+    title: "Автосинхронізація з кошиком замісу",
+    badge: "Інтеграція модулів",
+    category: "Випалювання печі",
+    formula: "Опоки, Порошок, Вода, Метал -> підтягуються з Вкладки 1",
+    desc: "Автоматично передає кількість опок, масу формомаси, води та металу з розділу «Литва і формомаса» для розрахунку витрат на завантаження печі.",
+    impact: "Виключає повторне ручне введення даних та забезпечує 100% відповідність фінансового розрахунку реальному складу замісу.",
+    tip: "Якщо ви додали нову опоку у кошик на першій вкладці, просто натисніть «🔄 Оновити з кошика»."
+  },
+  furnace_power: {
+    title: "Номінальна потужність муфельної печі (кВт)",
+    badge: "Паспорт печі",
+    category: "Обладнання",
+    formula: "P_ном (кВт) = паспортна потужність нагрівальних елементів (ТЕНів)",
+    desc: "Електрична потужність нагрівачів вашої муфельної печі (наприклад, 1.8 кВт, 2.2 кВт, 3.5 кВт).",
+    impact: "Основний множник для розрахунку кіловат-годин (кВт·год) та вартості випалювання.",
+    tip: "Дізнайтеся точну потужність на заводській табличці (шильдику) вашої печі або в технічному паспорті."
+  },
+  furnace_overhead: {
+    title: "Запас потужності / Похибка ТЕНів (%)",
+    badge: "Корекція тепловтрат",
+    category: "Обладнання",
+    formula: "P_ефективна = P_ном × (1 + Запас% / 100)",
+    desc: "Коригуючий коефіцієнт (зазвичай +10%), який враховує старіння фехралевих/канталових спіралей, просідання напруги в мережі та тепловтрати через фурнітуру і дверцята печі.",
+    impact: "Робить розрахунок фінансових витрат на електроенергію реалістичним, виключаючи заниження собівартості.",
+    tip: "Для нових імпортних печей з якісною керамоволоконною ізоляцією достатньо +5%, для старих або саморобних печей встановлюйте +15%."
+  },
+  furnace_flasks_count: {
+    title: "Кількість опок у садці печі (шт)",
+    badge: "Завантаження камери",
+    category: "Випалювання печі",
+    formula: "Собівартість на 1 опоку = Загальна вартість печі / Кількість опок",
+    desc: "Скільки всього опок завантажено в робочу камеру печі на один спільний цикл випалювання.",
+    impact: "Розподіляє загальні енерговитрати муфеля порівну між усіма виробами. Чим щільніше заповнена піч, тим нижча собівартість випалювання кожної окремої опоки.",
+    tip: "Максимально ущільнюйте садку печі, щоб не палити піч заради однієї маленької опоки."
+  },
+  tariff_dual: {
+    title: "Тарифна сітка електроенергії (Фіксований / Двозонний)",
+    badge: "Тарифи на електроенергію",
+    category: "Економіка енергії",
+    formula: "Нічний тариф = Денний тариф × 0.5 (з 23:00 до 07:00)",
+    desc: "Вибір типу обліку електроенергії. Двозонний лічильник автоматично застосовує 50% знижку на всю енергію, спожиту піччю у нічні години.",
+    impact: "Запуск печі на ніч удвічі скорочує витрати на випалювання, суттєво знижуючи кінцеву собівартість продукції.",
+    tip: "Встановіть старт випалювання на 23:00 за допомогою таймера терморегулятора, щоб весь основний нагрів припав на нічний дешевий тариф."
+  },
+  tariff_commercial: {
+    title: "Комерційний тариф електроенергії (для ФОП / Юр. осіб)",
+    badge: "Бізнес-тариф",
+    category: "Економіка енергії",
+    formula: "Вартість = кВт·год × Комерційний тариф (грн/кВт·год)",
+    desc: "Тариф для промислових ювелірних підприємств та майстерень з комерційним підключенням до електромережі.",
+    impact: "Забезпечує точний бухгалтерський облік собівартості для офіційних виробництв.",
+    tip: "Введіть актуальну ставку з вашого останнього рахунку від енергопостачальника."
+  },
+  burnout_start_time: {
+    title: "Час старту випалювання",
+    badge: "Таймінг циклу",
+    category: "Випалювання печі",
+    formula: "Час фінішу = Час старту + Тривалість циклу",
+    desc: "Точний час увімкнення печі. Калькулятор автоматично розраховує хронологію кожного кроку і розподіляє хвилини між нічною (23–07) та денною (07–23) зонами доби.",
+    impact: "Визначає, яка частка енергії буде оплачена за пільговим тарифом, та вказує точний час готовності опок до ранкової заливки металом.",
+    tip: "Оптимальний час старту стандартного 8-годинного графіка — 22:30 або 23:00, щоб до 7–8 ранку опоки охололи до температури литва."
+  },
+  burnout_profile: {
+    title: "Температурний профіль (Графік випалювання)",
+    badge: "Термограма",
+    category: "Випалювання печі",
+    formula: "Послідовність температурних кроків: Т_поч -> Т_кінц за час t_хв при навантаженні L%",
+    desc: "Покрокова таблиця температурних фаз: витоплювання воску (150°C), видалення хімічно зв'язаної води (370°C), деструкція вуглецю (730–750°C) та охолодження до температури литва (450–600°C).",
+    impact: "Основа якісного литва. Недогрів форми призводить до попелу і газових раковин у металі; перегрів (вище 760°C) — до розпаду гіпсу CaSO4 з виділенням сірчистого газу, що руйнує метал.",
+    tip: "Ніколи не перевищуйте температуру 750°C для гіпсових формомас."
+  },
+  burnout_presets: {
+    title: "Пресети температурних графіків",
+    badge: "Шаблони термограм",
+    category: "Випалювання печі",
+    formula: "Збережені масиви кроків під різні сплави та розміри опок",
+    desc: "Готові технологічні профілі: класичний 8-ступеневий (6.5 год), прискорений експрес-графік (4.5 год), подовжений для великих опок (10–12 год) або профіль для платини.",
+    impact: "Дозволяє за 1 клік налаштувати розрахунок під конкретне виробниче завдання.",
+    tip: "Ви можете змінювати кроки і зберігати власні пресети кнопкою «💾 Зберегти як пресет»."
+  },
+  burnout_chart: {
+    title: "Динамічна термограма муфельної печі (SVG)",
+    badge: "Візуалізація кривої",
+    category: "Випалювання печі",
+    formula: "Графік залежності Температури T(°C) від Часу t(год)",
+    desc: "Наочний векторний графік, який малює реальну траєкторію нагріву, полиць витримки та охолодження з колірною індикацією режимів навантаження.",
+    impact: "Допомагає ливарнику візуально оцінити плавність підйому температури та контролювати критичні фази випалювання.",
+    tip: "Червоний колір лінії позначає повний розгін (100% ТЕН), бурштиновий — стабілізацію полиці, блакитний — охолодження."
+  },
+  burnout_duty_cycle: {
+    title: "Режим навантаження ТЕНів (Duty Cycle %)",
+    badge: "Робота терморегулятора",
+    category: "Енерговитрати",
+    formula: "P_фактична = P_ефективна × (Навантаження% / 100)",
+    desc: "Показує, який відсоток часу нагрівальні елементи увімкнені під час даного кроку. При активному розгоні температури навантаження становить 100%, при утриманні стабільної температури на полиці — лише 30–50% (імпульсне вмикання терморегулятора ПІД), при охолодженні — 0%.",
+    impact: "Забезпечує високу фізичну точність підрахунку спожитих кВт·год, на відміну від примітивних калькуляторів, які помилково множать повну потужність на весь час циклу.",
+    tip: "Для якісно футерованих печей навантаження на полиці 730°C рідко перевищує 40–45%."
+  },
+  burnout_kwh: {
+    title: "Споживання електроенергії (кВт·год)",
+    badge: "Фактичні енерговитрати",
+    category: "Економіка енергії",
+    formula: "кВт·год = Σ [ P_ефективна × (Навантаження_i / 100) × (Час_хв_i / 60) ]",
+    desc: "Сумарна кількість електричної енергії, яку лічильник зафіксує за весь час роботи печі від старту до фінішу.",
+    impact: "Основа для бухгалтерського списання коштів за електроенергію.",
+    tip: "Порівняйте розрахункове значення з показниками вашого електролічильника для калібрування похибки печі."
+  },
+  burnout_output_cost: {
+    title: "Підсумкова вартість електроенергії на випалювання",
+    badge: "Грошові витрати",
+    category: "Економіка енергії",
+    formula: "Вартість = (кВт·год_ніч × Тариф_ніч) + (кВт·год_день × Тариф_день)",
+    desc: "Сума у гривнях, необхідна для оплати електроенергії за один повний цикл прокалки печі.",
+    impact: "Входить до загальної собівартості замісу як окрема обов'язкова стаття прямих витрат.",
+    tip: "Зверніть увагу на блок економії: там показано, скільки гривень ви зберігаєте завдяки нічному випалюванню."
+  },
+  burnout_cost_per_flask: {
+    title: "Собівартість випалювання на 1 опоку",
+    badge: "Одинична собівартість",
+    category: "Економіка енергії",
+    formula: "Ціна на 1 опоку = Загальна вартість печі / Кількість опок у садці",
+    desc: "Частка витрат на електроенергію печі, яка припадає на одну конкретну опоку в даному завантаженні.",
+    impact: "Використовується при калькуляції вартості виготовлення індивідуального замовлення клієнта.",
+    tip: "При завантаженні 4–6 опок вартість випалювання однієї опоки становить лише 2–4 грн!"
+  },
+  burnout_zones_breakdown: {
+    title: "Розподіл за зонами лічильника (День / Ніч)",
+    badge: "Деталізація тарифів",
+    category: "Економіка енергії",
+    formula: "Ніч (23:00 - 07:00) за тарифом 0.5x | День (07:00 - 23:00) за тарифом 1.0x",
+    desc: "Показує точну кількість кВт·год і суму в гривнях окремо для нічного та денного інтервалів доби.",
+    impact: "Допомагає оптимизувати графік ливарного цеху для досягнення максимальної енергоефективності.",
+    tip: "Якщо частина графіка заходить після 07:00 ранку, постарайтеся, щоб на цей час припадала лише завершальна полиця охолодження з мінімальним енергоспоживанням."
+  },
+  cost_block4_summary: {
+    title: "Зведена собівартість технологічних процесів замісу",
+    badge: "Повний розрахунок",
+    category: "Зведена собівартість",
+    formula: "Собівартість = Формомаса + Вода + Піч + Плавка (робота, бензин, компресор) + Чад металу",
+    desc: "Головний економічний модуль: акумулює всі прямі виробничі витрати ливарного циклу від замішування порошку до отримання очищеної ялинки з металу.",
+    impact: "Дає власнику бізнесу та ювеліру точну цифру собівартості для правильного ціноутворення, нарахування зарплати майстру та формування брендової націнки.",
+    tip: "Регулярно оновлюйте ціни на порошок, бензин та метал для підтримання актуальності калькуляцій."
+  },
+  cost_materials: {
+    title: "Собівартість матеріалів формовки (Порошок + Вода)",
+    badge: "Витратні матеріали",
+    category: "Зведена собівартість",
+    formula: "Вартість = (кг порошку × ціна/кг) + (л води × ціна/л)",
+    desc: "Вартість сухої формомаси та дистильованої води, витрачених на всі опоки поточного замісу.",
+    impact: "Перша складова матеріальної собівартості литва.",
+    tip: "Закупівля формомаси мішками по 22.5–45 кг дозволяє суттєво знизити ціну за 1 кг."
+  },
+  cost_powder_kg: {
+    title: "Ціна формомаси за 1 кг (грн/кг)",
+    badge: "Вхідна ціна порошку",
+    category: "Зведена собівартість",
+    formula: "Ціна закупівлі мішка формомаси / вага мішка (кг)",
+    desc: "Ринкова вартість кілограма сухої пакувальної маси (наприклад, Satin Cast 20, Gold Star, Kerr).",
+    impact: "Безпосередньо визначає вартість формовки кожної опоки.",
+    tip: "Вказуйте актуальну ціну з урахуванням вартості доставки."
+  },
+  cost_water_l: {
+    title: "Ціна дистильованої води за 1 л (грн/л)",
+    badge: "Очищена вода",
+    category: "Зведена собівартість",
+    formula: "Ціна бутля води / об'єм у літрах",
+    desc: "Вартість дистильованої або деіонізованої води для замісу.",
+    impact: "Враховує дрібні, але постійні супутні витрати на кожну опоку.",
+    tip: "Використання власного лабораторного дистилятора знижує собівартість літра води практично до вартості кіловата електроенергії."
+  },
+  cost_burnout_item: {
+    title: "Витрати на випалювання в печі",
+    badge: "Енергетична складова",
+    category: "Зведена собівартість",
+    formula: "Значення з Блоку 3 (розрахунок термограми печі)",
+    desc: "Фінансові витрати на електроенергію, необхідну для прожарювання всієї садки опок.",
+    impact: "Друга обов'язкова складова технологічної собівартості.",
+    tip: "Автоматично оновлюється при зміні графіка або тарифної сітки."
+  },
+  cost_melting_loss: {
+    title: "Плавка, бензин пальника, компресор та чад металу",
+    badge: "Металургійний блок",
+    category: "Зведена собівартість",
+    formula: "Сума = Робота ливарника + Бензин + Компресор + (г чаду × ціна/г)",
+    desc: "Включає витрати на вогневі роботи (оплата праці ливарника, пальне для бензинового/газового пальника, електроенергія компресора) та вартість безповоротно втраченого металу (угару).",
+    impact: "Найвагоміша частина собівартості при роботі з дорогоцінними металами (золото, платина).",
+    tip: "Контролюйте факел пальника: відновне полум'я мінімізує окислення та зменшує угар металу."
+  },
+  cost_melting_work: {
+    title: "Робота з плавки та литва (грн / опока)",
+    badge: "Оплата праці",
+    category: "Зведена собівартість",
+    formula: "Тариф ливарника за 1 опоку × Кількість опок",
+    desc: "Розцінка за виконання операції плавки металу пальником або в індукційній установці та заливку у форму.",
+    impact: "Формує фонд оплати праці майстра-ливарника.",
+    tip: "Встановіть внутрішній тариф вашої майстерні (наприклад, 40–60 грн за опоку)."
+  },
+  cost_gasoline: {
+    title: "Бензин для пальника (грн / опока)",
+    badge: "Пальне пальника",
+    category: "Зведена собівартість",
+    formula: "Витрата бензину «Калоша»/Б-70 (л) × Ціна/л на 1 опоку",
+    desc: "Вартість спеціального очищеного бензину (марки Б-70, «Калоша» або Нефрас), який використовується в ювелірних карбюраторних бензинових пальниках для розплавлення металу.",
+    impact: "Оскільки різні майстерні використовують різне за якістю та ціною пальне (імпортний бензин високої очистки, аптечний або технічний нефрас), це поле дозволяє точно врахувати реальну вартість пального на кожну вилиту опоку.",
+    tip: "Використовуйте тільки якісний бензин Б-70 без маслянистих домішок, щоб забезпечити максимальну температуру полум'я (до 1150°C) та захистити метал від навуглецьовування."
+  },
+  cost_compressor: {
+    title: "Робота компресора повітря (грн / опока)",
+    badge: "Стиснене повітря",
+    category: "Зведена собівартість",
+    formula: "Амортизація + Електроенергія компресора на 1 плавку",
+    desc: "Витрати на роботу електричного мембранного або поршневого компресора, що подає повітря в бачок пальника під час плавки.",
+    impact: "Враховує амортизацію пневматичного обладнання та енерговитрати на продувку.",
+    tip: "Своєчасно зливайте конденсат з ресивера компресора, щоб волога не потрапляла в бензиновий бачок."
+  },
+  cost_metal_loss_rate: {
+    title: "Норма технологічного чаду металу (%)",
+    badge: "Безповоротні втрати",
+    category: "Зведена собівартість",
+    formula: "Угар (%) = (Втрачена маса / Початкова маса) × 100%",
+    desc: "Відсоток маси металу, який безповоротно втрачається у вигляді пари та шлаку при плавці (для золота зазвичай 0.8–1.0%, для срібла 1.0–1.5%).",
+    impact: "Прямо впливає на фінансові втрати дорогоцінного металу під час кожної плавки.",
+    tip: "Використовуйте якісну тиглеву буру і не перегрівайте розплав вище температури литва, щоб мінімізувати випаровування цинку."
+  },
+  cost_metal_price_gram: {
+    title: "Ринкова ціна металу для оцінки чаду (грн/г)",
+    badge: "Оцінка металу",
+    category: "Зведена собівартість",
+    formula: "Поточна вартість 1 грама сплаву або чистоти 999.9",
+    desc: "Вартість грама металу на ювелірному ринку, за якою розраховується грошовий еквівалент технологічних втрат (угару).",
+    impact: "Переводить фізичні грами згорілого металу в реальні гривні собівартості.",
+    tip: "Вказуйте реальну ринкову ціну закупівлі металу або банківського злитка."
+  },
+  cost_grand_total: {
+    title: "Повна собівартість технологічного циклу (РАЗОМ)",
+    badge: "Фінальний результат",
+    category: "Зведена собівартість",
+    formula: "Total = Матеріали + Електроенергія + Робота + Пальне + Компресор + Чад",
+    desc: "Підсумкова сума всіх витрат на здійснення повного ливарного циклу для даної садки опок.",
+    impact: "Базова цифра для економіки підприємства: на її основі формується відпускна ціна виробів, розраховується маржинальність та рентабельність цеху.",
+    tip: "Цю суму можна скопіювати або експортувати у текстовий фінансовий звіт кнопками внизу картки."
+  },
+  cost_per_gram: {
+    title: "Собівартість технологічного обслуговування на 1 грам металу",
+    badge: "Питома вартість",
+    category: "Зведена собівартість",
+    formula: "грн/г = Повна собівартість циклу / Загальна вага відлитого металу (г)",
+    desc: "Показує, скільки гривень технологічних витрат закладено в кожен грам готової ювелірної продукції (без урахування вартості самого дорогоцінного металу).",
+    impact: "Універсальний ювелірний показник собівартості литва (наприклад, 8–15 грн/г для срібла, 15–25 грн/г для золота). Дозволяє миттєво оцінити собівартість литва для виробу будь-якої ваги.",
+    tip: "Чим більша вага виробів на ялинці при однаковій кількості опок, тим нижча собівартість у перерахунку на 1 грам."
+  }
+};
+
+// Відкриття модального вікна довідки
+function openHelpModal(topicKey) {
+  const modal = document.getElementById("helpModal");
+  if (!modal) return;
+
+  const topic = HELP_TOPICS[topicKey] || {
+    title: "Ювелірний параметр розрахунку",
+    badge: "Параметр",
+    category: "Ювелірне виробництво",
+    formula: "",
+    desc: "Технологічний параметр ювелірного процесу литва та економічного розрахунку собівартості.",
+    impact: "Впливає на якість готових виробів та точність фінансового балансу виробництва.",
+    tip: "Дотримуйтесь технологічних норм і рекомендацій виробників матеріалів."
+  };
+
+  const titleEl = document.getElementById("help-modal-title");
+  const badgeEl = document.getElementById("help-modal-badge");
+  const catEl = document.getElementById("help-modal-category");
+  const formulaBoxEl = document.getElementById("help-modal-formula-box");
+  const formulaEl = document.getElementById("help-modal-formula");
+  const descEl = document.getElementById("help-modal-desc");
+  const impactEl = document.getElementById("help-modal-impact");
+  const tipEl = document.getElementById("help-modal-tip");
+  const tipBoxEl = document.getElementById("help-modal-tip-box");
+
+  if (titleEl) titleEl.innerText = topic.title;
+  if (badgeEl) badgeEl.innerText = topic.badge || "Параметр";
+  if (catEl) catEl.innerText = topic.category || "Ювелірне литво & Економіка";
+
+  if (formulaBoxEl && formulaEl) {
+    if (topic.formula && topic.formula.trim().length > 0) {
+      formulaEl.innerText = topic.formula;
+      formulaBoxEl.style.display = "block";
+    } else {
+      formulaBoxEl.style.display = "none";
+    }
+  }
+
+  if (descEl) descEl.innerText = topic.desc || "";
+  if (impactEl) impactEl.innerText = topic.impact || "";
+
+  if (tipBoxEl && tipEl) {
+    if (topic.tip) {
+      tipEl.innerText = topic.tip;
+      tipBoxEl.style.display = "block";
+    } else {
+      tipBoxEl.style.display = "none";
+    }
+  }
+
+  modal.style.display = "flex";
+}
+
+// Закриття модального вікна довідки
+function closeHelpModal() {
+  const modal = document.getElementById("helpModal");
+  if (modal) {
+    modal.style.display = "none";
+  }
+}
+
+// Закриття по кліку на фон (бекдроп)
+window.addEventListener("click", function(e) {
+  const helpModal = document.getElementById("helpModal");
+  if (helpModal && e.target === helpModal) {
+    closeHelpModal();
+  }
+});
+
+// Закриття по клавіші Escape
+window.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") {
+    const helpModal = document.getElementById("helpModal");
+    if (helpModal && helpModal.style.display !== "none") {
+      closeHelpModal();
+    }
+  }
+});
 </script>
 
 </body>
