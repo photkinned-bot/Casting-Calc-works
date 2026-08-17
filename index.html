@@ -122,6 +122,7 @@
     .note-input:focus { border-color: var(--accent); border-style: solid; background: var(--bg-input); }
 
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center; padding: 12px; }
+    .modal.active { display: flex !important; }
     .modal-content { background: var(--bg-card); width: 100%; max-width: 500px; border-radius: 12px; padding: 20px; border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; }
 
     .quick-chip { background-color: var(--bg-input); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 4px 8px; font-size: 0.78rem; cursor: pointer; transition: all 0.15s; }
@@ -762,16 +763,16 @@
           <div class="burnout-tariff-card">
             <div style="font-weight: 700; color: #38bdf8; margin-bottom: 10px; font-size: 0.92rem; display: flex; align-items: center; justify-content: space-between;">
               <span>💡 Тарифна сітка електроенергії</span>
-              <span id="burnout-tariff-mode-badge" class="badge badge-success" style="font-size: 0.75rem;">Двозонний лічильник</span>
+              <span id="burnout-tariff-mode-badge" class="badge badge-pending" style="font-size: 0.75rem;">Побутовий фіксований</span>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 10px;">
               <!-- Перемикач типу тарифу -->
               <div class="burnout-segment-group">
-                <button type="button" class="burnout-segment-btn" id="btn-tariff-single" onclick="setTariffMode('single')">
+                <button type="button" class="burnout-segment-btn active" id="btn-tariff-single" onclick="setTariffMode('single')">
                   🏠 Побутовий (Фікс)
                 </button>
-                <button type="button" class="burnout-segment-btn active" id="btn-tariff-dual" onclick="setTariffMode('dual')">
+                <button type="button" class="burnout-segment-btn" id="btn-tariff-dual" onclick="setTariffMode('dual')">
                   🌙 Двозонний (Ніч/День)
                 </button>
                 <button type="button" class="burnout-segment-btn" id="btn-tariff-commercial" onclick="setTariffMode('commercial')">
@@ -780,7 +781,7 @@
               </div>
 
               <!-- Поля для фіксованого тарифу -->
-              <div id="tariff-fields-single" style="display: none; flex-direction: column; gap: 8px;">
+              <div id="tariff-fields-single" style="display: flex; flex-direction: column; gap: 8px;">
                 <div class="form-group">
                   <label for="burnout-tariff-single">Тариф електроенергії (грн/кВт·год):</label>
                   <input type="number" id="burnout-tariff-single" value="4.32" step="0.01" min="0" oninput="onBurnoutConfigChange()">
@@ -788,7 +789,7 @@
               </div>
 
               <!-- Поля для двозонного тарифу -->
-              <div id="tariff-fields-dual" style="display: flex; flex-direction: column; gap: 8px;">
+              <div id="tariff-fields-dual" style="display: none; flex-direction: column; gap: 8px;">
                 <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 8px;">
                   <div class="form-group">
                     <label for="burnout-tariff-day" style="color: #fbbf24;">☀️ Денний тариф (07–23):</label>
@@ -948,73 +949,79 @@
       </div>
     </div>
 
-    <!-- БЛОК 3: ПІДСУМКОВИЙ РОЗРАХУНОК ВАРТОСТІ ВИПАЛЮВАННЯ -->
-    <div class="card" style="border-left: 4px solid #10b981;" id="card-burnout-block3">
-      <div class="card-title">
+    <!-- БЛОК 3: ПІДСУМКОВИЙ РОЗРАХУНОК ВАРТОСТІ ВИПАЛЮВАННЯ (РОЗКРИВНИЙ) -->
+    <div class="card burnout-collapsible-card" style="border-left: 4px solid #10b981;" id="card-burnout-block3">
+      <div class="card-title burnout-collapsible-header" onclick="toggleBurnoutCard('card-burnout-block3')">
         <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="burnout-collapse-arrow" id="arrow-burnout-block3">▼</span>
           <span>💰 Блок 3. Підсумковий розрахунок вартості випалювання (Output)</span>
         </div>
-        <span class="badge badge-success" style="font-size: 0.75rem;">Результати калькуляції</span>
-      </div>
-
-      <!-- Зведені картки метрик (ЗАВЖДИ ВИДИМІ) -->
-      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-        <div class="burnout-stat-card">
-          <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">⏱️ Загальний час циклу</span>
-          <span style="font-size: 1.35rem; font-weight: 700; color: #f8fafc;" id="burnout-res-total-time">6 год 39 хв</span>
-          <span style="font-size: 0.74rem; color: #a7f3d0;" id="burnout-res-timeline-info">Старт 23:00 → Фініш 05:39</span>
-        </div>
-
-        <div class="burnout-stat-card">
-          <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">⚡ Споживання електроенергії</span>
-          <span style="font-size: 1.35rem; font-weight: 700; color: #38bdf8;" id="burnout-res-total-kwh">6.44 кВт·год</span>
-          <span style="font-size: 0.74rem; color: var(--text-muted);" id="burnout-res-nominal-kwh">Номінал: 5.85 кВт·год (+10%)</span>
-        </div>
-
-        <div class="burnout-stat-card" style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(15,23,42,0.85)); border-color: rgba(16,185,129,0.4);">
-          <span style="font-size: 0.75rem; color: #34d399; text-transform: uppercase; font-weight: 700;">💰 Вартість випалювання</span>
-          <span style="font-size: 1.45rem; font-weight: 800; color: #10b981;" id="burnout-res-total-cost">13.91 грн</span>
-          <span style="font-size: 0.74rem; color: #a7f3d0;" id="burnout-res-cost-sub">За весь цикл печі</span>
-        </div>
-
-        <div class="burnout-stat-card">
-          <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">🏺 Собівартість на 1 опоку</span>
-          <span style="font-size: 1.35rem; font-weight: 700; color: #fde047;" id="burnout-res-cost-per-flask">13.91 грн/опока</span>
-          <span style="font-size: 0.74rem; color: var(--text-muted);" id="burnout-res-flasks-sub">Для 1 опоки в садці</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="badge badge-success" style="font-size: 0.75rem;">Результати калькуляції</span>
+          <span class="burnout-collapse-hint" id="hint-burnout-block3">Згорнути ▲</span>
         </div>
       </div>
 
-      <!-- РОЗКРИВНЕ ПОЛЕ: Деталізація формул та зон лічильника (День / Ніч) -->
-      <div id="burnout-dual-breakdown-box" class="results-box burnout-collapsible-box" style="margin-top: 14px;">
-        <div class="burnout-box-toggle-header" onclick="toggleBurnoutZoneBreakdown()">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span class="burnout-collapse-arrow" id="arrow-burnout-zones">▼</span>
-            <span style="font-weight: 700; color: #38bdf8; font-size: 0.88rem;">🌙 Формули та розподіл за зонами лічильника (День / Ніч)</span>
+      <div class="burnout-collapsible-body" id="body-burnout-block3">
+        <!-- Зведені картки метрик -->
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+          <div class="burnout-stat-card">
+            <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">⏱️ Загальний час циклу</span>
+            <span style="font-size: 1.35rem; font-weight: 700; color: #f8fafc;" id="burnout-res-total-time">6 год 39 хв</span>
+            <span style="font-size: 0.74rem; color: #a7f3d0;" id="burnout-res-timeline-info">Старт 23:00 → Фініш 05:39</span>
           </div>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <span id="burnout-night-saving-badge" class="badge badge-success" style="font-size: 0.74rem;">Економія: -50% на нічних годинах</span>
-            <span class="burnout-collapse-hint" id="hint-burnout-zones">Згорнути ▲</span>
+
+          <div class="burnout-stat-card">
+            <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">⚡ Споживання електроенергії</span>
+            <span style="font-size: 1.35rem; font-weight: 700; color: #38bdf8;" id="burnout-res-total-kwh">6.44 кВт·год</span>
+            <span style="font-size: 0.74rem; color: var(--text-muted);" id="burnout-res-nominal-kwh">Номінал: 5.85 кВт·год (+10%)</span>
+          </div>
+
+          <div class="burnout-stat-card" style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(15,23,42,0.85)); border-color: rgba(16,185,129,0.4);">
+            <span style="font-size: 0.75rem; color: #34d399; text-transform: uppercase; font-weight: 700;">💰 Вартість випалювання</span>
+            <span style="font-size: 1.45rem; font-weight: 800; color: #10b981;" id="burnout-res-total-cost">13.91 грн</span>
+            <span style="font-size: 0.74rem; color: #a7f3d0;" id="burnout-res-cost-sub">За весь цикл печі</span>
+          </div>
+
+          <div class="burnout-stat-card">
+            <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">🏺 Собівартість на 1 опоку</span>
+            <span style="font-size: 1.35rem; font-weight: 700; color: #fde047;" id="burnout-res-cost-per-flask">13.91 грн/опока</span>
+            <span style="font-size: 0.74rem; color: var(--text-muted);" id="burnout-res-flasks-sub">Для 1 опоки в садці</span>
           </div>
         </div>
 
-        <div id="burnout-zone-breakdown-content" class="burnout-box-content" style="margin-top: 10px; display: flex; flex-direction: column; gap: 6px;">
-          <div class="results-row">
-            <span>🌙 Нічна зона (23:00 – 07:00, тариф <strong style="color: #a5b4fc;" id="burnout-lbl-night-rate">2.16 грн</strong>):</span>
-            <span class="val" style="color: #a5b4fc;" id="burnout-res-night-breakdown">6.44 кВт·год = 13.91 грн (100% циклу)</span>
+        <!-- РОЗКРИВНЕ ПОЛЕ: Деталізація формул та зон лічильника (День / Ніч) -->
+        <div id="burnout-dual-breakdown-box" class="results-box burnout-collapsible-box" style="margin-top: 14px;">
+          <div class="burnout-box-toggle-header" onclick="toggleBurnoutZoneBreakdown()">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="burnout-collapse-arrow" id="arrow-burnout-zones">▼</span>
+              <span style="font-weight: 700; color: #38bdf8; font-size: 0.88rem;">🌙 Формули та розподіл за зонами лічильника (День / Ніч)</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span id="burnout-night-saving-badge" class="badge badge-success" style="font-size: 0.74rem;">Економія: -50% на нічних годинах</span>
+              <span class="burnout-collapse-hint" id="hint-burnout-zones">Згорнути ▲</span>
+            </div>
           </div>
-          <div class="results-row">
-            <span>☀️ Денна зона (07:00 – 23:00, тариф <strong style="color: #fbbf24;" id="burnout-lbl-day-rate">4.32 грн</strong>):</span>
-            <span class="val" style="color: #fbbf24;" id="burnout-res-day-breakdown">0.00 кВт·год = 0.00 грн (0% циклу)</span>
-          </div>
-          <div class="results-row" style="background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 6px;">
-            <span style="color: var(--text-muted);">💡 Формула та економічний ефект:</span>
-            <span style="color: #34d399; font-weight: 600;" id="burnout-res-savings-text">Випалювання вночі заощаджує 13.91 грн у порівнянні з денним тарифом!</span>
+
+          <div id="burnout-zone-breakdown-content" class="burnout-box-content" style="margin-top: 10px; display: flex; flex-direction: column; gap: 6px;">
+            <div class="results-row">
+              <span>🌙 Нічна зона (23:00 – 07:00, тариф <strong style="color: #a5b4fc;" id="burnout-lbl-night-rate">2.16 грн</strong>):</span>
+              <span class="val" style="color: #a5b4fc;" id="burnout-res-night-breakdown">6.44 кВт·год = 13.91 грн (100% циклу)</span>
+            </div>
+            <div class="results-row">
+              <span>☀️ Денна зона (07:00 – 23:00, тариф <strong style="color: #fbbf24;" id="burnout-lbl-day-rate">4.32 грн</strong>):</span>
+              <span class="val" style="color: #fbbf24;" id="burnout-res-day-breakdown">0.00 кВт·год = 0.00 грн (0% циклу)</span>
+            </div>
+            <div class="results-row" style="background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 6px;">
+              <span style="color: var(--text-muted);">💡 Формула та економічний ефект:</span>
+              <span style="color: #34d399; font-weight: 600;" id="burnout-res-savings-text">Випалювання вночі заощаджує 13.91 грн у порівнянні з денним тарифом!</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- БЛОК 4: ПІДСУМКОВА ЗВЕДЕНА СОБІВАРТІСТЬ ТА ІНТЕГРАЦІЯ ЗВІТУ (РОЗКРИВНИЙ) -->
+    <!-- БЛОК 4: ПІДСУМКОВА ЗВЕДЕНА СОБІВАРТІСТЬ ТА ІНТЕГРАЦІЯ ЗВІТУ (РОЗКРИВНИЙ З ПОСТІЙНИМ ЗЕЛЕНИМ ПІДСУМКОМ) -->
     <div class="card burnout-collapsible-card" id="card-burnout-block4" style="border-color: rgba(56,189,248,0.5);">
       <div class="card-title burnout-collapsible-header" onclick="toggleBurnoutCard('card-burnout-block4')">
         <div style="display: flex; align-items: center; gap: 8px;">
@@ -1027,13 +1034,14 @@
         </div>
       </div>
 
+      <!-- Деталізація процесів (згортається при кліку на заголовок Блоку 4) -->
       <div class="burnout-collapsible-body" id="body-burnout-block4">
         <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 14px;">
-          Калькуляція поєднує формомасу та воду з кошика, енерговитрати муфельної печі, плавку металу та технологічний чад для розрахунку повної собівартості виробництва.
+          Калькуляція поєднує формомасу та воду з кошика, енерговитрати муфельної печі, плавку металу (роботу, бензин пальника, компресор) та технологічний чад для розрахунку повної собівартості виробництва.
         </p>
 
         <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
-          <!-- 1. Формомаса і вода (ВИПРАВЛЕНА РОЗМІТКА, БЕЗ НАПОВЗАННЯ ПОЛІВ) -->
+          <!-- 1. Формомаса і вода -->
           <div class="burnout-feature-box" style="border-color: rgba(52,211,153,0.3);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
               <span style="font-weight: 700; color: #a7f3d0; font-size: 0.95rem;">1. Формомаса і вода</span>
@@ -1076,86 +1084,99 @@
             </div>
           </div>
 
-          <!-- 3. Плавка та чад -->
+          <!-- 3. Плавка, бензин, компресор та чад -->
           <div class="burnout-feature-box" style="border-color: rgba(239,68,68,0.3);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
               <span style="font-weight: 700; color: #f87171; font-size: 0.95rem;">3. Плавка та чад металу</span>
-              <span class="badge" style="font-size: 0.7rem; background: rgba(239,68,68,0.2); color: #f87171; border-color: #ef4444;">Нормативи</span>
+              <span class="badge" style="font-size: 0.7rem; background: rgba(239,68,68,0.2); color: #f87171; border-color: #ef4444;">Пальник & чад</span>
             </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 2px;">
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 4px;">
               <div class="form-group" style="min-width: 0;">
-                <label for="price-melting-flask" style="font-size: 0.76rem; line-height: 1.2;">Плавка (грн/опока):</label>
+                <label for="price-melting-flask" style="font-size: 0.76rem; line-height: 1.2;">Плавка (робота, грн/оп):</label>
                 <input type="number" id="price-melting-flask" value="45" step="5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
+              </div>
+              <div class="form-group" style="min-width: 0;">
+                <label for="price-gasoline-flask" style="font-size: 0.76rem; line-height: 1.2;" title="Вартість бензину «Калоша»/Б-70 для пальника на 1 опоку">⛽ Бензин (грн/опока):</label>
+                <input type="number" id="price-gasoline-flask" value="15" step="1" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 6px;">
+              <div class="form-group" style="min-width: 0;">
+                <label for="price-compressor-flask" style="font-size: 0.76rem; line-height: 1.2;" title="Вартість роботи компресора повітря для бензинового пальника на 1 опоку">💨 Компресор (грн/оп):</label>
+                <input type="number" id="price-compressor-flask" value="5" step="1" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
               </div>
               <div class="form-group" style="min-width: 0;">
                 <label for="metal-loss-percent" style="font-size: 0.76rem; line-height: 1.2;">Норма чаду (%):</label>
                 <input type="number" id="metal-loss-percent" value="1.0" step="0.1" min="0" max="5" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
               </div>
             </div>
+
             <div class="form-group" style="margin-top: 6px; min-width: 0;">
-              <label for="metal-price-gram" style="font-size: 0.76rem; line-height: 1.2;">Ціна металу (грн/г) для оцінки чаду:</label>
+              <label for="metal-price-gram" style="font-size: 0.76rem; line-height: 1.2;">Ціна чистоти/сплаву (грн/г) для оцінки чаду:</label>
               <input type="number" id="metal-price-gram" value="2600" step="50" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
             </div>
+
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 0.85rem;">
-              <span>Плавка + чад металу:</span>
-              <strong style="color: #f87171;" id="cost-melting-total">45.00 грн</strong>
+              <span>Плавка, бензин, компресор + чад:</span>
+              <strong style="color: #f87171;" id="cost-melting-total">65.00 грн</strong>
             </div>
-          </div>
-        </div>
-
-        <!-- Зведена картка повної собівартості -->
-        <div class="burnout-cost-summary-card" style="margin-top: 16px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
-            <div>
-              <span style="font-size: 1.1rem; font-weight: 800; color: #10b981;">💎 РАЗОМ: Повна собівартість технологічного циклу</span>
-              <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
-                Формомаса + Вода + Випалювання + Плавка та витратні
-              </div>
-            </div>
-            <div style="text-align: right;">
-              <span style="font-size: 1.6rem; font-weight: 800; color: #34d399;" id="cost-grand-total">58.91 грн</span>
-              <div style="font-size: 0.76rem; color: var(--text-muted);" id="cost-per-flask-grand">58.91 грн / опока</div>
-            </div>
-          </div>
-
-          <div class="results-box" style="background: rgba(15,23,42,0.85); border-color: rgba(16,185,129,0.3); margin-top: 8px;">
-            <div class="results-row">
-              <span>🥣 Матеріали формовки (порошок + вода):</span>
-              <span class="val" style="color: #a7f3d0;" id="summary-cost-materials">0.00 грн</span>
-            </div>
-            <div class="results-row">
-              <span>⚡ Електроенергія випалювання в печі:</span>
-              <span class="val" style="color: #fbbf24;" id="summary-cost-burnout">13.91 грн</span>
-            </div>
-            <div class="results-row">
-              <span>🔥 Робота плавки, енергія та витратні:</span>
-              <span class="val" style="color: #f87171;" id="summary-cost-melting">45.00 грн</span>
-            </div>
-            <div class="results-row">
-              <span>⚖️ Технологічні безповоротні втрати металу (угар):</span>
-              <span class="val" style="color: #fde047;" id="summary-cost-loss">0.00 грн</span>
-            </div>
-            <div class="results-row" style="background: rgba(16,185,129,0.1); padding: 6px 10px; border-radius: 6px; margin-top: 4px;">
-              <span style="font-weight: 700; color: #f8fafc;">Собівартість на 1 грам відлитого металу:</span>
-              <strong style="color: #38bdf8; font-size: 1rem;" id="summary-cost-per-gram">0.00 грн/г</strong>
-            </div>
-          </div>
-
-          <!-- Кнопки експорту та інтеграції -->
-          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px;">
-            <button type="button" class="btn" onclick="exportCostReportTXT()" style="font-size: 0.85rem; padding: 8px 14px;">
-              📋 Скопіювати фінансовий звіт
-            </button>
-            <button type="button" class="btn btn-secondary" onclick="downloadCostReportTXT()" style="font-size: 0.85rem; padding: 8px 14px;">
-              📥 Завантажити звіт (TXT)
-            </button>
-            <button type="button" class="btn btn-secondary" onclick="saveBurnoutSettingsToProject()" style="font-size: 0.85rem; padding: 8px 14px;">
-              💾 Зберегти налаштування в JSON
-            </button>
           </div>
         </div>
       </div>
-    </div>
+
+      <!-- Зведена картка повної собівартості (ЗАВЖДИ ВИДИМА В БЛОЦІ 4, НАВІТЬ КОЛИ ВІН ЗГОРНУТИЙ) -->
+      <div class="burnout-cost-summary-card" style="margin-top: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+          <div>
+            <span style="font-size: 1.1rem; font-weight: 800; color: #10b981;">💎 РАЗОМ: Повна собівартість технологічного циклу</span>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+              Формомаса + Вода + Випалювання + Плавка (робота, бензин, компресор) + Чад
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-size: 1.6rem; font-weight: 800; color: #34d399;" id="cost-grand-total">78.91 грн</span>
+            <div style="font-size: 0.76rem; color: var(--text-muted);" id="cost-per-flask-grand">78.91 грн / опока</div>
+          </div>
+        </div>
+
+        <div class="results-box" style="background: rgba(15,23,42,0.85); border-color: rgba(16,185,129,0.3); margin-top: 8px;">
+          <div class="results-row">
+            <span>🥣 Матеріали формовки (порошок + вода):</span>
+            <span class="val" style="color: #a7f3d0;" id="summary-cost-materials">0.00 грн</span>
+          </div>
+          <div class="results-row">
+            <span>⚡ Електроенергія випалювання в печі:</span>
+            <span class="val" style="color: #fbbf24;" id="summary-cost-burnout">13.91 грн</span>
+          </div>
+          <div class="results-row">
+            <span>🔥 Робота плавки, бензин, компресор та витратні:</span>
+            <span class="val" style="color: #f87171;" id="summary-cost-melting">65.00 грн</span>
+          </div>
+          <div class="results-row">
+            <span>⚖️ Технологічні безповоротні втрати металу (угар):</span>
+            <span class="val" style="color: #fde047;" id="summary-cost-loss">0.00 грн</span>
+          </div>
+          <div class="results-row" style="background: rgba(16,185,129,0.1); padding: 6px 10px; border-radius: 6px; margin-top: 4px;">
+            <span style="font-weight: 700; color: #f8fafc;">Собівартість на 1 грам відлитого металу:</span>
+            <strong style="color: #38bdf8; font-size: 1rem;" id="summary-cost-per-gram">0.00 грн/г</strong>
+          </div>
+        </div>
+
+        <!-- Кнопки експорту та інтеграції -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px;">
+          <button type="button" class="btn" onclick="exportCostReportTXT()" style="font-size: 0.85rem; padding: 8px 14px;">
+            📋 Скопіювати фінансовий звіт
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="downloadCostReportTXT()" style="font-size: 0.85rem; padding: 8px 14px;">
+            📥 Завантажити звіт (TXT)
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="saveBurnoutSettingsToProject()" style="font-size: 0.85rem; padding: 8px 14px;">
+            💾 Зберегти налаштування в JSON
+          </button>
+        </div>
+      </div>
     </div>
   </div><!-- Кінець вкладки 2 (tab-content-burnout) -->
 </div>
@@ -3347,7 +3368,7 @@ let burnoutConfig = {
   furnacePower: 1.8,
   powerReserve: 10,
   flasksInFurnace: 1,
-  tariffType: "dual", // 'single', 'dual', 'commercial'
+  tariffType: "single", // 'single', 'dual', 'commercial'
   tariffSingle: 4.32,
   tariffDay: 4.32,
   tariffNight: 2.16,
@@ -3359,6 +3380,8 @@ let burnoutConfig = {
     powderKg: 160,
     waterL: 8,
     meltingFlask: 45,
+    gasolineFlask: 15,
+    compressorFlask: 5,
     metalLossPercent: 1.0,
     metalPriceGram: 2600
   }
@@ -3389,6 +3412,17 @@ function initBurnoutCalculator() {
       const parsed = JSON.parse(savedConfig);
       if (parsed && typeof parsed === "object") {
         burnoutConfig = Object.assign(burnoutConfig, parsed);
+        if (parsed.prices) {
+          burnoutConfig.prices = Object.assign({
+            powderKg: 160,
+            waterL: 8,
+            meltingFlask: 45,
+            gasolineFlask: 15,
+            compressorFlask: 5,
+            metalLossPercent: 1.0,
+            metalPriceGram: 2600
+          }, parsed.prices);
+        }
       }
     } catch (e) {
       console.warn("Could not load burnout config from localStorage", e);
@@ -3429,16 +3463,20 @@ function syncBurnoutInputsToUI() {
   const pricePowder = document.getElementById("price-powder-kg");
   const priceWater = document.getElementById("price-water-l");
   const priceMelting = document.getElementById("price-melting-flask");
+  const priceGasoline = document.getElementById("price-gasoline-flask");
+  const priceCompressor = document.getElementById("price-compressor-flask");
   const metalLoss = document.getElementById("metal-loss-percent");
   const metalPrice = document.getElementById("metal-price-gram");
 
   if (pricePowder && burnoutConfig.prices) pricePowder.value = burnoutConfig.prices.powderKg ?? 160;
   if (priceWater && burnoutConfig.prices) priceWater.value = burnoutConfig.prices.waterL ?? 8;
   if (priceMelting && burnoutConfig.prices) priceMelting.value = burnoutConfig.prices.meltingFlask ?? 45;
+  if (priceGasoline && burnoutConfig.prices) priceGasoline.value = burnoutConfig.prices.gasolineFlask ?? 15;
+  if (priceCompressor && burnoutConfig.prices) priceCompressor.value = burnoutConfig.prices.compressorFlask ?? 5;
   if (metalLoss && burnoutConfig.prices) metalLoss.value = burnoutConfig.prices.metalLossPercent ?? 1.0;
   if (metalPrice && burnoutConfig.prices) metalPrice.value = burnoutConfig.prices.metalPriceGram ?? 2600;
 
-  setTariffMode(burnoutConfig.tariffType || "dual", false);
+  setTariffMode(burnoutConfig.tariffType || "single", false);
 }
 
 function onBurnoutConfigChange() {
@@ -3616,6 +3654,7 @@ function toggleBurnoutCard(cardId) {
   let hintId = "";
   if (cardId === "card-burnout-block1") { arrowId = "arrow-burnout-block1"; hintId = "hint-burnout-block1"; }
   else if (cardId === "card-burnout-block2") { arrowId = "arrow-burnout-block2"; hintId = "hint-burnout-block2"; }
+  else if (cardId === "card-burnout-block3") { arrowId = "arrow-burnout-block3"; hintId = "hint-burnout-block3"; }
   else if (cardId === "card-burnout-block4") { arrowId = "arrow-burnout-block4"; hintId = "hint-burnout-block4"; }
 
   const arrow = document.getElementById(arrowId);
@@ -3751,12 +3790,16 @@ function openSaveBurnoutPresetModal() {
     setTimeout(() => { nameInput.focus(); nameInput.select(); }, 100);
   }
 
+  modal.style.display = "flex";
   modal.classList.add("active");
 }
 
 function closeSaveBurnoutPresetModal() {
   const modal = document.getElementById("saveBurnoutPresetModal");
-  if (modal) modal.classList.remove("active");
+  if (modal) {
+    modal.style.display = "none";
+    modal.classList.remove("active");
+  }
 }
 
 function confirmSaveBurnoutPreset() {
@@ -3840,12 +3883,16 @@ function openManageBurnoutPresetsModal() {
   const modal = document.getElementById("manageBurnoutPresetsModal");
   if (!modal) return;
   renderManageBurnoutPresetsList();
+  modal.style.display = "flex";
   modal.classList.add("active");
 }
 
 function closeManageBurnoutPresetsModal() {
   const modal = document.getElementById("manageBurnoutPresetsModal");
-  if (modal) modal.classList.remove("active");
+  if (modal) {
+    modal.style.display = "none";
+    modal.classList.remove("active");
+  }
 }
 
 function renderManageBurnoutPresetsList() {
@@ -4428,6 +4475,8 @@ function calculateTotalProductionCost() {
   const pricePowderKg = parseFloat(document.getElementById("price-powder-kg")?.value) || 160;
   const priceWaterL = parseFloat(document.getElementById("price-water-l")?.value) || 8;
   const priceMeltingFlask = parseFloat(document.getElementById("price-melting-flask")?.value) || 45;
+  const priceGasolineFlask = parseFloat(document.getElementById("price-gasoline-flask")?.value) || 15;
+  const priceCompressorFlask = parseFloat(document.getElementById("price-compressor-flask")?.value) || 5;
   const metalLossPercent = parseFloat(document.getElementById("metal-loss-percent")?.value) || 1.0;
   const metalPriceGram = parseFloat(document.getElementById("metal-price-gram")?.value) || 2600;
 
@@ -4435,6 +4484,8 @@ function calculateTotalProductionCost() {
     powderKg: pricePowderKg,
     waterL: priceWaterL,
     meltingFlask: priceMeltingFlask,
+    gasolineFlask: priceGasolineFlask,
+    compressorFlask: priceCompressorFlask,
     metalLossPercent: metalLossPercent,
     metalPriceGram: metalPriceGram
   };
@@ -4447,9 +4498,13 @@ function calculateTotalProductionCost() {
 
   const costBurnout = lastBurnoutCalculations.totalCost || 13.91;
   const costMeltingLabor = priceMeltingFlask * flasksCount;
+  const costGasoline = priceGasolineFlask * flasksCount;
+  const costCompressor = priceCompressorFlask * flasksCount;
+  const costMeltingConsumables = costMeltingLabor + costGasoline + costCompressor;
+
   const metalLostG = totalMetalG * (metalLossPercent / 100);
   const costMetalLoss = metalLostG * metalPriceGram;
-  const costMeltingTotal = costMeltingLabor + costMetalLoss;
+  const costMeltingTotal = costMeltingConsumables + costMetalLoss;
 
   const grandTotal = costMaterials + costBurnout + costMeltingTotal;
   const grandPerFlask = grandTotal / Math.max(1, flasksCount);
@@ -4478,14 +4533,14 @@ function calculateTotalProductionCost() {
   if (burnoutKwhDisp) burnoutKwhDisp.innerText = `${lastBurnoutCalculations.totalActualKwh.toFixed(2)} кВт·год`;
   if (burnoutTotalDisp) burnoutTotalDisp.innerText = `${costBurnout.toFixed(2)} грн`;
 
-  if (meltingTotalDisp) meltingTotalDisp.innerText = `${costMeltingTotal.toFixed(2)} грн (робота: ${costMeltingLabor.toFixed(0)} грн + угар: ${costMetalLoss.toFixed(2)} грн)`;
+  if (meltingTotalDisp) meltingTotalDisp.innerText = `${costMeltingTotal.toFixed(2)} грн (робота: ${costMeltingLabor.toFixed(0)} + бензин: ${costGasoline.toFixed(0)} + компр: ${costCompressor.toFixed(0)} + угар: ${costMetalLoss.toFixed(2)} грн)`;
 
   if (grandTotalDisp) grandTotalDisp.innerText = `${grandTotal.toFixed(2)} грн`;
   if (perFlaskGrandDisp) perFlaskGrandDisp.innerText = `${grandPerFlask.toFixed(2)} грн / опока`;
 
   if (sumMaterials) sumMaterials.innerText = `${costMaterials.toFixed(2)} грн (порошок: ${costPowder.toFixed(2)} + вода: ${costWater.toFixed(2)})`;
   if (sumBurnout) sumBurnout.innerText = `${costBurnout.toFixed(2)} грн (${lastBurnoutCalculations.totalActualKwh.toFixed(2)} кВт·год)`;
-  if (sumMelting) sumMelting.innerText = `${costMeltingLabor.toFixed(2)} грн (${flasksCount} опок × ${priceMeltingFlask} грн)`;
+  if (sumMelting) sumMelting.innerText = `${costMeltingConsumables.toFixed(2)} грн (${flasksCount} оп. × ${priceMeltingFlask}+${priceGasolineFlask}+${priceCompressorFlask} грн)`;
   if (sumLoss) sumLoss.innerText = `${costMetalLoss.toFixed(2)} грн (${metalLostG.toFixed(2)} г угару при ${metalLossPercent}%)`;
   if (sumPerGram) sumPerGram.innerText = totalMetalG > 0 ? `${costPerGram.toFixed(2)} грн/г (на ${totalMetalG.toFixed(2)} г металу)` : `0.00 грн/г`;
 }
@@ -4527,16 +4582,20 @@ function getCostReportText() {
 
   const powderKg = totalPowderG / 1000;
   const waterL = totalWaterMl / 1000;
-  const prices = burnoutConfig.prices || { powderKg: 160, waterL: 8, meltingFlask: 45, metalLossPercent: 1.0, metalPriceGram: 2600 };
+  const prices = burnoutConfig.prices || { powderKg: 160, waterL: 8, meltingFlask: 45, gasolineFlask: 15, compressorFlask: 5, metalLossPercent: 1.0, metalPriceGram: 2600 };
 
   const costPowder = powderKg * (prices.powderKg || 160);
   const costWater = waterL * (prices.waterL || 8);
   const costMaterials = costPowder + costWater;
   const costBurnout = lastBurnoutCalculations.totalCost || 0;
   const costMeltingLabor = (prices.meltingFlask || 45) * flasksCount;
+  const costGasoline = (prices.gasolineFlask ?? 15) * flasksCount;
+  const costCompressor = (prices.compressorFlask ?? 5) * flasksCount;
+  const costMeltingConsumables = costMeltingLabor + costGasoline + costCompressor;
+
   const metalLossG = totalMetalG * ((prices.metalLossPercent || 1.0) / 100);
   const costMetalLoss = metalLossG * (prices.metalPriceGram || 2600);
-  const costMeltingTotal = costMeltingLabor + costMetalLoss;
+  const costMeltingTotal = costMeltingConsumables + costMetalLoss;
   const grandTotal = costMaterials + costBurnout + costMeltingTotal;
   const costPerFlask = grandTotal / Math.max(1, flasksCount);
   const costPerGram = totalMetalG > 0 ? (grandTotal / totalMetalG) : 0;
@@ -4574,24 +4633,26 @@ function getCostReportText() {
   txt += ` • РАЗОМ МАТЕРІАЛИ:     ${costMaterials.toFixed(2)} грн\n\n`;
 
   txt += `-------------------------------------------------------\n`;
-  txt += `🔥 3. ПЛАВКА МЕТАЛУ ТА ТЕХНОЛОГІЧНИЙ ЧАД (УГАР):\n`;
+  txt += `🔥 3. ПЛАВКА МЕТАЛУ, БЕНЗИН, КОМПРЕСОР ТА УГАР:\n`;
   txt += `-------------------------------------------------------\n`;
-  txt += ` • Робота плавки:       ${flasksCount} опок × ${prices.meltingFlask} грн = ${costMeltingLabor.toFixed(2)} грн\n`;
+  txt += ` • Робота плавки:       ${flasksCount} опок × ${prices.meltingFlask || 45} грн = ${costMeltingLabor.toFixed(2)} грн\n`;
+  txt += ` • Бензин для пальника: ${flasksCount} опок × ${prices.gasolineFlask ?? 15} грн = ${costGasoline.toFixed(2)} грн\n`;
+  txt += ` • Робота компресора:   ${flasksCount} опок × ${prices.compressorFlask ?? 5} грн = ${costCompressor.toFixed(2)} грн\n`;
   txt += ` • Норма чаду металу:   ${prices.metalLossPercent}% від ${totalMetalG.toFixed(2)} г = ${metalLossG.toFixed(2)} г угару\n`;
   txt += ` • Вартість втрат:      ${metalLossG.toFixed(2)} г × ${prices.metalPriceGram} грн/г = ${costMetalLoss.toFixed(2)} грн\n`;
-  txt += ` • РАЗОМ ПЛАВКА + ЧАД:  ${costMeltingTotal.toFixed(2)} грн\n\n`;
+  txt += ` • РАЗОМ ПЛАВКА ТА ЧАД: ${costMeltingTotal.toFixed(2)} грн\n\n`;
 
   txt += `=======================================================\n`;
   txt += `💎 4. ПОВНА ЗВЕДЕНА СОБІВАРТІСТЬ ТЕХНОЛОГІЧНОГО ЦИКЛУ:\n`;
   txt += `=======================================================\n`;
-  txt += ` 1. Формомаса + вода:   ${costMaterials.toFixed(2)} грн\n`;
-  txt += ` 2. Енергія випалювання: ${costBurnout.toFixed(2)} грн\n`;
-  txt += ` 3. Плавка та витратні: ${costMeltingLabor.toFixed(2)} грн\n`;
-  txt += ` 4. Угар металу:        ${costMetalLoss.toFixed(2)} грн\n`;
+  txt += ` 1. Формомаса + вода:        ${costMaterials.toFixed(2)} грн\n`;
+  txt += ` 2. Енергія випалювання:      ${costBurnout.toFixed(2)} грн\n`;
+  txt += ` 3. Плавка, бензин, компресор:${costMeltingConsumables.toFixed(2)} грн\n`;
+  txt += ` 4. Угар металу:             ${costMetalLoss.toFixed(2)} грн\n`;
   txt += `-------------------------------------------------------\n`;
-  txt += ` 🏁 ВСЬОГО СОБІВАРТІСТЬ: ${grandTotal.toFixed(2)} грн\n`;
-  txt += ` 🏺 НА 1 ОПОКУ:          ${costPerFlask.toFixed(2)} грн / опока\n`;
-  txt += ` ⚖️ НА 1 ГРАМ МЕТАЛУ:    ${costPerGram.toFixed(2)} грн / г\n`;
+  txt += ` 🏁 ВСЬОГО СОБІВАРТІСТЬ:      ${grandTotal.toFixed(2)} грн\n`;
+  txt += ` 🏺 НА 1 ОПОКУ:               ${costPerFlask.toFixed(2)} грн / опока\n`;
+  txt += ` ⚖️ НА 1 ГРАМ МЕТАЛУ:         ${costPerGram.toFixed(2)} грн / г\n`;
   txt += `=======================================================\n`;
   txt += `Casting Calc — Ювелірне виробництво та економіка литва\n`;
 
