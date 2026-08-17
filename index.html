@@ -177,6 +177,101 @@
     .flask-row-platinum { background: rgba(129, 140, 248, 0.08) !important; border-left: 4px solid #818cf8 !important; }
     .flask-card-platinum { border: 1px solid #818cf8 !important; border-left: 5px solid #818cf8 !important; background: rgba(129, 140, 248, 0.07) !important; box-shadow: 0 2px 10px rgba(129,140,248,0.12); }
 
+    /* Вкладки верхньої навігації додатку */
+    .app-nav-tabs {
+      display: flex;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.85);
+      padding: 6px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    .nav-tab-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .nav-tab-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+    .nav-tab-btn.active {
+      color: #ffffff;
+      background: linear-gradient(135deg, rgba(217, 119, 6, 0.35), rgba(180, 83, 9, 0.5));
+      border-color: var(--accent);
+      box-shadow: 0 2px 12px rgba(217, 119, 6, 0.35);
+    }
+    .nav-tab-btn .tab-icon {
+      font-size: 1.15rem;
+    }
+    .nav-tab-btn .tab-pill-badge {
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      font-weight: 600;
+    }
+    .tab-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeInTab 0.22s ease-out;
+    }
+    @keyframes fadeInTab {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .burnout-feature-box {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .burnout-feature-box:hover {
+      border-color: var(--accent);
+      background: rgba(15, 23, 42, 0.85);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+
+    /* Стилі для калькулятора випалювання та собівартості */
+    .burnout-tariff-card { background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border); border-radius: 10px; padding: 14px; transition: all 0.2s; }
+    .burnout-tariff-card:hover { border-color: var(--accent); }
+    .burnout-segment-group { display: flex; gap: 6px; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 8px; border: 1px solid var(--border); flex-wrap: wrap; }
+    .burnout-segment-btn { flex: 1; min-width: 120px; padding: 8px 12px; font-size: 0.82rem; font-weight: 600; text-align: center; border-radius: 6px; border: 1px solid transparent; background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.2s; user-select: none; }
+    .burnout-segment-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    .burnout-segment-btn.active { background: linear-gradient(135deg, rgba(217, 119, 6, 0.35), rgba(180, 83, 9, 0.5)); color: #ffffff; border-color: var(--accent); box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3); }
+    .burnout-stat-card { background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 4px; }
+    .burnout-chart-box { background: rgba(10, 15, 29, 0.95); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-top: 10px; position: relative; overflow-x: auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+    .burnout-step-row { transition: background 0.15s; }
+    .burnout-step-row:hover { background: rgba(255, 255, 255, 0.04); }
+    .burnout-badge-night { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; border: 1px solid #6366f1; font-weight: 600; }
+    .burnout-badge-day { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; font-weight: 600; }
+    .burnout-step-input { background: rgba(15,23,42,0.8); border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px; font-size: 0.82rem; color: var(--text); width: 100%; transition: border-color 0.2s; }
+    .burnout-step-input:focus { border-color: var(--accent); outline: none; background: var(--bg-input); }
+    .burnout-cost-summary-card { background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95)); border: 1px solid #10b981; border-radius: 12px; padding: 16px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15); }
+    .burnout-slider { width: 100%; accent-color: var(--accent); cursor: pointer; height: 6px; border-radius: 3px; background: var(--bg-input); }
+
     /* Повноекранний оверлей при перетягуванні файлу */
     .drag-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.94); z-index: 10000; border: 4px dashed var(--accent); justify-content: center; align-items: center; pointer-events: auto; }
     .drag-overlay-box { background: var(--bg-card); border: 2px solid var(--accent); border-radius: 16px; padding: 32px; text-align: center; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); animation: pulse 1.5s infinite; }
@@ -253,8 +348,23 @@
     <p>Калькулятор розрахунку формомаси, шихтовки металу та керування проектами литва</p>
   </header>
 
-  <!-- Блок управління проектом (JSON Збереження / Завантаження) -->
-  <div class="project-card">
+  <!-- Верхня панель перемикання вкладок -->
+  <nav class="app-nav-tabs" id="app-nav-tabs">
+    <button type="button" class="nav-tab-btn active" id="tab-btn-casting" onclick="switchAppTab('casting')" title="Калькулятор литва, формомаси та шихтовки металу">
+      <span class="tab-icon">🔥</span>
+      <span class="tab-label">Литва і формомаса</span>
+    </button>
+    <button type="button" class="nav-tab-btn" id="tab-btn-burnout" onclick="switchAppTab('burnout')" title="Калькулятор випалювання опок та розрахунок собівартості">
+      <span class="tab-icon">🌡️</span>
+      <span class="tab-label">Випалювання і вартість</span>
+      <span class="tab-pill-badge" id="burnout-tab-badge">Нове</span>
+    </button>
+  </nav>
+
+  <!-- Вкладка 1: Литва і формомаса -->
+  <div id="tab-content-casting" class="tab-pane active">
+    <!-- Блок управління проектом (JSON Збереження / Завантаження) -->
+    <div class="project-card">
     <div class="card-title" style="margin-bottom: 8px;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <span>📦 Проект литва (JSON)</span>
@@ -452,6 +562,489 @@
       <button class="btn btn-secondary" id="btn-export-txt" onclick="exportTXT()">📋 Копіювати текст</button>
     </div>
   </div>
+  </div><!-- Кінець вкладки 1 (tab-content-casting) -->
+
+  <!-- Вкладка 2: Випалювання і вартість -->
+  <div id="tab-content-burnout" class="tab-pane" style="display: none;">
+    <!-- Заголовок та опис робочого простору випалювання -->
+    <div class="project-card" style="border-color: rgba(245, 158, 11, 0.45); background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(22, 27, 46, 0.95));">
+      <div class="card-title" style="margin-bottom: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span style="font-size: 1.15rem; font-weight: 700; color: #fbbf24;">🌡️ Калькулятор випалювання опок та собівартості виробництва</span>
+          <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border-color: #f59e0b; font-size: 0.76rem;">Двофазний розрахунок</span>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="switchAppTab('casting')" style="font-size: 0.8rem; border-color: var(--accent); color: var(--accent);">
+            ↩ До розрахунку литва
+          </button>
+        </div>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; margin-bottom: 4px;">
+        Професійний розрахунок енерговитрат муфельної печі з урахуванням нагріву (100% потужність), імпульсного утримання полиць (30–50%), двозонного тарифу (день/ніч) та повної собівартості матеріалів литва.
+      </p>
+    </div>
+
+    <!-- Блок автоматичної синхронізації з кошиком замісу -->
+    <div class="card" style="border-left: 4px solid var(--accent);">
+      <div class="card-title" style="font-size: 1rem;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>🛒 Дані з кошика замісу (Автосинхронізація)</span>
+          <span id="burnout-batch-badge" class="badge" style="font-size: 0.78rem;">0 опок</span>
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <button type="button" class="quick-chip" onclick="syncBurnoutWithBatch()" style="font-size: 0.75rem; color: #38bdf8; border-color: #38bdf8;">
+            🔄 Оновити з кошика
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="switchAppTab('casting')" style="font-size: 0.75rem; padding: 4px 10px;">
+            Змінити в кошику ↗
+          </button>
+        </div>
+      </div>
+      <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 12px;">
+        Ці параметри автоматично підтягуються з розділу <strong>"Литва і формомаса"</strong> для точного розрахунку вартості матеріалів та розподілу витрат печі на садку:
+      </p>
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px;">
+        <div style="background: rgba(15,23,42,0.7); border: 1px solid var(--border); border-radius: 8px; padding: 12px;">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Опок у замісі</div>
+          <div style="font-size: 1.3rem; font-weight: 700; color: #f8fafc; margin-top: 2px;" id="burnout-sync-flasks">0 шт</div>
+          <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;" id="burnout-sync-flasks-sub">Специфікація кошика</div>
+        </div>
+        <div style="background: rgba(15,23,42,0.7); border: 1px solid var(--border); border-radius: 8px; padding: 12px;">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Суха суміш (порошок)</div>
+          <div style="font-size: 1.3rem; font-weight: 700; color: #a7f3d0; margin-top: 2px;" id="burnout-sync-powder">0 г (0.00 кг)</div>
+          <div style="font-size: 0.72rem; color: #34d399; margin-top: 2px;" id="burnout-sync-powder-sub">Підтягується для ціни/кг</div>
+        </div>
+        <div style="background: rgba(15,23,42,0.7); border: 1px solid var(--border); border-radius: 8px; padding: 12px;">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Дистильована / чиста вода</div>
+          <div style="font-size: 1.3rem; font-weight: 700; color: #38bdf8; margin-top: 2px;" id="burnout-sync-water">0 мл (0.00 л)</div>
+          <div style="font-size: 0.72rem; color: #38bdf8; margin-top: 2px;" id="burnout-sync-water-sub">Підтягується для ціни/л</div>
+        </div>
+        <div style="background: rgba(15,23,42,0.7); border: 1px solid var(--border); border-radius: 8px; padding: 12px;">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Метал на завантаження</div>
+          <div style="font-size: 1.3rem; font-weight: 700; color: #fde047; margin-top: 2px;" id="burnout-sync-metal">0.00 г</div>
+          <div style="font-size: 0.72rem; color: #fde047; margin-top: 2px;" id="burnout-sync-metal-sub">Для розрахунку плавки</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- БЛОК 1: НАЛАШТУВАННЯ ОБЛАДНАННЯ ТА ТАРИФУ -->
+    <div class="card">
+      <div class="card-title">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>⚡ Блок 1. Налаштування обладнання та тарифу електроенергії</span>
+        </div>
+        <span class="badge" style="font-size: 0.75rem; background: rgba(56,189,248,0.15); color: #38bdf8; border-color: #38bdf8;">Вхідні параметри</span>
+      </div>
+
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
+        <!-- Параметри печі -->
+        <div class="burnout-tariff-card">
+          <div style="font-weight: 700; color: #fbbf24; margin-bottom: 10px; font-size: 0.92rem; display: flex; align-items: center; justify-content: space-between;">
+            <span>🔥 Параметри муфельної печі</span>
+            <span id="burnout-effective-power-badge" class="badge badge-pending" style="font-size: 0.75rem;">1.98 кВт (з похибкою)</span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label for="burnout-furnace-power">Номінальна потужність печі (кВт):</label>
+                <span style="font-weight: 700; color: #38bdf8;" id="burnout-power-display">1.8 кВт</span>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="number" id="burnout-furnace-power" value="1.8" step="0.1" min="0.5" max="10.0" style="width: 100px;" oninput="onBurnoutConfigChange()">
+                <input type="range" id="burnout-furnace-slider" class="burnout-slider" min="0.8" max="4.0" step="0.1" value="1.8" oninput="onBurnoutSliderChange()">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label for="burnout-power-reserve">Запас потужності / Похибка (%):</label>
+                <span style="font-weight: 600; color: #fde047;" id="burnout-reserve-display">+10%</span>
+              </div>
+              <input type="number" id="burnout-power-reserve" value="10" step="1" min="0" max="50" oninput="onBurnoutConfigChange()">
+              <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 2px;">
+                <button type="button" class="quick-chip" onclick="setPowerReserve(0)">0% (Точно)</button>
+                <button type="button" class="quick-chip" onclick="setPowerReserve(5)">+5%</button>
+                <button type="button" class="quick-chip" onclick="setPowerReserve(10)">+10% (Китайські ТЕНи)</button>
+                <button type="button" class="quick-chip" onclick="setPowerReserve(15)">+15% (Втрати тепла)</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label for="burnout-flasks-count">Кількість опок у садці печі (шт):</label>
+                <button type="button" class="quick-chip" onclick="syncFlasksCountFromBatch()" style="font-size: 0.72rem;">Взяти з кошика</button>
+              </div>
+              <input type="number" id="burnout-flasks-count" value="1" min="1" step="1" oninput="onBurnoutConfigChange()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Тарифна сітка -->
+        <div class="burnout-tariff-card">
+          <div style="font-weight: 700; color: #38bdf8; margin-bottom: 10px; font-size: 0.92rem; display: flex; align-items: center; justify-content: space-between;">
+            <span>💡 Тарифна сітка електроенергії</span>
+            <span id="burnout-tariff-mode-badge" class="badge badge-success" style="font-size: 0.75rem;">Двозонний лічильник</span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- Перемикач типу тарифу -->
+            <div class="burnout-segment-group">
+              <button type="button" class="burnout-segment-btn" id="btn-tariff-single" onclick="setTariffMode('single')">
+                🏠 Побутовий (Фікс)
+              </button>
+              <button type="button" class="burnout-segment-btn active" id="btn-tariff-dual" onclick="setTariffMode('dual')">
+                🌙 Двозонний (Ніч/День)
+              </button>
+              <button type="button" class="burnout-segment-btn" id="btn-tariff-commercial" onclick="setTariffMode('commercial')">
+                🏢 Комерційний / ФОП
+              </button>
+            </div>
+
+            <!-- Поля для фіксованого тарифу -->
+            <div id="tariff-fields-single" style="display: none; flex-direction: column; gap: 8px;">
+              <div class="form-group">
+                <label for="burnout-tariff-single">Тариф електроенергії (грн/кВт·год):</label>
+                <input type="number" id="burnout-tariff-single" value="4.32" step="0.01" min="0" oninput="onBurnoutConfigChange()">
+              </div>
+            </div>
+
+            <!-- Поля для двозонного тарифу -->
+            <div id="tariff-fields-dual" style="display: flex; flex-direction: column; gap: 8px;">
+              <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div class="form-group">
+                  <label for="burnout-tariff-day" style="color: #fbbf24;">☀️ Денний тариф (07–23):</label>
+                  <input type="number" id="burnout-tariff-day" value="4.32" step="0.01" min="0" oninput="onBurnoutConfigChange()">
+                </div>
+                <div class="form-group">
+                  <label for="burnout-tariff-night" style="color: #a5b4fc;">🌙 Нічний коеф. 0.5 (23–07):</label>
+                  <input type="number" id="burnout-tariff-night" value="2.16" step="0.01" min="0" oninput="onBurnoutConfigChange()">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <label for="burnout-start-time">⏰ Час старту випалювання (для розрахунку Ніч/День):</label>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);" id="burnout-finish-time-preview">Фініш: ~05:39</span>
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                  <input type="time" id="burnout-start-time" value="23:00" style="font-size: 0.95rem; font-weight: 600;" onchange="onBurnoutConfigChange()">
+                  <button type="button" class="quick-chip" onclick="setStartTime('22:00')">22:00</button>
+                  <button type="button" class="quick-chip" onclick="setStartTime('23:00')">23:00 (Ніч)</button>
+                  <button type="button" class="quick-chip" onclick="setStartTimeNow()">Зараз</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Поля для комерційного тарифу -->
+            <div id="tariff-fields-commercial" style="display: none; flex-direction: column; gap: 8px;">
+              <div class="form-group">
+                <label for="burnout-tariff-commercial">Тариф для бізнесу / ФОП (грн/кВт·год):</label>
+                <input type="number" id="burnout-tariff-commercial" value="9.60" step="0.01" min="0" oninput="onBurnoutConfigChange()">
+              </div>
+            </div>
+
+            <!-- Швидкі пресети тарифів регіону (Київська обл. / Обухів) -->
+            <div style="margin-top: 4px;">
+              <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 4px;">
+                Швидкі тарифні сітки (Київська обл. / м. Обухів):
+              </div>
+              <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                <button type="button" class="quick-chip" onclick="applyRegionalTariff('obukhiv_dual')">⚡ Двозонний Обухів (2.16 / 4.32)</button>
+                <button type="button" class="quick-chip" onclick="applyRegionalTariff('residential_fixed')">🏠 Побутовий фіксований (4.32)</button>
+                <button type="button" class="quick-chip" onclick="applyRegionalTariff('business_small')">🏢 ФОП 2-й клас (9.60)</button>
+                <button type="button" class="quick-chip" onclick="applyRegionalTariff('business_large')">🏭 Юр. особи (10.50)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- БЛОК 2: РЕДАКТОР ТЕМПЕРАТУРНОГО ПРОФІЛЮ (ГРАФІК ВИПАЛЮВАННЯ) -->
+    <div class="card">
+      <div class="card-title">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>📈 Блок 2. Редактор температурного профілю (Графік випалювання)</span>
+        </div>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="resetBurnoutToDefault()" style="font-size: 0.75rem; padding: 4px 8px;" title="Скинути до стандартного 8-ступеневого графіка">
+            ↩ Скинути профіль
+          </button>
+          <button type="button" class="btn btn-sm" onclick="addBurnoutStep()" style="font-size: 0.75rem; padding: 4px 10px;">
+            + Додати крок
+          </button>
+        </div>
+      </div>
+
+      <!-- Селектор готових пресетів випалювання -->
+      <div class="form-group" style="margin-bottom: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label for="burnout-preset-select">Шаблони температурного графіка (Пресети):</label>
+          <span style="font-size: 0.74rem; color: #a7f3d0;" id="burnout-preset-info-badge">8 кроків | ~6 год 39 хв</span>
+        </div>
+        <select id="burnout-preset-select" onchange="applyBurnoutPreset()">
+          <option value="standard_obukhiv" selected>⭐ Стандартне випалювання (Обухів) — 8 кроків (6.65 год, нагрів + полиці)</option>
+          <option value="fast_small">⚡ Прискорене випалювання для дрібних опок (4.5 год)</option>
+          <option value="extended_large">🏺 Подовжене випалювання для великих опок 100х150 (8.5 год)</option>
+          <option value="resin_3d">🧪 Випалювання 3D-фотополімерів (Resin/DWS) (9.0 год)</option>
+          <option value="custom">✏️ Користувацький профіль (Ручне редагування)</option>
+        </select>
+      </div>
+
+      <!-- Візуальний графік (Термограма муфельної печі SVG) -->
+      <div class="burnout-chart-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-weight: 700; color: #f8fafc; font-size: 0.88rem;">📊 Термограма циклу випалювання опок:</span>
+            <span class="badge" style="font-size: 0.72rem; background: rgba(16,185,129,0.15); color: #34d399; border-color: #10b981;">Динамічна крива</span>
+          </div>
+          <div style="display: flex; gap: 10px; font-size: 0.72rem; color: var(--text-muted); flex-wrap: wrap;">
+            <span style="display: inline-flex; align-items: center; gap: 4px;">
+              <span style="width: 10px; height: 10px; background: #ef4444; border-radius: 2px; display: inline-block;"></span>
+              Нагрів (100% ТЕН)
+            </span>
+            <span style="display: inline-flex; align-items: center; gap: 4px;">
+              <span style="width: 10px; height: 10px; background: #f59e0b; border-radius: 2px; display: inline-block;"></span>
+              Полиця (30–50% імпульс)
+            </span>
+            <span style="display: inline-flex; align-items: center; gap: 4px;">
+              <span style="width: 10px; height: 10px; background: #38bdf8; border-radius: 2px; display: inline-block;"></span>
+              Охолодження (0% вимкн)
+            </span>
+          </div>
+        </div>
+
+        <div id="burnout-svg-chart-container" style="width: 100%; min-height: 220px; overflow-x: auto;">
+          <!-- Динамічний SVG графік термограми -->
+        </div>
+      </div>
+
+      <!-- Інтерактивна таблиця кроків випалювання -->
+      <div class="table-responsive" style="margin-top: 14px;">
+        <table style="min-width: 720px;">
+          <thead>
+            <tr>
+              <th style="width: 36px; text-align: center;">№</th>
+              <th style="min-width: 180px;">Етап / Опис фази</th>
+              <th style="width: 80px; text-align: center;">Т° поч.</th>
+              <th style="width: 80px; text-align: center;">Т° кінц.</th>
+              <th style="width: 90px; text-align: center;">Час (хв)</th>
+              <th style="width: 130px;">Режим навантаження</th>
+              <th style="width: 95px; text-align: right;">Споживання</th>
+              <th style="width: 40px; text-align: center;">✕</th>
+            </tr>
+          </thead>
+          <tbody id="burnout-steps-tbody">
+            <!-- Динамічні рядки кроків -->
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; flex-wrap: wrap; gap: 8px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="addBurnoutStep()" style="font-size: 0.8rem;">
+          ➕ Додати новий крок до таблиці
+        </button>
+        <span style="font-size: 0.78rem; color: var(--text-muted);">
+          💡 Значення <strong>Навантаження %</strong> відображає роботу терморегулятора (100% при наборі, 30–50% при витримці).
+        </span>
+      </div>
+    </div>
+
+    <!-- БЛОК 3: ПІДСУМКОВИЙ РОЗРАХУНОК ВАРТОСТІ ВИПАЛЮВАННЯ -->
+    <div class="card" style="border-left: 4px solid #10b981;">
+      <div class="card-title">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>💰 Блок 3. Підсумковий розрахунок вартості випалювання (Output)</span>
+        </div>
+        <span class="badge badge-success" style="font-size: 0.75rem;">Результати калькуляції</span>
+      </div>
+
+      <!-- Зведені картки метрик -->
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+        <div class="burnout-stat-card">
+          <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">⏱️ Загальний час циклу</span>
+          <span style="font-size: 1.35rem; font-weight: 700; color: #f8fafc;" id="burnout-res-total-time">6 год 39 хв</span>
+          <span style="font-size: 0.74rem; color: #a7f3d0;" id="burnout-res-timeline-info">Старт 23:00 → Фініш 05:39</span>
+        </div>
+
+        <div class="burnout-stat-card">
+          <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">⚡ Споживання електроенергії</span>
+          <span style="font-size: 1.35rem; font-weight: 700; color: #38bdf8;" id="burnout-res-total-kwh">6.44 кВт·год</span>
+          <span style="font-size: 0.74rem; color: var(--text-muted);" id="burnout-res-nominal-kwh">Номінал: 5.85 кВт·год (+10%)</span>
+        </div>
+
+        <div class="burnout-stat-card" style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(15,23,42,0.85)); border-color: rgba(16,185,129,0.4);">
+          <span style="font-size: 0.75rem; color: #34d399; text-transform: uppercase; font-weight: 700;">💰 Вартість випалювання</span>
+          <span style="font-size: 1.45rem; font-weight: 800; color: #10b981;" id="burnout-res-total-cost">13.91 грн</span>
+          <span style="font-size: 0.74rem; color: #a7f3d0;" id="burnout-res-cost-sub">За весь цикл печі</span>
+        </div>
+
+        <div class="burnout-stat-card">
+          <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">🏺 Собівартість на 1 опоку</span>
+          <span style="font-size: 1.35rem; font-weight: 700; color: #fde047;" id="burnout-res-cost-per-flask">13.91 грн/опока</span>
+          <span style="font-size: 0.74rem; color: var(--text-muted);" id="burnout-res-flasks-sub">Для 1 опоки в садці</span>
+        </div>
+      </div>
+
+      <!-- Деталізація по зонах лічильника (День / Ніч) -->
+      <div id="burnout-dual-breakdown-box" class="results-box" style="margin-top: 14px;">
+        <div style="font-weight: 700; color: #38bdf8; font-size: 0.88rem; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
+          <span>🌙 Розподіл за зонами лічильника (День / Ніч):</span>
+          <span id="burnout-night-saving-badge" class="badge badge-success" style="font-size: 0.75rem;">Економія: -50% на нічних годинах</span>
+        </div>
+
+        <div class="results-row">
+          <span>🌙 Нічна зона (23:00 – 07:00, тариф <strong style="color: #a5b4fc;" id="burnout-lbl-night-rate">2.16 грн</strong>):</span>
+          <span class="val" style="color: #a5b4fc;" id="burnout-res-night-breakdown">6.44 кВт·год = 13.91 грн (100% циклу)</span>
+        </div>
+        <div class="results-row">
+          <span>☀️ Денна зона (07:00 – 23:00, тариф <strong style="color: #fbbf24;" id="burnout-lbl-day-rate">4.32 грн</strong>):</span>
+          <span class="val" style="color: #fbbf24;" id="burnout-res-day-breakdown">0.00 кВт·год = 0.00 грн (0% циклу)</span>
+        </div>
+        <div class="results-row" style="background: rgba(0,0,0,0.25); padding: 4px 8px; border-radius: 6px;">
+          <span style="color: var(--text-muted);">💡 Економічний ефект:</span>
+          <span style="color: #34d399; font-weight: 600;" id="burnout-res-savings-text">Випалювання вночі заощаджує 13.91 грн у порівнянні з денним тарифом!</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- БЛОК 4: ПІДСУМКОВА ЗВЕДЕНА СОБІВАРТІСТЬ ТА ІНТЕГРАЦІЯ ЗВІТУ -->
+    <div class="card" style="border-color: rgba(56,189,248,0.5);">
+      <div class="card-title">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>📦 Блок 4. Зведена собівартість технологічних процесів замісу</span>
+        </div>
+        <span class="badge" style="background: rgba(56,189,248,0.2); color: #38bdf8; border-color: #38bdf8; font-size: 0.75rem;">Повний виробничий розрахунок</span>
+      </div>
+      <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 14px;">
+        Калькуляція поєднує формомасу та воду з кошика, енерговитрати муфельної печі, плавку металу та технологічний чад для розрахунку повної собівартості виробництва.
+      </p>
+
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+        <!-- 1. Формомаса і вода -->
+        <div class="burnout-feature-box" style="border-color: rgba(52,211,153,0.3);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; color: #a7f3d0; font-size: 0.95rem;">1. Формомаса і вода</span>
+            <span class="badge badge-success" style="font-size: 0.7rem;">З кошика</span>
+          </div>
+          <div style="font-size: 0.82rem; color: var(--text-muted);">
+            Порошок: <strong style="color: #f8fafc;" id="cost-powder-weight-disp">0 кг</strong> | Вода: <strong style="color: #f8fafc;" id="cost-water-vol-disp">0 л</strong>
+          </div>
+          <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px;">
+            <div class="form-group">
+              <label for="price-powder-kg" style="font-size: 0.75rem;">Ціна порошку (грн/кг):</label>
+              <input type="number" id="price-powder-kg" value="160" step="5" min="0" oninput="calculateTotalProductionCost()">
+            </div>
+            <div class="form-group">
+              <label for="price-water-l" style="font-size: 0.75rem;">Ціна води (грн/л):</label>
+              <input type="number" id="price-water-l" value="8" step="1" min="0" oninput="calculateTotalProductionCost()">
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border); font-size: 0.85rem;">
+            <span>Вартість формомаси:</span>
+            <strong style="color: #a7f3d0;" id="cost-powder-total">0.00 грн</strong>
+          </div>
+        </div>
+
+        <!-- 2. Випалювання печі -->
+        <div class="burnout-feature-box" style="border-color: rgba(245,158,11,0.3);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; color: #fbbf24; font-size: 0.95rem;">2. Випалювання опок</span>
+            <span class="badge" style="font-size: 0.7rem; background: rgba(245,158,11,0.2); color: #fbbf24; border-color: #f59e0b;">З калькулятора</span>
+          </div>
+          <div style="font-size: 0.82rem; color: var(--text-muted);">
+            Енергія печі: <strong style="color: #f8fafc;" id="cost-burnout-kwh-disp">6.44 кВт·год</strong>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px; line-height: 1.4;">
+            Сума розрахована на основі графіка температурних полиць та обраного тарифу:
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 6px; border-top: 1px dashed var(--border); font-size: 0.85rem;">
+            <span>Вартість випалювання:</span>
+            <strong style="color: #fbbf24;" id="cost-burnout-total">13.91 грн</strong>
+          </div>
+        </div>
+
+        <!-- 3. Плавка та чад -->
+        <div class="burnout-feature-box" style="border-color: rgba(239,68,68,0.3);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; color: #f87171; font-size: 0.95rem;">3. Плавка та чад металу</span>
+            <span class="badge" style="font-size: 0.7rem; background: rgba(239,68,68,0.2); color: #f87171; border-color: #ef4444;">Нормативи</span>
+          </div>
+          <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 6px;">
+            <div class="form-group">
+              <label for="price-melting-flask" style="font-size: 0.75rem;">Плавка (грн/опока):</label>
+              <input type="number" id="price-melting-flask" value="45" step="5" min="0" oninput="calculateTotalProductionCost()">
+            </div>
+            <div class="form-group">
+              <label for="metal-loss-percent" style="font-size: 0.75rem;">Норма чаду (%):</label>
+              <input type="number" id="metal-loss-percent" value="1.0" step="0.1" min="0" max="5" oninput="calculateTotalProductionCost()">
+            </div>
+          </div>
+          <div class="form-group" style="margin-top: 4px;">
+            <label for="metal-price-gram" style="font-size: 0.75rem;">Ціна металу (грн/г) для оцінки чаду:</label>
+            <input type="number" id="metal-price-gram" value="2600" step="50" min="0" oninput="calculateTotalProductionCost()">
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border); font-size: 0.85rem;">
+            <span>Плавка + чад металу:</span>
+            <strong style="color: #f87171;" id="cost-melting-total">45.00 грн</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Зведена картка повної собівартості -->
+      <div class="burnout-cost-summary-card" style="margin-top: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+          <div>
+            <span style="font-size: 1.1rem; font-weight: 800; color: #10b981;">💎 РАЗОМ: Повна собівартість технологічного циклу</span>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+              Формомаса + Вода + Випалювання + Плавка та витратні
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <span style="font-size: 1.6rem; font-weight: 800; color: #34d399;" id="cost-grand-total">58.91 грн</span>
+            <div style="font-size: 0.76rem; color: var(--text-muted);" id="cost-per-flask-grand">58.91 грн / опока</div>
+          </div>
+        </div>
+
+        <div class="results-box" style="background: rgba(15,23,42,0.85); border-color: rgba(16,185,129,0.3); margin-top: 8px;">
+          <div class="results-row">
+            <span>🥣 Матеріали формовки (порошок + вода):</span>
+            <span class="val" style="color: #a7f3d0;" id="summary-cost-materials">0.00 грн</span>
+          </div>
+          <div class="results-row">
+            <span>⚡ Електроенергія випалювання в печі:</span>
+            <span class="val" style="color: #fbbf24;" id="summary-cost-burnout">13.91 грн</span>
+          </div>
+          <div class="results-row">
+            <span>🔥 Робота плавки, енергія та витратні:</span>
+            <span class="val" style="color: #f87171;" id="summary-cost-melting">45.00 грн</span>
+          </div>
+          <div class="results-row">
+            <span>⚖️ Технологічні безповоротні втрати металу (угар):</span>
+            <span class="val" style="color: #fde047;" id="summary-cost-loss">0.00 грн</span>
+          </div>
+          <div class="results-row" style="background: rgba(16,185,129,0.1); padding: 6px 10px; border-radius: 6px; margin-top: 4px;">
+            <span style="font-weight: 700; color: #f8fafc;">Собівартість на 1 грам відлитого металу:</span>
+            <strong style="color: #38bdf8; font-size: 1rem;" id="summary-cost-per-gram">0.00 грн/г</strong>
+          </div>
+        </div>
+
+        <!-- Кнопки експорту та інтеграції -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px;">
+          <button type="button" class="btn" onclick="exportCostReportTXT()" style="font-size: 0.85rem; padding: 8px 14px;">
+            📋 Скопіювати фінансовий звіт
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="downloadCostReportTXT()" style="font-size: 0.85rem; padding: 8px 14px;">
+            📥 Завантажити звіт (TXT)
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="saveBurnoutSettingsToProject()" style="font-size: 0.85rem; padding: 8px 14px;">
+            💾 Зберегти налаштування в JSON
+          </button>
+        </div>
+      </div>
+    </div>
+  </div><!-- Кінець вкладки 2 (tab-content-burnout) -->
 </div>
 
 <!-- Модальне вікно перерахунку металу та шихтовки для опоки у кошику -->
@@ -810,6 +1403,75 @@ let projectLastSaved = localStorage.getItem("cc_project_last_saved") || "";
 let currentRecalcIndex = -1;
 let isFlaskManual = false;
 let isFlaskExpanded = false;
+let activeAppTab = localStorage.getItem("cc_active_tab") || "casting";
+
+// --- КЕРУВАННЯ ГОЛОВНИМИ ВКЛАДКАМИ ДОДАТКУ ---
+function switchAppTab(tabId) {
+  activeAppTab = tabId;
+  localStorage.setItem("cc_active_tab", tabId);
+
+  const btnCasting = document.getElementById("tab-btn-casting");
+  const btnBurnout = document.getElementById("tab-btn-burnout");
+  const paneCasting = document.getElementById("tab-content-casting");
+  const paneBurnout = document.getElementById("tab-content-burnout");
+
+  if (tabId === "burnout") {
+    if (btnCasting) btnCasting.classList.remove("active");
+    if (btnBurnout) btnBurnout.classList.add("active");
+    if (paneCasting) paneCasting.style.display = "none";
+    if (paneBurnout) paneBurnout.style.display = "flex";
+    updateBurnoutCartPreview();
+  } else {
+    if (btnBurnout) btnBurnout.classList.remove("active");
+    if (btnCasting) btnCasting.classList.add("active");
+    if (paneBurnout) paneBurnout.style.display = "none";
+    if (paneCasting) paneCasting.style.display = "flex";
+  }
+}
+
+function updateBurnoutCartPreview() {
+  const badge = document.getElementById("burnout-batch-badge");
+  const flasksEl = document.getElementById("burnout-sync-flasks");
+  const powderEl = document.getElementById("burnout-sync-powder");
+  const waterEl = document.getElementById("burnout-sync-water");
+  const metalEl = document.getElementById("burnout-sync-metal");
+
+  if (!flasksEl) return;
+
+  const totalFlasks = state.batch.length;
+  let totalPowder = 0;
+  let totalWater = 0;
+  let totalMetal = 0;
+
+  state.batch.forEach(item => {
+    recomputeFlaskItem(item);
+    totalPowder += (item.powderWeight || 0);
+    totalWater += (item.waterVolume || 0);
+    totalMetal += (item.totalMetalNeeded || 0);
+  });
+
+  const powderKg = (totalPowder / 1000).toFixed(2);
+  const waterL = (totalWater / 1000).toFixed(2);
+
+  if (badge) {
+    badge.innerText = `${totalFlasks} ${totalFlasks === 1 ? 'опока' : (totalFlasks >= 2 && totalFlasks <= 4 ? 'опоки' : 'опок')}`;
+    badge.className = totalFlasks > 0 ? "badge badge-success" : "badge badge-pending";
+  }
+
+  if (flasksEl) flasksEl.innerText = `${totalFlasks} шт`;
+  if (powderEl) powderEl.innerText = `${Math.round(totalPowder)} г (${powderKg} кг)`;
+  if (waterEl) waterEl.innerText = `${Math.round(totalWater)} мл (${waterL} л)`;
+  if (metalEl) metalEl.innerText = `${totalMetal.toFixed(2)} г`;
+
+  const flasksCountInput = document.getElementById("burnout-flasks-count");
+  if (flasksCountInput && totalFlasks > 0 && (!burnoutConfig.flasksInFurnace || burnoutConfig.flasksInFurnace === 1)) {
+    burnoutConfig.flasksInFurnace = totalFlasks;
+    flasksCountInput.value = totalFlasks;
+  }
+
+  calculateBurnoutCycle();
+  calculateTotalProductionCost();
+}
 
 // --- ТОСТ-СПОВІЩЕННЯ (замість блокуючих alert) ---
 function showToast(message, duration = 2800) {
@@ -836,6 +1498,8 @@ window.addEventListener("DOMContentLoaded", () => {
   renderBatch();
   onNoteInput();
   setupDragAndDrop();
+  initBurnoutCalculator();
+  switchAppTab(activeAppTab);
   
   // Очищення застарілого кешу Service Worker для негайного оновлення застосунку
   if ('serviceWorker' in navigator) {
@@ -1805,6 +2469,7 @@ function renderBatch() {
 
   renderBatchSummary();
   updateProjectHeader();
+  updateBurnoutCartPreview();
 }
 
 function renderBatchSummary() {
@@ -2084,7 +2749,7 @@ function buildProjectObject() {
   };
 
   return {
-    version: "1.0",
+    version: "1.1",
     appName: "Casting Calc",
     schema: "casting-project",
     exportedAt: now.toISOString(),
@@ -2100,7 +2765,8 @@ function buildProjectObject() {
     presets: {
       flasks: state.flasks,
       investments: state.investments
-    }
+    },
+    burnout: burnoutConfig
   };
 }
 
@@ -2283,9 +2949,15 @@ function parseAndApplyProjectJSON(jsonText, sourceName = "") {
       onNoteInput();
     }
 
-    // 5. Оновлення інтерфейсу
+    // 5. Відновлення налаштувань випалювання та собівартості (якщо є)
+    if (data.burnout) {
+      loadBurnoutConfigFromObject(data.burnout);
+    }
+
+    // 6. Оновлення інтерфейсу
     calculateSingle();
     renderBatch();
+    updateBurnoutCartPreview();
     updateProjectHeader();
     closeJsonModal();
 
@@ -2415,6 +3087,1073 @@ function setupDragAndDrop() {
       }
     });
   }
+}
+
+// ============================================================================
+// --- МОДУЛЬ 2: КАЛЬКУЛЯТОР ВИПАЛЮВАННЯ ОПОК ТА СОБІВАРТОСТІ ВИРОБНИЦТВА ---
+// ============================================================================
+
+const DEFAULT_BURNOUT_STEPS = [
+  { id: 1, name: "1. Нагрів до 180°C (Випалювання воску)", startT: 20, endT: 180, durationMin: 15, loadPercent: 100 },
+  { id: 2, name: "2. Утримання 150-180°C (Витоплення воску)", startT: 180, endT: 180, durationMin: 60, loadPercent: 30 },
+  { id: 3, name: "3. Нагрів 180°C -> 370°C (Видалення води)", startT: 180, endT: 370, durationMin: 9, loadPercent: 100 },
+  { id: 4, name: "4. Утримання 370°C (Кристалізація форми)", startT: 370, endT: 370, durationMin: 60, loadPercent: 35 },
+  { id: 5, name: "5. Нагрів 370°C -> 750°C (Допалювання залишків)", startT: 370, endT: 750, durationMin: 45, loadPercent: 100 },
+  { id: 6, name: "6. Утримання 750°C (Повне прожарювання)", startT: 750, endT: 750, durationMin: 150, loadPercent: 50 },
+  { id: 7, name: "7. Плавне охолодження 750°C -> 550°C", startT: 750, endT: 550, durationMin: 30, loadPercent: 0 },
+  { id: 8, name: "8. Утримання 550°C (Ливарна полиця опоки)", startT: 550, endT: 550, durationMin: 30, loadPercent: 40 }
+];
+
+const BURNOUT_PRESETS = {
+  standard_obukhiv: {
+    name: "⭐ Стандартне випалювання (Обухів) — 8 кроків (6.65 год, нагрів + полиці)",
+    badgeText: "8 кроків | ~6 год 39 хв",
+    steps: DEFAULT_BURNOUT_STEPS
+  },
+  fast_small: {
+    name: "⚡ Прискорене випалювання для дрібних опок (4.5 год)",
+    badgeText: "8 кроків | 4 год 30 хв",
+    steps: [
+      { id: 1, name: "1. Нагрів до 200°C", startT: 20, endT: 200, durationMin: 20, loadPercent: 100 },
+      { id: 2, name: "2. Витримка 200°C (Витоплення)", startT: 200, endT: 200, durationMin: 40, loadPercent: 30 },
+      { id: 3, name: "3. Нагрів 200°C -> 450°C", startT: 200, endT: 450, durationMin: 30, loadPercent: 100 },
+      { id: 4, name: "4. Витримка 450°C", startT: 450, endT: 450, durationMin: 40, loadPercent: 35 },
+      { id: 5, name: "5. Нагрів 450°C -> 730°C", startT: 450, endT: 730, durationMin: 35, loadPercent: 100 },
+      { id: 6, name: "6. Витримка 730°C (Прожарювання)", startT: 730, endT: 730, durationMin: 60, loadPercent: 50 },
+      { id: 7, name: "7. Охолодження до 580°C", startT: 730, endT: 580, durationMin: 25, loadPercent: 0 },
+      { id: 8, name: "8. Ливарна полиця 580°C", startT: 580, endT: 580, durationMin: 20, loadPercent: 40 }
+    ]
+  },
+  extended_large: {
+    name: "🏺 Подовжене випалювання для великих опок 100х150 (8.5 год)",
+    badgeText: "8 кроків | 8 год 30 хв",
+    steps: [
+      { id: 1, name: "1. Повільний нагрів до 150°C", startT: 20, endT: 150, durationMin: 30, loadPercent: 100 },
+      { id: 2, name: "2. Витримка 150°C (Витоплення воску)", startT: 150, endT: 150, durationMin: 90, loadPercent: 30 },
+      { id: 3, name: "3. Нагрів 150°C -> 370°C", startT: 150, endT: 370, durationMin: 45, loadPercent: 100 },
+      { id: 4, name: "4. Витримка 370°C (Дегідратація)", startT: 370, endT: 370, durationMin: 90, loadPercent: 35 },
+      { id: 5, name: "5. Нагрів 370°C -> 750°C", startT: 370, endT: 750, durationMin: 60, loadPercent: 100 },
+      { id: 6, name: "6. Максимальна витримка 750°C", startT: 750, endT: 750, durationMin: 120, loadPercent: 50 },
+      { id: 7, name: "7. Плавне охолодження до 530°C", startT: 750, endT: 530, durationMin: 45, loadPercent: 0 },
+      { id: 8, name: "8. Ливарна полиця 530°C", startT: 530, endT: 530, durationMin: 30, loadPercent: 40 }
+    ]
+  },
+  resin_3d: {
+    name: "🧪 Випалювання 3D-фотополімерів (Resin/DWS) (9.0 год)",
+    badgeText: "8 кроків | 9 год 00 хв",
+    steps: [
+      { id: 1, name: "1. Нагрів до 150°C (Сушка форми)", startT: 20, endT: 150, durationMin: 40, loadPercent: 100 },
+      { id: 2, name: "2. Витримка 150°C (Випаровування спиртів)", startT: 150, endT: 150, durationMin: 60, loadPercent: 30 },
+      { id: 3, name: "3. Нагрів 150°C -> 250°C (Початок золи)", startT: 150, endT: 250, durationMin: 30, loadPercent: 100 },
+      { id: 4, name: "4. Витримка 250°C (Деструкція полімеру)", startT: 250, endT: 250, durationMin: 60, loadPercent: 35 },
+      { id: 5, name: "5. Нагрів 250°C -> 780°C (Повне вигорання)", startT: 250, endT: 780, durationMin: 70, loadPercent: 100 },
+      { id: 6, name: "6. Витримка 780°C (Очищення від золи)", startT: 780, endT: 780, durationMin: 180, loadPercent: 50 },
+      { id: 7, name: "7. Охолодження до 550°C", startT: 780, endT: 550, durationMin: 60, loadPercent: 0 },
+      { id: 8, name: "8. Ливарна полиця 550°C", startT: 550, endT: 550, durationMin: 40, loadPercent: 40 }
+    ]
+  }
+};
+
+let burnoutConfig = {
+  furnacePower: 1.8,
+  powerReserve: 10,
+  flasksInFurnace: 1,
+  tariffType: "dual", // 'single', 'dual', 'commercial'
+  tariffSingle: 4.32,
+  tariffDay: 4.32,
+  tariffNight: 2.16,
+  tariffCommercial: 9.60,
+  startTime: "23:00",
+  currentPreset: "standard_obukhiv",
+  steps: JSON.parse(JSON.stringify(DEFAULT_BURNOUT_STEPS)),
+  prices: {
+    powderKg: 160,
+    waterL: 8,
+    meltingFlask: 45,
+    metalLossPercent: 1.0,
+    metalPriceGram: 2600
+  }
+};
+
+let lastBurnoutCalculations = {
+  totalMinutes: 399,
+  totalHours: 6.65,
+  effectivePower: 1.98,
+  totalNominalKwh: 5.85,
+  totalActualKwh: 6.44,
+  nightKwh: 6.44,
+  dayKwh: 0,
+  nightCost: 13.91,
+  dayCost: 0,
+  totalCost: 13.91,
+  costPerFlask: 13.91,
+  savingsVsDay: 13.91,
+  finishTimeStr: "05:39",
+  stepCalculations: []
+};
+
+// Ініціалізація модуля випалювання
+function initBurnoutCalculator() {
+  const savedConfig = localStorage.getItem("cc_burnout_config");
+  if (savedConfig) {
+    try {
+      const parsed = JSON.parse(savedConfig);
+      if (parsed && typeof parsed === "object") {
+        burnoutConfig = Object.assign(burnoutConfig, parsed);
+      }
+    } catch (e) {
+      console.warn("Could not load burnout config from localStorage", e);
+    }
+  }
+
+  syncBurnoutInputsToUI();
+  renderBurnoutStepsTable();
+  calculateBurnoutCycle();
+  calculateTotalProductionCost();
+}
+
+function syncBurnoutInputsToUI() {
+  const powerInput = document.getElementById("burnout-furnace-power");
+  const sliderInput = document.getElementById("burnout-furnace-slider");
+  const reserveInput = document.getElementById("burnout-power-reserve");
+  const flasksInput = document.getElementById("burnout-flasks-count");
+  const tariffSingle = document.getElementById("burnout-tariff-single");
+  const tariffDay = document.getElementById("burnout-tariff-day");
+  const tariffNight = document.getElementById("burnout-tariff-night");
+  const tariffCommercial = document.getElementById("burnout-tariff-commercial");
+  const startTimeInput = document.getElementById("burnout-start-time");
+  const presetSelect = document.getElementById("burnout-preset-select");
+
+  if (powerInput) powerInput.value = burnoutConfig.furnacePower;
+  if (sliderInput) sliderInput.value = burnoutConfig.furnacePower;
+  if (reserveInput) reserveInput.value = burnoutConfig.powerReserve;
+  if (flasksInput) flasksInput.value = burnoutConfig.flasksInFurnace || 1;
+  if (tariffSingle) tariffSingle.value = burnoutConfig.tariffSingle;
+  if (tariffDay) tariffDay.value = burnoutConfig.tariffDay;
+  if (tariffNight) tariffNight.value = burnoutConfig.tariffNight;
+  if (tariffCommercial) tariffCommercial.value = burnoutConfig.tariffCommercial;
+  if (startTimeInput) startTimeInput.value = burnoutConfig.startTime || "23:00";
+  if (presetSelect) presetSelect.value = burnoutConfig.currentPreset || "standard_obukhiv";
+
+  // Прайси для Блоку 4
+  const pricePowder = document.getElementById("price-powder-kg");
+  const priceWater = document.getElementById("price-water-l");
+  const priceMelting = document.getElementById("price-melting-flask");
+  const metalLoss = document.getElementById("metal-loss-percent");
+  const metalPrice = document.getElementById("metal-price-gram");
+
+  if (pricePowder && burnoutConfig.prices) pricePowder.value = burnoutConfig.prices.powderKg ?? 160;
+  if (priceWater && burnoutConfig.prices) priceWater.value = burnoutConfig.prices.waterL ?? 8;
+  if (priceMelting && burnoutConfig.prices) priceMelting.value = burnoutConfig.prices.meltingFlask ?? 45;
+  if (metalLoss && burnoutConfig.prices) metalLoss.value = burnoutConfig.prices.metalLossPercent ?? 1.0;
+  if (metalPrice && burnoutConfig.prices) metalPrice.value = burnoutConfig.prices.metalPriceGram ?? 2600;
+
+  setTariffMode(burnoutConfig.tariffType || "dual", false);
+}
+
+function onBurnoutConfigChange() {
+  const powerInput = document.getElementById("burnout-furnace-power");
+  const sliderInput = document.getElementById("burnout-furnace-slider");
+  const reserveInput = document.getElementById("burnout-power-reserve");
+  const flasksInput = document.getElementById("burnout-flasks-count");
+  const tariffSingle = document.getElementById("burnout-tariff-single");
+  const tariffDay = document.getElementById("burnout-tariff-day");
+  const tariffNight = document.getElementById("burnout-tariff-night");
+  const tariffCommercial = document.getElementById("burnout-tariff-commercial");
+  const startTimeInput = document.getElementById("burnout-start-time");
+
+  if (powerInput) {
+    burnoutConfig.furnacePower = parseFloat(powerInput.value) || 1.8;
+    if (sliderInput) sliderInput.value = burnoutConfig.furnacePower;
+  }
+  if (reserveInput) {
+    burnoutConfig.powerReserve = parseFloat(reserveInput.value) || 0;
+  }
+  if (flasksInput) {
+    burnoutConfig.flasksInFurnace = Math.max(1, parseInt(flasksInput.value, 10) || 1);
+  }
+  if (tariffSingle) {
+    burnoutConfig.tariffSingle = parseFloat(tariffSingle.value) || 4.32;
+  }
+  if (tariffDay) {
+    burnoutConfig.tariffDay = parseFloat(tariffDay.value) || 4.32;
+  }
+  if (tariffNight) {
+    burnoutConfig.tariffNight = parseFloat(tariffNight.value) || 2.16;
+  }
+  if (tariffCommercial) {
+    burnoutConfig.tariffCommercial = parseFloat(tariffCommercial.value) || 9.60;
+  }
+  if (startTimeInput) {
+    burnoutConfig.startTime = startTimeInput.value || "23:00";
+  }
+
+  // Оновлення підписів та бейджів
+  const powerDisplay = document.getElementById("burnout-power-display");
+  const reserveDisplay = document.getElementById("burnout-reserve-display");
+  const effBadge = document.getElementById("burnout-effective-power-badge");
+
+  const effPower = burnoutConfig.furnacePower * (1 + burnoutConfig.powerReserve / 100);
+  if (powerDisplay) powerDisplay.innerText = `${burnoutConfig.furnacePower.toFixed(1)} кВт`;
+  if (reserveDisplay) reserveDisplay.innerText = `+${burnoutConfig.powerReserve}%`;
+  if (effBadge) effBadge.innerText = `${effPower.toFixed(2)} кВт (з похибкою)`;
+
+  saveBurnoutConfigLocal();
+  calculateBurnoutCycle();
+  calculateTotalProductionCost();
+}
+
+function onBurnoutSliderChange() {
+  const sliderInput = document.getElementById("burnout-furnace-slider");
+  const powerInput = document.getElementById("burnout-furnace-power");
+  if (sliderInput && powerInput) {
+    powerInput.value = sliderInput.value;
+    onBurnoutConfigChange();
+  }
+}
+
+function setPowerReserve(percent) {
+  const reserveInput = document.getElementById("burnout-power-reserve");
+  if (reserveInput) {
+    reserveInput.value = percent;
+    onBurnoutConfigChange();
+  }
+}
+
+function syncFlasksCountFromBatch() {
+  const count = state.batch.length > 0 ? state.batch.length : 1;
+  const flasksInput = document.getElementById("burnout-flasks-count");
+  if (flasksInput) {
+    flasksInput.value = count;
+    onBurnoutConfigChange();
+    showToast(`Оновлено кількість опок: ${count} шт`);
+  }
+}
+
+function syncBurnoutWithBatch() {
+  updateBurnoutCartPreview();
+  syncFlasksCountFromBatch();
+  calculateTotalProductionCost();
+  showToast("🔄 Дані замісу успішно синхронізовано!");
+}
+
+function setTariffMode(mode, triggerRecalc = true) {
+  burnoutConfig.tariffType = mode;
+
+  const btnSingle = document.getElementById("btn-tariff-single");
+  const btnDual = document.getElementById("btn-tariff-dual");
+  const btnComm = document.getElementById("btn-tariff-commercial");
+
+  const pnlSingle = document.getElementById("tariff-fields-single");
+  const pnlDual = document.getElementById("tariff-fields-dual");
+  const pnlComm = document.getElementById("tariff-fields-commercial");
+  const modeBadge = document.getElementById("burnout-tariff-mode-badge");
+
+  if (btnSingle) btnSingle.className = `burnout-segment-btn ${mode === 'single' ? 'active' : ''}`;
+  if (btnDual) btnDual.className = `burnout-segment-btn ${mode === 'dual' ? 'active' : ''}`;
+  if (btnComm) btnComm.className = `burnout-segment-btn ${mode === 'commercial' ? 'active' : ''}`;
+
+  if (pnlSingle) pnlSingle.style.display = mode === 'single' ? 'flex' : 'none';
+  if (pnlDual) pnlDual.style.display = mode === 'dual' ? 'flex' : 'none';
+  if (pnlComm) pnlComm.style.display = mode === 'commercial' ? 'flex' : 'none';
+
+  if (modeBadge) {
+    if (mode === 'dual') {
+      modeBadge.innerText = "Двозонний лічильник (Ніч/День)";
+      modeBadge.className = "badge badge-success";
+    } else if (mode === 'single') {
+      modeBadge.innerText = "Побутовий фіксований";
+      modeBadge.className = "badge badge-pending";
+    } else {
+      modeBadge.innerText = "Комерційний / ФОП";
+      modeBadge.className = "badge badge-danger";
+    }
+  }
+
+  if (triggerRecalc) {
+    saveBurnoutConfigLocal();
+    calculateBurnoutCycle();
+    calculateTotalProductionCost();
+  }
+}
+
+function setStartTime(timeStr) {
+  const startTimeInput = document.getElementById("burnout-start-time");
+  if (startTimeInput) {
+    startTimeInput.value = timeStr;
+    onBurnoutConfigChange();
+  }
+}
+
+function setStartTimeNow() {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const mins = String(now.getMinutes()).padStart(2, '0');
+  setStartTime(`${hours}:${mins}`);
+}
+
+function applyRegionalTariff(tariffKey) {
+  if (tariffKey === 'obukhiv_dual') {
+    burnoutConfig.tariffDay = 4.32;
+    burnoutConfig.tariffNight = 2.16;
+    setTariffMode('dual', false);
+    showToast("Застосовано: Двозонний тариф м. Обухів (2.16 / 4.32 грн)");
+  } else if (tariffKey === 'residential_fixed') {
+    burnoutConfig.tariffSingle = 4.32;
+    setTariffMode('single', false);
+    showToast("Застосовано: Побутовий фіксований тариф (4.32 грн)");
+  } else if (tariffKey === 'business_small') {
+    burnoutConfig.tariffCommercial = 9.60;
+    setTariffMode('commercial', false);
+    showToast("Застосовано: Комерційний тариф ФОП (9.60 грн)");
+  } else if (tariffKey === 'business_large') {
+    burnoutConfig.tariffCommercial = 10.50;
+    setTariffMode('commercial', false);
+    showToast("Застосовано: Тариф для юр. осіб / виробництва (10.50 грн)");
+  }
+  syncBurnoutInputsToUI();
+  onBurnoutConfigChange();
+}
+
+function applyBurnoutPreset() {
+  const select = document.getElementById("burnout-preset-select");
+  if (!select) return;
+
+  const key = select.value;
+  burnoutConfig.currentPreset = key;
+
+  if (key !== 'custom' && BURNOUT_PRESETS[key]) {
+    burnoutConfig.steps = JSON.parse(JSON.stringify(BURNOUT_PRESETS[key].steps));
+    const infoBadge = document.getElementById("burnout-preset-info-badge");
+    if (infoBadge) infoBadge.innerText = BURNOUT_PRESETS[key].badgeText;
+    showToast(`Застосовано шаблон: ${BURNOUT_PRESETS[key].name.split('(')[0]}`);
+  }
+
+  renderBurnoutStepsTable();
+  saveBurnoutConfigLocal();
+  calculateBurnoutCycle();
+  calculateTotalProductionCost();
+}
+
+function resetBurnoutToDefault() {
+  burnoutConfig.currentPreset = "standard_obukhiv";
+  burnoutConfig.steps = JSON.parse(JSON.stringify(DEFAULT_BURNOUT_STEPS));
+  const select = document.getElementById("burnout-preset-select");
+  if (select) select.value = "standard_obukhiv";
+  const infoBadge = document.getElementById("burnout-preset-info-badge");
+  if (infoBadge) infoBadge.innerText = BURNOUT_PRESETS.standard_obukhiv.badgeText;
+
+  renderBurnoutStepsTable();
+  saveBurnoutConfigLocal();
+  calculateBurnoutCycle();
+  calculateTotalProductionCost();
+  showToast("Профіль скинуто до стандартного 8-ступеневого циклу Обухів");
+}
+
+function addBurnoutStep() {
+  const nextId = burnoutConfig.steps.length + 1;
+  const lastStep = burnoutConfig.steps[burnoutConfig.steps.length - 1];
+  const lastEndT = lastStep ? lastStep.endT : 20;
+
+  burnoutConfig.steps.push({
+    id: nextId,
+    name: `${nextId}. Новий крок`,
+    startT: lastEndT,
+    endT: lastEndT,
+    durationMin: 30,
+    loadPercent: 40
+  });
+
+  burnoutConfig.currentPreset = "custom";
+  const select = document.getElementById("burnout-preset-select");
+  if (select) select.value = "custom";
+
+  renderBurnoutStepsTable();
+  saveBurnoutConfigLocal();
+  calculateBurnoutCycle();
+  calculateTotalProductionCost();
+  showToast(`Додано крок #${nextId}`);
+}
+
+function deleteBurnoutStep(stepIndex) {
+  if (burnoutConfig.steps.length <= 1) {
+    showToast("⚠️ У профілі повинен залишитися щонайменше один крок");
+    return;
+  }
+  burnoutConfig.steps.splice(stepIndex, 1);
+  burnoutConfig.currentPreset = "custom";
+  const select = document.getElementById("burnout-preset-select");
+  if (select) select.value = "custom";
+
+  renderBurnoutStepsTable();
+  saveBurnoutConfigLocal();
+  calculateBurnoutCycle();
+  calculateTotalProductionCost();
+  showToast("Крок видалено");
+}
+
+function onBurnoutStepInputChange(stepIndex, field, value) {
+  if (!burnoutConfig.steps[stepIndex]) return;
+
+  if (field === 'name') {
+    burnoutConfig.steps[stepIndex].name = value;
+  } else if (field === 'startT' || field === 'endT' || field === 'durationMin') {
+    burnoutConfig.steps[stepIndex][field] = Math.max(0, parseInt(value, 10) || 0);
+  } else if (field === 'loadPercent') {
+    burnoutConfig.steps[stepIndex].loadPercent = Math.min(100, Math.max(0, parseInt(value, 10) || 0));
+  }
+
+  burnoutConfig.currentPreset = "custom";
+  const select = document.getElementById("burnout-preset-select");
+  if (select) select.value = "custom";
+
+  saveBurnoutConfigLocal();
+  calculateBurnoutCycle();
+  calculateTotalProductionCost();
+}
+
+function renderBurnoutStepsTable() {
+  const tbody = document.getElementById("burnout-steps-tbody");
+  if (!tbody) return;
+
+  if (!burnoutConfig.steps || burnoutConfig.steps.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 16px;">Список кроків порожній. Натисніть "+ Додати крок".</td></tr>`;
+    return;
+  }
+
+  let html = "";
+  burnoutConfig.steps.forEach((step, i) => {
+    const isHeat = step.loadPercent === 100;
+    const isCool = step.loadPercent === 0;
+    const isHold = step.loadPercent > 0 && step.loadPercent < 100;
+
+    let badgeStyle = "background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid #f59e0b;";
+    let modeText = `Полиця ${step.loadPercent}%`;
+    if (isHeat) {
+      badgeStyle = "background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid #ef4444;";
+      modeText = `Нагрів 100%`;
+    } else if (isCool) {
+      badgeStyle = "background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid #38bdf8;";
+      modeText = `Охолодж. 0%`;
+    }
+
+    html += `
+      <tr class="burnout-step-row" id="burnout-row-${i}">
+        <td style="text-align: center; font-weight: 700; color: var(--text-muted); font-size: 0.85rem;">
+          ${i + 1}
+        </td>
+        <td>
+          <input type="text" value="${escapeHtml(step.name)}" 
+            class="burnout-table-input" 
+            style="text-align: left; font-weight: 600; min-width: 170px;" 
+            onchange="onBurnoutStepInputChange(${i}, 'name', this.value)">
+        </td>
+        <td style="text-align: center;">
+          <input type="number" value="${step.startT}" step="10" min="0" max="1100" 
+            class="burnout-table-input" style="width: 65px;" 
+            onchange="onBurnoutStepInputChange(${i}, 'startT', this.value)">
+        </td>
+        <td style="text-align: center;">
+          <input type="number" value="${step.endT}" step="10" min="0" max="1100" 
+            class="burnout-table-input" style="width: 65px; font-weight: 700; color: #fbbf24;" 
+            onchange="onBurnoutStepInputChange(${i}, 'endT', this.value)">
+        </td>
+        <td style="text-align: center;">
+          <input type="number" value="${step.durationMin}" step="5" min="1" max="600" 
+            class="burnout-table-input" style="width: 65px; font-weight: 600; color: #38bdf8;" 
+            onchange="onBurnoutStepInputChange(${i}, 'durationMin', this.value)">
+        </td>
+        <td>
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <input type="number" value="${step.loadPercent}" step="5" min="0" max="100" 
+              class="burnout-table-input" style="width: 50px;" 
+              onchange="onBurnoutStepInputChange(${i}, 'loadPercent', this.value)">
+            <span class="badge" style="${badgeStyle} font-size: 0.7rem; padding: 2px 6px; white-space: nowrap;">
+              ${modeText}
+            </span>
+          </div>
+        </td>
+        <td style="text-align: right; font-weight: 700; color: #a7f3d0; font-size: 0.85rem;" id="burnout-step-kwh-${i}">
+          0.00 кВт·г
+        </td>
+        <td style="text-align: center;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="deleteBurnoutStep(${i})" style="padding: 2px 6px; font-size: 0.72rem; color: #f87171; border-color: rgba(239,68,68,0.3);" title="Видалити крок">
+            ✕
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
+}
+
+// ОСНОВНИЙ ДВОФАЗНИЙ РОЗРАХУНОК ЕНЕРГОВИТРАТ ТА ТАРИФІВ
+function calculateBurnoutCycle() {
+  const steps = burnoutConfig.steps || [];
+  const pNominal = burnoutConfig.furnacePower || 1.8;
+  const pReserve = burnoutConfig.powerReserve || 0;
+  const pEffective = pNominal * (1 + pReserve / 100);
+  const tariffType = burnoutConfig.tariffType || "dual";
+  const tariffSingle = burnoutConfig.tariffSingle || 4.32;
+  const tariffDay = burnoutConfig.tariffDay || 4.32;
+  const tariffNight = burnoutConfig.tariffNight || 2.16;
+  const tariffComm = burnoutConfig.tariffCommercial || 9.60;
+  const flasksInFurnace = Math.max(1, burnoutConfig.flasksInFurnace || 1);
+
+  // Парсинг часу початку
+  let startHour = 23;
+  let startMinute = 0;
+  if (burnoutConfig.startTime && burnoutConfig.startTime.includes(":")) {
+    const parts = burnoutConfig.startTime.split(":");
+    startHour = parseInt(parts[0], 10) || 0;
+    startMinute = parseInt(parts[1], 10) || 0;
+  }
+  let currentMinuteOfDay = startHour * 60 + startMinute;
+
+  let totalMinutes = 0;
+  let totalNominalKwh = 0;
+  let totalActualKwh = 0;
+  let nightKwh = 0;
+  let dayKwh = 0;
+  let nightCost = 0;
+  let dayCost = 0;
+  let totalCost = 0;
+
+  const stepCalcs = [];
+
+  steps.forEach((step, i) => {
+    const duration = Math.max(0, step.durationMin || 0);
+    const loadFactor = (step.loadPercent || 0) / 100;
+    const hours = duration / 60;
+
+    const stepNominalKwh = hours * pNominal * loadFactor;
+    const stepActualKwh = hours * pEffective * loadFactor;
+
+    // Розрахунок скільки хвилин кроку припадає на ніч (23:00–07:00), а скільки на день (07:00–23:00)
+    let stepNightMin = 0;
+    let stepDayMin = 0;
+
+    for (let m = 0; m < duration; m++) {
+      const clockMin = (currentMinuteOfDay + m) % 1440;
+      // Ніч з 23:00 (1380 хв) до 07:00 (420 хв)
+      if (clockMin >= 1380 || clockMin < 420) {
+        stepNightMin++;
+      } else {
+        stepDayMin++;
+      }
+    }
+
+    currentMinuteOfDay = (currentMinuteOfDay + duration) % 1440;
+    totalMinutes += duration;
+
+    const nightFraction = duration > 0 ? (stepNightMin / duration) : 0;
+    const dayFraction = duration > 0 ? (stepDayMin / duration) : 0;
+
+    const stepNightKwh = stepActualKwh * nightFraction;
+    const stepDayKwh = stepActualKwh * dayFraction;
+
+    let stepCost = 0;
+    if (tariffType === 'dual') {
+      stepCost = (stepNightKwh * tariffNight) + (stepDayKwh * tariffDay);
+      nightCost += (stepNightKwh * tariffNight);
+      dayCost += (stepDayKwh * tariffDay);
+    } else if (tariffType === 'single') {
+      stepCost = stepActualKwh * tariffSingle;
+      nightCost += (stepNightKwh * tariffSingle);
+      dayCost += (stepDayKwh * tariffSingle);
+    } else if (tariffType === 'commercial') {
+      stepCost = stepActualKwh * tariffComm;
+      nightCost += (stepNightKwh * tariffComm);
+      dayCost += (stepDayKwh * tariffComm);
+    }
+
+    totalNominalKwh += stepNominalKwh;
+    totalActualKwh += stepActualKwh;
+    nightKwh += stepNightKwh;
+    dayKwh += stepDayKwh;
+    totalCost += stepCost;
+
+    stepCalcs.push({
+      stepNominalKwh,
+      stepActualKwh,
+      stepNightKwh,
+      stepDayKwh,
+      stepCost,
+      duration
+    });
+
+    // Оновлення рядка таблиці
+    const cellEl = document.getElementById(`burnout-step-kwh-${i}`);
+    if (cellEl) {
+      cellEl.innerText = `${stepActualKwh.toFixed(2)} кВт·г`;
+    }
+  });
+
+  const totalHours = totalMinutes / 60;
+  const costPerFlask = totalCost / flasksInFurnace;
+
+  // Розрахунок часу фінішу
+  const finishHours = Math.floor(currentMinuteOfDay / 60);
+  const finishMins = currentMinuteOfDay % 60;
+  const finishTimeStr = `${String(finishHours).padStart(2, '0')}:${String(finishMins).padStart(2, '0')}`;
+
+  // Порівняння з суто денним тарифом (для демонстрації економії)
+  const fullDayCost = totalActualKwh * (tariffType === 'dual' ? tariffDay : (tariffType === 'single' ? tariffSingle : tariffComm));
+  const savingsVsDay = Math.max(0, fullDayCost - totalCost);
+
+  lastBurnoutCalculations = {
+    totalMinutes,
+    totalHours,
+    effectivePower: pEffective,
+    totalNominalKwh,
+    totalActualKwh,
+    nightKwh,
+    dayKwh,
+    nightCost,
+    dayCost,
+    totalCost,
+    costPerFlask,
+    savingsVsDay,
+    finishTimeStr,
+    stepCalculations: stepCalcs
+  };
+
+  // Оновлення карток Блоку 3
+  const totalTimeEl = document.getElementById("burnout-res-total-time");
+  const timelineInfoEl = document.getElementById("burnout-res-timeline-info");
+  const totalKwhEl = document.getElementById("burnout-res-total-kwh");
+  const nominalKwhEl = document.getElementById("burnout-res-nominal-kwh");
+  const totalCostEl = document.getElementById("burnout-res-total-cost");
+  const costSubEl = document.getElementById("burnout-res-cost-sub");
+  const costPerFlaskEl = document.getElementById("burnout-res-cost-per-flask");
+  const flasksSubEl = document.getElementById("burnout-res-flasks-sub");
+  const finishPreviewEl = document.getElementById("burnout-finish-time-preview");
+
+  const hoursPart = Math.floor(totalMinutes / 60);
+  const minsPart = totalMinutes % 60;
+  const timeFormatted = `${hoursPart} год ${minsPart} хв`;
+
+  if (totalTimeEl) totalTimeEl.innerText = timeFormatted;
+  if (timelineInfoEl) timelineInfoEl.innerText = `Старт ${burnoutConfig.startTime || "23:00"} → Фініш ${finishTimeStr}`;
+  if (finishPreviewEl) finishPreviewEl.innerText = `Фініш: ~${finishTimeStr}`;
+  if (totalKwhEl) totalKwhEl.innerText = `${totalActualKwh.toFixed(2)} кВт·год`;
+  if (nominalKwhEl) nominalKwhEl.innerText = `Номінал: ${totalNominalKwh.toFixed(2)} кВт·год (+${pReserve}%)`;
+  if (totalCostEl) totalCostEl.innerText = `${totalCost.toFixed(2)} грн`;
+  if (costSubEl) costSubEl.innerText = `За весь цикл садки`;
+  if (costPerFlaskEl) costPerFlaskEl.innerText = `${costPerFlask.toFixed(2)} грн/опока`;
+  if (flasksSubEl) flasksSubEl.innerText = `Для ${flasksInFurnace} ${flasksInFurnace === 1 ? 'опоки' : 'опок'} в садці`;
+
+  // Деталізація зон лічильника
+  const nightBreakdownEl = document.getElementById("burnout-res-night-breakdown");
+  const dayBreakdownEl = document.getElementById("burnout-res-day-breakdown");
+  const savingsTextEl = document.getElementById("burnout-res-savings-text");
+  const nightRateLbl = document.getElementById("burnout-lbl-night-rate");
+  const dayRateLbl = document.getElementById("burnout-lbl-day-rate");
+  const dualBreakdownBox = document.getElementById("burnout-dual-breakdown-box");
+
+  if (nightRateLbl) nightRateLbl.innerText = `${tariffNight.toFixed(2)} грн`;
+  if (dayRateLbl) dayRateLbl.innerText = `${tariffDay.toFixed(2)} грн`;
+
+  const nightPercent = totalActualKwh > 0 ? Math.round((nightKwh / totalActualKwh) * 100) : 0;
+  const dayPercent = totalActualKwh > 0 ? Math.round((dayKwh / totalActualKwh) * 100) : 0;
+
+  if (nightBreakdownEl) nightBreakdownEl.innerText = `${nightKwh.toFixed(2)} кВт·год = ${nightCost.toFixed(2)} грн (${nightPercent}% циклу)`;
+  if (dayBreakdownEl) dayBreakdownEl.innerText = `${dayKwh.toFixed(2)} кВт·год = ${dayCost.toFixed(2)} грн (${dayPercent}% циклу)`;
+
+  if (savingsTextEl) {
+    if (tariffType === 'dual' && savingsVsDay > 0.05) {
+      savingsTextEl.innerText = `Нічний запуск печі заощаджує ${savingsVsDay.toFixed(2)} грн (-${Math.round((savingsVsDay / fullDayCost) * 100)}%) у порівнянні з денним литвом!`;
+    } else if (tariffType === 'dual') {
+      savingsTextEl.innerText = `Цикл повністю потрапив у вибрані години лічильника.`;
+    } else {
+      savingsTextEl.innerText = `Розрахунок за фіксованим тарифом (${(tariffType === 'single' ? tariffSingle : tariffComm).toFixed(2)} грн/кВт·год).`;
+    }
+  }
+
+  // Рендер динамічного SVG графіка термограми
+  let maxT = 800;
+  steps.forEach(s => {
+    if (s.startT > maxT) maxT = s.startT;
+    if (s.endT > maxT) maxT = s.endT;
+  });
+  renderBurnoutSVGChart(steps, totalMinutes, maxT);
+}
+
+// ГЕНЕРАТОР ДИНАМІЧНОГО SVG ГРАФІКА ТЕРМОГРАМИ
+function renderBurnoutSVGChart(steps, totalMin, maxT) {
+  const container = document.getElementById("burnout-svg-chart-container");
+  if (!container) return;
+
+  if (!steps || steps.length === 0 || totalMin <= 0) {
+    container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 40px;">Немає кроків для побудови графіка.</div>`;
+    return;
+  }
+
+  const svgW = 760;
+  const svgH = 220;
+  const padLeft = 55;
+  const padRight = 35;
+  const padTop = 25;
+  const padBottom = 35;
+
+  const plotW = svgW - padLeft - padRight;
+  const plotH = svgH - padTop - padBottom;
+
+  const chartMaxT = Math.max(800, Math.ceil((maxT + 40) / 100) * 100);
+
+  const getX = (m) => padLeft + (m / totalMin) * plotW;
+  const getY = (t) => padTop + plotH - (t / chartMaxT) * plotH;
+
+  // Побудова сітки температур
+  let gridLines = "";
+  const tSteps = [0, 200, 370, 550, 750, chartMaxT];
+  const uniqueT = [...new Set(tSteps)].sort((a, b) => a - b);
+
+  uniqueT.forEach(tVal => {
+    const yPos = getY(tVal);
+    gridLines += `
+      <line x1="${padLeft}" y1="${yPos}" x2="${svgW - padRight}" y2="${yPos}" stroke="rgba(255,255,255,0.08)" stroke-dasharray="3,3" />
+      <text x="${padLeft - 8}" y="${yPos + 4}" fill="#94a3b8" font-size="10" text-anchor="end" font-family="system-ui, sans-serif">${tVal}°C</text>
+    `;
+  });
+
+  // Побудова часової сітки (кожна 1 година)
+  let timeLines = "";
+  const totalHours = Math.ceil(totalMin / 60);
+  for (let h = 0; h <= totalHours; h++) {
+    const mVal = Math.min(totalMin, h * 60);
+    const xPos = getX(mVal);
+    const timeLabel = h === 0 ? "0г" : `${h}г`;
+    timeLines += `
+      <line x1="${xPos}" y1="${padTop}" x2="${xPos}" y2="${padTop + plotH}" stroke="rgba(255,255,255,0.06)" />
+      <text x="${xPos}" y="${padTop + plotH + 18}" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="system-ui, sans-serif">${timeLabel}</text>
+    `;
+    if (mVal >= totalMin) break;
+  }
+
+  // Обчислення координат полілінії та градієнтних областей
+  let currentM = 0;
+  const points = [];
+  points.push({ m: 0, t: steps[0].startT, x: getX(0), y: getY(steps[0].startT) });
+
+  let segmentsSvg = "";
+  let areaPolygonPoints = `${getX(0)},${getY(0)}`;
+
+  steps.forEach((step, idx) => {
+    const startM = currentM;
+    const endM = currentM + step.durationMin;
+    currentM = endM;
+
+    const x1 = getX(startM);
+    const y1 = getY(step.startT);
+    const x2 = getX(endM);
+    const y2 = getY(step.endT);
+
+    points.push({ m: endM, t: step.endT, x: x2, y: y2, name: step.name, duration: step.durationMin });
+
+    // Вибір кольору сегмента
+    let strokeColor = "#f59e0b"; // полиця (amber)
+    if (step.loadPercent === 100) {
+      strokeColor = "#ef4444"; // нагрів (red)
+    } else if (step.loadPercent === 0) {
+      strokeColor = "#38bdf8"; // охолодження (cyan)
+    }
+
+    segmentsSvg += `
+      <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${strokeColor}" stroke-width="3.5" stroke-linecap="round" />
+    `;
+
+    // Анотація над ключовими точками
+    if (step.endT >= 150 && (idx === 1 || idx === 3 || idx === 5 || idx === 7 || idx === steps.length - 1)) {
+      const isHold = step.startT === step.endT;
+      const lbl = isHold ? `${step.endT}°C (${step.durationMin}хв)` : `${step.endT}°C`;
+      const badgeY = Math.max(padTop + 12, y2 - 10);
+      segmentsSvg += `
+        <rect x="${x2 - 32}" y="${badgeY - 12}" width="64" height="16" rx="4" fill="rgba(15,23,42,0.85)" stroke="${strokeColor}" stroke-width="1" />
+        <text x="${x2}" y="${badgeY}" fill="#f8fafc" font-size="9.5" font-weight="700" text-anchor="middle" font-family="system-ui, sans-serif">${lbl}</text>
+      `;
+    }
+  });
+
+  // Заповнення фонової площі під кривою
+  let areaD = `M ${points[0].x} ${points[0].y}`;
+  points.forEach(p => {
+    areaD += ` L ${p.x} ${p.y}`;
+  });
+  areaD += ` L ${points[points.length - 1].x} ${getY(0)} L ${points[0].x} ${getY(0)} Z`;
+
+  // Вершини (точки)
+  let circlesSvg = "";
+  points.forEach((p, idx) => {
+    circlesSvg += `
+      <circle cx="${p.x}" cy="${p.y}" r="4.5" fill="#f8fafc" stroke="#f59e0b" stroke-width="2">
+        <title>${p.t}°C @ ${p.m} хв</title>
+      </circle>
+    `;
+  });
+
+  const svgCode = `
+    <svg viewBox="0 0 ${svgW} ${svgH}" style="width: 100%; height: auto; display: block; border-radius: 8px; background: rgba(15, 23, 42, 0.65);" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="burnoutFlameGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#ef4444" stop-opacity="0.35"/>
+          <stop offset="60%" stop-color="#f59e0b" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.0"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Сітка -->
+      ${gridLines}
+      ${timeLines}
+
+      <!-- Заливка під графіком -->
+      <path d="${areaD}" fill="url(#burnoutFlameGrad)" />
+
+      <!-- Сегменти кривої -->
+      ${segmentsSvg}
+
+      <!-- Точки -->
+      ${circlesSvg}
+
+      <!-- Підпис осі X -->
+      <text x="${svgW - padRight}" y="${svgH - 8}" fill="#64748b" font-size="9" text-anchor="end" font-family="system-ui, sans-serif">Час (години)</text>
+    </svg>
+  `;
+
+  container.innerHTML = svgCode;
+}
+
+// РОЗРАХУНОК ЗВЕДЕНОЇ СОБІВАРТОСТІ ТЕХНОЛОГІЧНИХ ПРОЦЕСІВ (БЛОК 4)
+function calculateTotalProductionCost() {
+  // 1. Дані замісу з кошика
+  let totalPowderG = 0;
+  let totalWaterMl = 0;
+  let totalMetalG = 0;
+  const flasksCount = state.batch.length > 0 ? state.batch.length : (burnoutConfig.flasksInFurnace || 1);
+
+  state.batch.forEach(item => {
+    recomputeFlaskItem(item);
+    totalPowderG += (item.powderWeight || 0);
+    totalWaterMl += (item.waterVolume || 0);
+    totalMetalG += (item.totalMetalNeeded || 0);
+  });
+
+  const powderKg = totalPowderG / 1000;
+  const waterL = totalWaterMl / 1000;
+
+  // 2. Зчитування розцінок
+  const pricePowderKg = parseFloat(document.getElementById("price-powder-kg")?.value) || 160;
+  const priceWaterL = parseFloat(document.getElementById("price-water-l")?.value) || 8;
+  const priceMeltingFlask = parseFloat(document.getElementById("price-melting-flask")?.value) || 45;
+  const metalLossPercent = parseFloat(document.getElementById("metal-loss-percent")?.value) || 1.0;
+  const metalPriceGram = parseFloat(document.getElementById("metal-price-gram")?.value) || 2600;
+
+  burnoutConfig.prices = {
+    powderKg: pricePowderKg,
+    waterL: priceWaterL,
+    meltingFlask: priceMeltingFlask,
+    metalLossPercent: metalLossPercent,
+    metalPriceGram: metalPriceGram
+  };
+  saveBurnoutConfigLocal();
+
+  // 3. Калькуляція компонентів собівартості
+  const costPowder = powderKg * pricePowderKg;
+  const costWater = waterL * priceWaterL;
+  const costMaterials = costPowder + costWater;
+
+  const costBurnout = lastBurnoutCalculations.totalCost || 13.91;
+  const costMeltingLabor = priceMeltingFlask * flasksCount;
+  const metalLostG = totalMetalG * (metalLossPercent / 100);
+  const costMetalLoss = metalLostG * metalPriceGram;
+  const costMeltingTotal = costMeltingLabor + costMetalLoss;
+
+  const grandTotal = costMaterials + costBurnout + costMeltingTotal;
+  const grandPerFlask = grandTotal / Math.max(1, flasksCount);
+  const costPerGram = totalMetalG > 0 ? (grandTotal / totalMetalG) : 0;
+
+  // 4. Оновлення інтерфейсу Блоку 4
+  const powderDisp = document.getElementById("cost-powder-weight-disp");
+  const waterDisp = document.getElementById("cost-water-vol-disp");
+  const powderTotalDisp = document.getElementById("cost-powder-total");
+  const burnoutKwhDisp = document.getElementById("cost-burnout-kwh-disp");
+  const burnoutTotalDisp = document.getElementById("cost-burnout-total");
+  const meltingTotalDisp = document.getElementById("cost-melting-total");
+  const grandTotalDisp = document.getElementById("cost-grand-total");
+  const perFlaskGrandDisp = document.getElementById("cost-per-flask-grand");
+
+  const sumMaterials = document.getElementById("summary-cost-materials");
+  const sumBurnout = document.getElementById("summary-cost-burnout");
+  const sumMelting = document.getElementById("summary-cost-melting");
+  const sumLoss = document.getElementById("summary-cost-loss");
+  const sumPerGram = document.getElementById("summary-cost-per-gram");
+
+  if (powderDisp) powderDisp.innerText = `${powderKg.toFixed(2)} кг (${Math.round(totalPowderG)} г)`;
+  if (waterDisp) waterDisp.innerText = `${waterL.toFixed(2)} л (${Math.round(totalWaterMl)} мл)`;
+  if (powderTotalDisp) powderTotalDisp.innerText = `${costMaterials.toFixed(2)} грн`;
+
+  if (burnoutKwhDisp) burnoutKwhDisp.innerText = `${lastBurnoutCalculations.totalActualKwh.toFixed(2)} кВт·год`;
+  if (burnoutTotalDisp) burnoutTotalDisp.innerText = `${costBurnout.toFixed(2)} грн`;
+
+  if (meltingTotalDisp) meltingTotalDisp.innerText = `${costMeltingTotal.toFixed(2)} грн (робота: ${costMeltingLabor.toFixed(0)} грн + угар: ${costMetalLoss.toFixed(2)} грн)`;
+
+  if (grandTotalDisp) grandTotalDisp.innerText = `${grandTotal.toFixed(2)} грн`;
+  if (perFlaskGrandDisp) perFlaskGrandDisp.innerText = `${grandPerFlask.toFixed(2)} грн / опока`;
+
+  if (sumMaterials) sumMaterials.innerText = `${costMaterials.toFixed(2)} грн (порошок: ${costPowder.toFixed(2)} + вода: ${costWater.toFixed(2)})`;
+  if (sumBurnout) sumBurnout.innerText = `${costBurnout.toFixed(2)} грн (${lastBurnoutCalculations.totalActualKwh.toFixed(2)} кВт·год)`;
+  if (sumMelting) sumMelting.innerText = `${costMeltingLabor.toFixed(2)} грн (${flasksCount} опок × ${priceMeltingFlask} грн)`;
+  if (sumLoss) sumLoss.innerText = `${costMetalLoss.toFixed(2)} грн (${metalLostG.toFixed(2)} г угару при ${metalLossPercent}%)`;
+  if (sumPerGram) sumPerGram.innerText = totalMetalG > 0 ? `${costPerGram.toFixed(2)} грн/г (на ${totalMetalG.toFixed(2)} г металу)` : `0.00 грн/г`;
+}
+
+function saveBurnoutConfigLocal() {
+  localStorage.setItem("cc_burnout_config", JSON.stringify(burnoutConfig));
+}
+
+function saveBurnoutSettingsToProject() {
+  saveBurnoutConfigLocal();
+  showToast("💾 Налаштування випалювання та собівартості збережено в пам'ять проекту!");
+}
+
+function loadBurnoutConfigFromObject(obj) {
+  if (!obj || typeof obj !== "object") return;
+  burnoutConfig = Object.assign(burnoutConfig, obj);
+  saveBurnoutConfigLocal();
+  syncBurnoutInputsToUI();
+  renderBurnoutStepsTable();
+  calculateBurnoutCycle();
+  calculateTotalProductionCost();
+}
+
+// ГЕНЕРАТОР ТЕКСТОВОГО ЗВІТУ СОБІВАРТОСТІ (ФІНАНСОВИЙ ЗВІТ)
+function getCostReportText() {
+  const dateStr = getFormattedDate();
+  const readableDate = new Date().toLocaleString('uk-UA', { 
+    year: 'numeric', month: '2-digit', day: '2-digit', 
+    hour: '2-digit', minute: '2-digit' 
+  });
+
+  const flasksCount = state.batch.length > 0 ? state.batch.length : (burnoutConfig.flasksInFurnace || 1);
+  let totalPowderG = 0, totalWaterMl = 0, totalMetalG = 0;
+  state.batch.forEach(item => {
+    totalPowderG += item.powderWeight || 0;
+    totalWaterMl += item.waterVolume || 0;
+    totalMetalG += item.totalMetalNeeded || 0;
+  });
+
+  const powderKg = totalPowderG / 1000;
+  const waterL = totalWaterMl / 1000;
+  const prices = burnoutConfig.prices || { powderKg: 160, waterL: 8, meltingFlask: 45, metalLossPercent: 1.0, metalPriceGram: 2600 };
+
+  const costPowder = powderKg * (prices.powderKg || 160);
+  const costWater = waterL * (prices.waterL || 8);
+  const costMaterials = costPowder + costWater;
+  const costBurnout = lastBurnoutCalculations.totalCost || 0;
+  const costMeltingLabor = (prices.meltingFlask || 45) * flasksCount;
+  const metalLossG = totalMetalG * ((prices.metalLossPercent || 1.0) / 100);
+  const costMetalLoss = metalLossG * (prices.metalPriceGram || 2600);
+  const costMeltingTotal = costMeltingLabor + costMetalLoss;
+  const grandTotal = costMaterials + costBurnout + costMeltingTotal;
+  const costPerFlask = grandTotal / Math.max(1, flasksCount);
+  const costPerGram = totalMetalG > 0 ? (grandTotal / totalMetalG) : 0;
+
+  let txt = `=======================================================\n`;
+  txt += `   CASTING CALC — ЕКОНОМІЧНИЙ ЗВІТ СОБІВАРТОСТІ ЛИТВА   \n`;
+  txt += `=======================================================\n`;
+  txt += `Проект: "${projectTitle || "Проект литва"}"\n`;
+  txt += `Дата формування звіту: ${readableDate}\n`;
+  txt += `Опок у завантаженні: ${flasksCount} шт. | Загальний метал: ${totalMetalG.toFixed(2)} г\n\n`;
+
+  txt += `-------------------------------------------------------\n`;
+  txt += `⚡ 1. ТЕРМОГРАМА ТА ЕНЕРГОВИТРАТИ МУФЕЛЬНОЇ ПЕЧІ:\n`;
+  txt += `-------------------------------------------------------\n`;
+  txt += ` • Потужність печі:     ${burnoutConfig.furnacePower} кВт (з похибкою +${burnoutConfig.powerReserve}%: ${lastBurnoutCalculations.effectivePower.toFixed(2)} кВт)\n`;
+  txt += ` • Час циклу:           ${Math.floor(lastBurnoutCalculations.totalMinutes / 60)} год ${lastBurnoutCalculations.totalMinutes % 60} хв (Старт ${burnoutConfig.startTime || "23:00"} → Фініш ${lastBurnoutCalculations.finishTimeStr})\n`;
+  txt += ` • Споживання енергії:  ${lastBurnoutCalculations.totalActualKwh.toFixed(2)} кВт·год (номінальне: ${lastBurnoutCalculations.totalNominalKwh.toFixed(2)} кВт·год)\n`;
+  txt += ` • Тарифна сітка:       ${burnoutConfig.tariffType === 'dual' ? 'Двозонна (Ніч: 2.16 грн / День: 4.32 грн)' : (burnoutConfig.tariffType === 'single' ? `Побутова фіксована (${burnoutConfig.tariffSingle} грн)` : `Комерційна (${burnoutConfig.tariffCommercial} грн)`)}\n`;
+  txt += ` • Нічна зона (23-07):  ${lastBurnoutCalculations.nightKwh.toFixed(2)} кВт·год = ${lastBurnoutCalculations.nightCost.toFixed(2)} грн\n`;
+  txt += ` • Денна зона (07-23):  ${lastBurnoutCalculations.dayKwh.toFixed(2)} кВт·год = ${lastBurnoutCalculations.dayCost.toFixed(2)} грн\n`;
+  txt += ` • ВАРТІСТЬ ВИПАЛЮВАННЯ: ${costBurnout.toFixed(2)} грн (${(costBurnout / flasksCount).toFixed(2)} грн/опока)\n\n`;
+
+  txt += `📋 Етапи графіка випалювання:\n`;
+  burnoutConfig.steps.forEach((s, idx) => {
+    const calc = lastBurnoutCalculations.stepCalculations[idx] || { stepActualKwh: 0, stepCost: 0 };
+    txt += `  [${idx + 1}] ${s.name}: ${s.startT}°C -> ${s.endT}°C | ${s.durationMin} хв | Навантаження: ${s.loadPercent}% -> ${calc.stepActualKwh.toFixed(2)} кВт·г (${calc.stepCost.toFixed(2)} грн)\n`;
+  });
+  txt += `\n`;
+
+  txt += `-------------------------------------------------------\n`;
+  txt += `🥣 2. МАТЕРІАЛИ ФОРМОВКИ (ПОРОШОК + ДИСТИЛЬОВАНА ВОДА):\n`;
+  txt += `-------------------------------------------------------\n`;
+  txt += ` • Суха формомаса:      ${powderKg.toFixed(2)} кг (${Math.round(totalPowderG)} г) × ${prices.powderKg} грн/кг = ${costPowder.toFixed(2)} грн\n`;
+  txt += ` • Дистильована вода:   ${waterL.toFixed(2)} л (${Math.round(totalWaterMl)} мл) × ${prices.waterL} грн/л = ${costWater.toFixed(2)} грн\n`;
+  txt += ` • РАЗОМ МАТЕРІАЛИ:     ${costMaterials.toFixed(2)} грн\n\n`;
+
+  txt += `-------------------------------------------------------\n`;
+  txt += `🔥 3. ПЛАВКА МЕТАЛУ ТА ТЕХНОЛОГІЧНИЙ ЧАД (УГАР):\n`;
+  txt += `-------------------------------------------------------\n`;
+  txt += ` • Робота плавки:       ${flasksCount} опок × ${prices.meltingFlask} грн = ${costMeltingLabor.toFixed(2)} грн\n`;
+  txt += ` • Норма чаду металу:   ${prices.metalLossPercent}% від ${totalMetalG.toFixed(2)} г = ${metalLossG.toFixed(2)} г угару\n`;
+  txt += ` • Вартість втрат:      ${metalLossG.toFixed(2)} г × ${prices.metalPriceGram} грн/г = ${costMetalLoss.toFixed(2)} грн\n`;
+  txt += ` • РАЗОМ ПЛАВКА + ЧАД:  ${costMeltingTotal.toFixed(2)} грн\n\n`;
+
+  txt += `=======================================================\n`;
+  txt += `💎 4. ПОВНА ЗВЕДЕНА СОБІВАРТІСТЬ ТЕХНОЛОГІЧНОГО ЦИКЛУ:\n`;
+  txt += `=======================================================\n`;
+  txt += ` 1. Формомаса + вода:   ${costMaterials.toFixed(2)} грн\n`;
+  txt += ` 2. Енергія випалювання: ${costBurnout.toFixed(2)} грн\n`;
+  txt += ` 3. Плавка та витратні: ${costMeltingLabor.toFixed(2)} грн\n`;
+  txt += ` 4. Угар металу:        ${costMetalLoss.toFixed(2)} грн\n`;
+  txt += `-------------------------------------------------------\n`;
+  txt += ` 🏁 ВСЬОГО СОБІВАРТІСТЬ: ${grandTotal.toFixed(2)} грн\n`;
+  txt += ` 🏺 НА 1 ОПОКУ:          ${costPerFlask.toFixed(2)} грн / опока\n`;
+  txt += ` ⚖️ НА 1 ГРАМ МЕТАЛУ:    ${costPerGram.toFixed(2)} грн / г\n`;
+  txt += `=======================================================\n`;
+  txt += `Casting Calc — Ювелірне виробництво та економіка литва\n`;
+
+  return { txt, dateStr, readableDate };
+}
+
+function exportCostReportTXT() {
+  const { txt } = getCostReportText();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(() => {
+      showToast("📋 Фінансовий звіт собівартості скопійовано!");
+    }).catch(() => {
+      fallbackCopyText(txt);
+    });
+  } else {
+    fallbackCopyText(txt);
+  }
+}
+
+function downloadCostReportTXT() {
+  const { txt, dateStr } = getCostReportText();
+  const safeTitle = (projectTitle || "Проект").replace(/[^\w\dа-яА-ЯіїєґІЇЄҐ_-]/gi, '_');
+  const filename = `Собівартість_${safeTitle}_${dateStr}.txt`;
+
+  const blob = new Blob(["\uFEFF" + txt], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast("📥 Файл економічного звіту збережено!");
+}
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 </script>
 
