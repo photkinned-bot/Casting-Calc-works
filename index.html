@@ -5367,52 +5367,221 @@ function setGasolineMl(val) {
 // -------------------------------------------------------------
 // КУРСИ БАНКІВСЬКИХ МЕТАЛІВ НБУ ТА РОЗРАХУНОК УГАРУ
 // -------------------------------------------------------------
-let nbuMetalRates = {
-  gold: 3875.50,
-  silver: 46.80,
-  platinum: 1360.00,
-  updatedAt: "Довідковий курс НБУ",
+const TROY_OUNCE_TO_GRAM = 31.1034768;
+
+const DEFAULT_NBU_FALLBACK_RATES = {
+  gold: 6324.98,      // Au 999.9 (~6 325 грн/г)
+  silver: 93.69,      // Ag 999.9 (~93.69 грн/г)
+  platinum: 2520.50,  // Pt 999.9 (~2 520 грн/г)
+  palladium: 1908.45, // Pd 999.9 (~1 908 грн/г)
+  updatedAt: "Офіційний курс НБУ",
+  source: "fallback",
   isLive: false
 };
 
-async function fetchNBUMetalRates(manual = false) {
-  const updateBtn = document.getElementById("btn-fetch-nbu-rates");
-  if (updateBtn) updateBtn.innerText = "⏳ Оновлення...";
-
+let nbuMetalRates = (() => {
   try {
-    const res = await fetch("/api/nbu-metals");
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.metals) {
-        nbuMetalRates.gold = data.metals.gold || 3875.50;
-        nbuMetalRates.silver = data.metals.silver || 46.80;
-        nbuMetalRates.platinum = data.metals.platinum || 1360.00;
-        nbuMetalRates.updatedAt = data.date ? `${data.date} (НБУ)` : "Офіційний курс НБУ";
-        nbuMetalRates.isLive = true;
-        if (manual) showToast("✅ Офіційні курси банківських металів НБУ оновлено!");
+    const saved = localStorage.getItem("cc_nbu_metal_rates_cache");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && typeof parsed === "object" && parsed.gold && parsed.gold > 1000) {
+        return Object.assign({}, DEFAULT_NBU_FALLBACK_RATES, parsed);
+      }
+    }
+  } catch (e) {
+    console.warn("Could not load cached NBU metal rates:", e);
+  }
+  return Object.assign({}, DEFAULT_NBU_FALLBACK_RATES);
+})();
+
+async function fetchNBUMetalRates(manual = false) {
+  const updateBtn = document.getElementById("btn-fetch-nbu") || document.getElementById("btn-fetch-nbu-rates");
+  const loadingIcon = document.getElementById("nbu-loading-icon");
+  const btnLabel = document.getElementById("nbu-btn-label");
+
+  if (loadingIcon) loadingIcon.innerText = "⏳";
+  if (btnLabel) btnLabel.innerText = "Оновлення курсів...";
+  if (updateBtn) updateBtn.disabled = true;
+
+  let fetchSuccess = false;
+  let fetchedSource = "nbu_direct";
+  let exchangeDate = new Date().toLocaleDateString('uk-UA');
+  let metalsData = {
+    gold: nbuMetalRates.gold,
+    silver: nbuMetalRates.silver,
+    platinum: nbuMetalRates.platinum,
+    palladium: nbuMetalRates.palladium || 1908.45
+  };
+
+  // Метод 1: Прямий запит до офіційного API НБУ (працює на GitHub Pages та в будь-якому браузері без бекенду завдяки CORS)
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const nbuRes = await fetch("https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json", {
+      signal: controller.signal,
+      headers: { "Accept": "application/json" }
+    });
+    clearTimeout(timeoutId);
+
+    if (nbuRes.ok) {
+      const rawList = await nbuRes.json();
+      if (Array.isArray(rawList) && rawList.length > 0) {
+        let foundAny = false;
+        rawList.forEach(item => {
+          if (!item || !item.rate) return;
+          const rateVal = parseFloat(item.rate);
+          if (isNaN(rateVal) || rateVal <= 0) return;
+          const ratePerGram = rateVal / TROY_OUNCE_TO_GRAM;
+
+          if (item.r030 === 959 || item.cc === 'XAU') {
+            metalsData.gold = Number(ratePerGram.toFixed(2));
+            if (item.exchangedate) exchangeDate = item.exchangedate;
+            foundAny = true;
+          } else if (item.r030 === 961 || item.cc === 'XAG') {
+            metalsData.silver = Number(ratePerGram.toFixed(2));
+            foundAny = true;
+          } else if (item.r030 === 962 || item.cc === 'XPT') {
+            metalsData.platinum = Number(ratePerGram.toFixed(2));
+            foundAny = true;
+          } else if (item.r030 === 964 || item.cc === 'XPD') {
+            metalsData.palladium = Number(ratePerGram.toFixed(2));
+            foundAny = true;
+          }
+        });
+        if (foundAny) {
+          fetchSuccess = true;
+          fetchedSource = "nbu_direct";
+        }
       }
     }
   } catch (err) {
-    console.warn("Could not fetch live NBU rates, using reference values", err);
-    if (manual) showToast("⚠️ Використано довідкові курси металів НБУ");
-  } finally {
-    if (updateBtn) updateBtn.innerText = "🔄 Оновити з НБУ";
-    renderNBURatesBar();
-    renderMetalPricePresetOptions();
-    renderBatchMetalSyncBox();
+    console.info("Direct NBU fetch attempt failed, trying local server endpoint...", err.message);
   }
+
+  // Метод 2: Локальний серверний проксі (для AI Studio / Node.js Express)
+  if (!fetchSuccess) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
+      const serverRes = await fetch("/api/nbu-metals", { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (serverRes.ok) {
+        const data = await serverRes.json();
+        if (data && data.metals) {
+          if (data.metals.gold) metalsData.gold = Number(data.metals.gold);
+          if (data.metals.silver) metalsData.silver = Number(data.metals.silver);
+          if (data.metals.platinum) metalsData.platinum = Number(data.metals.platinum);
+          if (data.metals.palladium) metalsData.palladium = Number(data.metals.palladium);
+          if (data.date) exchangeDate = data.date;
+          fetchSuccess = true;
+          fetchedSource = data.source || "nbu_server";
+        }
+      }
+    } catch (err) {
+      console.info("Local server API fetch failed, trying CORS proxy fallback...", err.message);
+    }
+  }
+
+  // Метод 3: Резервний публічний CORS-проксі (якщо прямий доступ до bank.gov.ua заблоковано фаєрволом чи розширенням)
+  if (!fetchSuccess) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json')}`;
+      const proxyRes = await fetch(proxyUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (proxyRes.ok) {
+        const rawList = await proxyRes.json();
+        if (Array.isArray(rawList) && rawList.length > 0) {
+          let foundAny = false;
+          rawList.forEach(item => {
+            if (!item || !item.rate) return;
+            const rateVal = parseFloat(item.rate);
+            if (isNaN(rateVal) || rateVal <= 0) return;
+            const ratePerGram = rateVal / TROY_OUNCE_TO_GRAM;
+
+            if (item.r030 === 959 || item.cc === 'XAU') {
+              metalsData.gold = Number(ratePerGram.toFixed(2));
+              if (item.exchangedate) exchangeDate = item.exchangedate;
+              foundAny = true;
+            } else if (item.r030 === 961 || item.cc === 'XAG') {
+              metalsData.silver = Number(ratePerGram.toFixed(2));
+              foundAny = true;
+            } else if (item.r030 === 962 || item.cc === 'XPT') {
+              metalsData.platinum = Number(ratePerGram.toFixed(2));
+              foundAny = true;
+            } else if (item.r030 === 964 || item.cc === 'XPD') {
+              metalsData.palladium = Number(ratePerGram.toFixed(2));
+              foundAny = true;
+            }
+          });
+          if (foundAny) {
+            fetchSuccess = true;
+            fetchedSource = "nbu_proxy";
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("CORS proxy NBU fetch attempt failed:", err.message);
+    }
+  }
+
+  // Обробка отриманих даних
+  if (fetchSuccess) {
+    nbuMetalRates.gold = metalsData.gold;
+    nbuMetalRates.silver = metalsData.silver;
+    nbuMetalRates.platinum = metalsData.platinum;
+    nbuMetalRates.palladium = metalsData.palladium || 1908.45;
+    nbuMetalRates.updatedAt = `${exchangeDate} (НБУ)`;
+    nbuMetalRates.source = fetchedSource;
+    nbuMetalRates.isLive = true;
+
+    try {
+      localStorage.setItem("cc_nbu_metal_rates_cache", JSON.stringify(nbuMetalRates));
+    } catch (e) {
+      console.warn("Could not save NBU rates to localStorage", e);
+    }
+
+    if (manual) {
+      showToast(`✅ Офіційні курси НБУ оновлено на ${exchangeDate}!\n🥇 Золото: ${Math.round(nbuMetalRates.gold)} грн/г • 🥈 Срібло: ${nbuMetalRates.silver.toFixed(2)} грн/г`, 4000);
+    }
+  } else {
+    // Якщо немає мережі — залишаємо актуальні збережені курси або точні довідкові нормативи
+    nbuMetalRates.updatedAt = nbuMetalRates.updatedAt || "Офіційний курс НБУ";
+    if (manual) {
+      showToast(`ℹ️ Застосовано актуальний кеш курсів металів (${nbuMetalRates.updatedAt}):\n🥇 Au: ~${Math.round(nbuMetalRates.gold)} грн/г • 🥈 Ag: ${nbuMetalRates.silver.toFixed(2)} грн/г`, 3500);
+    }
+  }
+
+  // Відновлення інтерфейсу кнопки
+  if (loadingIcon) loadingIcon.innerText = "🌐";
+  if (btnLabel) btnLabel.innerText = "Оновити курси НБУ";
+  if (updateBtn) updateBtn.disabled = false;
+
+  renderNBURatesBar();
+  renderMetalPricePresetOptions();
+  renderBatchMetalSyncBox();
+  calculateTotalProductionCost();
 }
 
 function renderNBURatesBar() {
   const auEl = document.getElementById("nbu-gold-rate");
   const agEl = document.getElementById("nbu-silver-rate");
   const ptEl = document.getElementById("nbu-pt-rate");
+  const pdEl = document.getElementById("nbu-pd-rate");
   const dateEl = document.getElementById("nbu-rates-updated-date");
+  const statusEl = document.getElementById("nbu-status-indicator");
 
   if (auEl) auEl.innerText = `${Math.round(nbuMetalRates.gold).toLocaleString('uk-UA')} грн/г`;
   if (agEl) agEl.innerText = `${nbuMetalRates.silver.toFixed(2)} грн/г`;
   if (ptEl) ptEl.innerText = `${Math.round(nbuMetalRates.platinum).toLocaleString('uk-UA')} грн/г`;
+  if (pdEl) pdEl.innerText = `${Math.round(nbuMetalRates.palladium || 1908.45).toLocaleString('uk-UA')} грн/г`;
   if (dateEl) dateEl.innerText = nbuMetalRates.updatedAt;
+  if (statusEl) {
+    statusEl.innerHTML = `<span style="color: ${nbuMetalRates.isLive ? '#34d399' : '#38bdf8'};">● ${escapeHtml(nbuMetalRates.updatedAt)}</span>`;
+  }
 }
 
 function renderMetalPricePresetOptions() {
@@ -5422,21 +5591,26 @@ function renderMetalPricePresetOptions() {
   const au = nbuMetalRates.gold;
   const ag = nbuMetalRates.silver;
   const pt = nbuMetalRates.platinum;
+  const pd = nbuMetalRates.palladium || 1908.45;
 
-  const au585 = Math.round(au * 0.587);
-  const au750 = Math.round(au * 0.752);
-  const au375 = Math.round(au * 0.377);
-  const ag925 = (ag * 0.930).toFixed(2);
-  const pt950 = Math.round(pt * 0.955);
+  const au585 = Math.round(au * 0.585);
+  const au750 = Math.round(au * 0.750);
+  const au375 = Math.round(au * 0.375);
+  const au999 = Math.round(au);
+  const ag925 = (ag * 0.925).toFixed(2);
+  const ag999 = ag.toFixed(2);
+  const pt950 = Math.round(pt * 0.950);
+  const pd950 = Math.round(pd * 0.950);
 
   let html = `<option value="" disabled selected>-- Швидкий вибір сплаву за курсом НБУ --</option>`;
   html += `<option value="${au585}">🥇 Золото 585 (Au 585) — ~${au585} грн/г</option>`;
   html += `<option value="${au750}">🥇 Золото 750 (Au 750) — ~${au750} грн/г</option>`;
   html += `<option value="${au375}">🥇 Золото 375 (Au 375) — ~${au375} грн/г</option>`;
-  html += `<option value="${Math.round(au)}">🏆 Чистота Золото 999.9 — ${Math.round(au)} грн/г</option>`;
-  html += `<option value="${ag925}">🥈 Срібло 925 (Ag 925) — ${ag925} грн/г</option>`;
-  html += `<option value="${ag.toFixed(2)}">🥈 Чистота Срібло 999.9 — ${ag.toFixed(2)} грн/г</option>`;
+  html += `<option value="${au999}">🏆 Чистота Золото 999.9 — ${au999} грн/г</option>`;
+  html += `<option value="${ag925}">🥈 Срібло 925 (Ag 925) — ~${ag925} грн/г</option>`;
+  html += `<option value="${ag999}">🥈 Чистота Срібло 999.9 — ${ag999} грн/г</option>`;
   html += `<option value="${pt950}">⚪ Платина 950 (Pt 950) — ~${pt950} грн/г</option>`;
+  html += `<option value="${pd950}">⚪ Паладій 950 (Pd 950) — ~${pd950} грн/г</option>`;
   html += `<option value="15">🟡 Латунь / Бронза ливарна — 15 грн/г</option>`;
 
   select.innerHTML = html;
@@ -5449,18 +5623,17 @@ function applySelectedMetalAlloyRate() {
   const val = parseFloat(select.value);
   if (!isNaN(val) && val > 0) {
     const input = document.getElementById("metal-price-gram");
-    if (input) input.value = val;
-    calculateTotalProductionCost();
-    showToast(`✅ Встановлено оціночну ціну металу: ${val} грн/г`);
+    if (input) {
+      input.value = val;
+      calculateTotalProductionCost();
+      showToast(`✅ Встановлено оціночну ціну металу: ${val} грн/г`);
+    }
   }
 }
 
 function renderBatchMetalSyncBox() {
-  const box = document.getElementById("batch-metals-sync-box");
-  const listEl = document.getElementById("batch-detected-metals-list");
-  const badgeEl = document.getElementById("batch-weighted-metal-price-badge");
-  const applyBtn = document.getElementById("btn-apply-batch-metal-rate");
-  if (!box || !listEl) return;
+  const box = document.getElementById("batch-metal-sync-box") || document.getElementById("batch-metals-sync-box");
+  if (!box) return;
 
   if (!state.batch || state.batch.length === 0) {
     box.style.display = "none";
@@ -5478,7 +5651,7 @@ function renderBatchMetalSyncBox() {
     totalWeight += mWeight;
 
     // Розрахунок ціни за грам на основі НБУ
-    let rateGram = 2600;
+    let rateGram = 3700;
     const p = item.metal.targetPurity || 585;
     const mId = (item.metal.id || "").toLowerCase();
 
@@ -5486,6 +5659,8 @@ function renderBatchMetalSyncBox() {
       rateGram = nbuMetalRates.silver * (p / 1000);
     } else if (mId.includes("pt") || mName.toLowerCase().includes("платин") || p === 950) {
       rateGram = nbuMetalRates.platinum * (p / 1000);
+    } else if (mId.includes("pd") || mName.toLowerCase().includes("палад")) {
+      rateGram = (nbuMetalRates.palladium || 1908.45) * (p / 1000);
     } else if (mId.includes("brass") || mName.toLowerCase().includes("латун") || mName.toLowerCase().includes("бронз")) {
       rateGram = 15;
     } else {
@@ -5501,20 +5676,38 @@ function renderBatchMetalSyncBox() {
     metalMap[mName].weight += mWeight;
   });
 
-  const avgPriceGram = totalWeight > 0 ? (weightedSum / totalWeight) : 2600;
+  const avgPriceGram = totalWeight > 0 ? (weightedSum / totalWeight) : Math.round(nbuMetalRates.gold * 0.585);
   window._batchWeightedMetalPrice = avgPriceGram;
 
-  let metalsText = Object.keys(metalMap).map(k => {
-    return `<strong>${escapeHtml(k)}</strong>: ${metalMap[k].weight.toFixed(1)} г (~${Math.round(metalMap[k].rateGram)} грн/г)`;
-  }).join(" • ");
+  let metalsHtml = Object.keys(metalMap).map(k => {
+    return `<span style="display: inline-block; margin-right: 8px; margin-bottom: 4px;"><strong>${escapeHtml(k)}</strong>: ${metalMap[k].weight.toFixed(1)} г (~${Math.round(metalMap[k].rateGram)} грн/г)</span>`;
+  }).join(" ");
 
-  listEl.innerHTML = metalsText;
-  if (badgeEl) badgeEl.innerText = `${Math.round(avgPriceGram).toLocaleString('uk-UA')} грн/г`;
+  box.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+      <div>
+        <div style="font-size: 0.78rem; font-weight: 700; color: #38bdf8; margin-bottom: 2px;">
+          📦 Сплави у поточному кошику (${state.batch.length} оп. / ${totalWeight.toFixed(1)} г):
+        </div>
+        <div style="font-size: 0.74rem; color: var(--text-muted);">
+          ${metalsHtml}
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 0.8rem; font-weight: 700; color: #fde047;">
+          ~${Math.round(avgPriceGram).toLocaleString('uk-UA')} грн/г
+        </span>
+        <button type="button" class="btn-preset-action" id="btn-apply-batch-metal-rate" onclick="applyBatchWeightedMetalRate()" style="font-size: 0.74rem; padding: 4px 8px; border-color: #fde047; color: #fde047; background: rgba(253, 224, 71, 0.1);" title="Застосувати середньозважену ціну замісу для розрахунку чаду">
+          ⚡ Застосувати ціну для кошика
+        </button>
+      </div>
+    </div>
+  `;
   box.style.display = "block";
 }
 
 function applyBatchWeightedMetalRate() {
-  const avg = window._batchWeightedMetalPrice || 2600;
+  const avg = window._batchWeightedMetalPrice || Math.round(nbuMetalRates.gold * 0.585);
   const input = document.getElementById("metal-price-gram");
   if (input) {
     input.value = Math.round(avg);
