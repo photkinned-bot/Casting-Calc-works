@@ -490,8 +490,12 @@
   </div>
 </div>
 
-<!-- Прихований інпут для вибору JSON файлу -->
+<!-- Прихований інпут для вибору JSON файлу проекту -->
 <input type="file" id="project-file-input" accept=".json,application/json" style="display: none;" onchange="handleProjectFileSelect(event)">
+<!-- Прихований інпут для імпорту пресетів -->
+<input type="file" id="presets-file-input" accept=".json,application/json" style="display: none;" onchange="handlePresetsFileSelect(event)">
+<!-- Прихований інпут для імпорту профілю випалювання -->
+<input type="file" id="burnout-profile-file-input" accept=".json,application/json" style="display: none;" onchange="handleBurnoutProfileFileSelect(event)">
 
 <div id="toast-container" class="toast-container"></div>
 
@@ -616,7 +620,11 @@
         <span>Пресет-менеджер</span>
         <button type="button" class="help-btn" onclick="openHelpModal('preset_manager')" title="Довідка: Пресет-менеджер">?</button>
       </div>
-      <button class="btn btn-secondary btn-sm" onclick="openPresetModal()">Керування пресетами</button>
+      <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="exportAllPresetsJSON()" style="font-size: 0.76rem; padding: 4px 8px;" title="Зберегти всі пресети формомаси, опок та профілів випалювання у файл .json на пристрій">💾 Експорт пресетів</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="triggerImportPresetsJSON()" style="font-size: 0.76rem; padding: 4px 8px;" title="Завантажити пресети з файлу .json">📂 Імпорт пресетів</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="openPresetModal()" style="font-size: 0.76rem; padding: 4px 10px;">⚙️ Керування</button>
+      </div>
     </div>
     <div class="grid">
       <div class="form-group">
@@ -641,7 +649,7 @@
         </select>
         <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
           <label for="preset-investment-price" style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; margin-bottom: 0;">Ціна (грн/кг):</label>
-          <input type="number" id="preset-investment-price" value="165" step="5" min="0" style="padding: 4px 8px; font-size: 0.85rem; font-weight: 600; width: 95px; color: #a7f3d0;" oninput="onInvestmentPriceDirectInput(this.value)" title="Ціна формомаси за 1 кг (синхронізована із вкладкою 'Випалювання і вартість')">
+          <input type="number" id="preset-investment-price" value="165" step="5" min="0" style="padding: 4px 8px; font-size: 0.85rem; font-weight: 600; width: 95px; color: #a7f3d0;" oninput="onInvestmentPriceDirectInput(this.value, 'casting')" title="Ціна формомаси за 1 кг (100% синхронізована із вкладкою 'Випалювання і вартість')">
           <span id="preset-inv-sync-info" style="font-size: 0.72rem; color: #38bdf8; margin-left: auto;">⚡ Синхронізовано</span>
         </div>
       </div>
@@ -1072,8 +1080,14 @@
         <!-- Верхня панель швидких дій -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
           <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="openManageBurnoutPresetsModal()" style="font-size: 0.78rem; padding: 5px 10px;" title="Керування збереженими пресетами">
-              ⚙️ Менеджер пресетів
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openManageBurnoutPresetsModal()" style="font-size: 0.78rem; padding: 5px 10px;" title="Керування збереженими пресетами випалювання">
+              ⚙️ Менеджер шаблонів
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="exportBurnoutProfileJSON()" style="font-size: 0.78rem; padding: 5px 10px;" title="Зберегти поточний температурний профіль у файл .json">
+              💾 Експорт графіка
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="triggerImportBurnoutProfileJSON()" style="font-size: 0.78rem; padding: 5px 10px;" title="Завантажити температурний профіль з файлу .json">
+              📂 Імпорт графіка
             </button>
             <button type="button" class="btn btn-secondary btn-sm" onclick="resetBurnoutToDefault()" style="font-size: 0.78rem; padding: 5px 10px;" title="Скинути до стандартного 8-ступеневого графіка">
               ↩ Скинути профіль
@@ -1279,16 +1293,21 @@
                 <span style="font-weight: 700; color: #a7f3d0; font-size: 0.95rem;">1. Формомаса і вода</span>
                 <button type="button" class="help-btn help-btn-green" onclick="openHelpModal('cost_materials')" title="Довідка: Собівартість формомаси та води">?</button>
               </div>
-              <span class="badge badge-success" id="cost-powder-source-badge" style="font-size: 0.7rem;">⚡ Синхронізовано</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="badge badge-success" id="cost-powder-source-badge" style="font-size: 0.7rem;">⚡ Синхронізовано</span>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openPresetModal()" style="font-size: 0.72rem; padding: 2px 7px;" title="Керування пресетами формомаси та опок">⚙️ Пресети</button>
+              </div>
             </div>
 
-            <!-- Вибір формомаси (пресети) - повністю синхронізований із вкладкою "Литва і формомаса" -->
+            <!-- Вибір формомаси (пресети) - 100% синхронізований із вкладкою 'Литва і формомаса' -->
             <div class="form-group" style="margin-top: 6px; margin-bottom: 8px;">
-              <label for="material-price-preset-select" style="font-size: 0.76rem; color: #cbd5e1; display: flex; justify-content: space-between; align-items: center;">
-                <span>Вибір формомаси (пресет):</span>
-                <span style="font-size: 0.7rem; color: #38bdf8;">🔄 Синхрон із вкладкою "Литва"</span>
-              </label>
-              <select id="material-price-preset-select" class="preset-select-sm" style="width: 100%; padding: 6px 10px; font-weight: 600;" onchange="applyMaterialPricePreset()" title="Вибір формомаси - автоматично синхронізується з Preset Manager вкладки 'Литва і формомаса'">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <label for="material-price-preset-select" style="font-size: 0.76rem; color: #cbd5e1; margin-bottom: 0;">
+                  Формомаса W/P (Пресет):
+                </label>
+                <span id="cost-powder-ratio-badge" class="badge" style="font-size: 0.7rem; color: #38bdf8; background: rgba(56,189,248,0.12); border-color: #38bdf8;">W/P 35:100</span>
+              </div>
+              <select id="material-price-preset-select" class="preset-select-sm" style="width: 100%; padding: 6px 10px; font-weight: 600;" onchange="applyInvestmentPreset('burnout')" title="Вибір формомаси - 100% синхрон із вкладкою 'Калькулятор литва'">
                 <!-- Опції пресетів формомаси -->
               </select>
             </div>
@@ -1302,14 +1321,14 @@
                   Ціна порошку (грн/кг):
                   <button type="button" class="help-btn" onclick="openHelpModal('cost_powder_kg')" title="Довідка: Ціна формомаси за кг">?</button>
                 </label>
-                <input type="number" id="price-powder-kg" value="165" step="5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem; font-weight: 600; color: #a7f3d0;" oninput="onMaterialPriceManualInput()">
+                <input type="number" id="price-powder-kg" value="165" step="5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem; font-weight: 600; color: #a7f3d0;" oninput="onInvestmentPriceDirectInput(this.value, 'burnout')" title="Ціна порошку за 1 кг (синхронізована із першою вкладкою)">
               </div>
               <div class="form-group" style="min-width: 0;">
                 <label for="price-water-l" style="font-size: 0.76rem; line-height: 1.2;">
                   Ціна води (грн/л):
                   <button type="button" class="help-btn" onclick="openHelpModal('cost_water_l')" title="Довідка: Ціна води за літр">?</button>
                 </label>
-                <input type="number" id="price-water-l" value="8" step="1" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onMaterialPriceManualInput()">
+                <input type="number" id="price-water-l" value="8" step="1" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onWaterPriceDirectInput(this.value)" title="Ціна дистильованої води за 1 л">
               </div>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 0.85rem;">
@@ -1706,10 +1725,20 @@
         </div>
       </div>
 
-      <!-- Кнопка скидання до заводських значень -->
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <button class="btn btn-secondary btn-sm" id="btn-reset-presets" onclick="resetDefaultPresets()">Скинути до стандартних</button>
-        <button class="btn btn-sm" id="btn-done-presets" onclick="closePresetModal()">Готово</button>
+      <!-- Кнопки експорту/імпорту та скидання до заводських значень -->
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
+        <div style="display: flex; gap: 8px; justify-content: space-between; flex-wrap: wrap;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="exportAllPresetsJSON()" style="flex: 1; min-width: 160px; font-size: 0.78rem;" title="Зберегти всі пресети формомаси, опок та профілів випалювання у файл .json">
+            💾 Експорт пресетів (.json)
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="triggerImportPresetsJSON()" style="flex: 1; min-width: 160px; font-size: 0.78rem;" title="Завантажити пресети з файлу .json на пристрої">
+            📂 Імпорт пресетів (.json)
+          </button>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+          <button class="btn btn-secondary btn-sm" id="btn-reset-presets" onclick="resetDefaultPresets()">Скинути до стандартних</button>
+          <button class="btn btn-sm" id="btn-done-presets" onclick="closePresetModal()">Готово</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1834,11 +1863,21 @@
         <!-- Динамічний список пресетів -->
       </div>
 
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; border-top: 1px solid var(--border); padding-top: 12px;">
-        <button type="button" class="btn btn-secondary btn-sm" onclick="openSaveBurnoutPresetModal(); closeManageBurnoutPresetsModal();" style="color: #34d399;">
-          + Зберегти поточний як пресет
-        </button>
-        <button type="button" class="btn btn-sm" onclick="closeManageBurnoutPresetsModal()">Закрити</button>
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px; border-top: 1px solid var(--border); padding-top: 12px;">
+        <div style="display: flex; gap: 8px; justify-content: space-between; flex-wrap: wrap;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="exportAllPresetsJSON()" style="flex: 1; min-width: 160px; font-size: 0.78rem;" title="Зберегти всі власні пресети випалювання та матеріалів у файл .json">
+            💾 Експортувати всі пресети (.json)
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="triggerImportPresetsJSON()" style="flex: 1; min-width: 160px; font-size: 0.78rem;" title="Завантажити пресети з файлу .json">
+            📂 Імпортувати пресети (.json)
+          </button>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="openSaveBurnoutPresetModal(); closeManageBurnoutPresetsModal();" style="color: #34d399;">
+            + Зберегти поточний як пресет
+          </button>
+          <button type="button" class="btn btn-sm" onclick="closeManageBurnoutPresetsModal()">Закрити</button>
+        </div>
       </div>
     </div>
   </div>
@@ -2407,7 +2446,7 @@ function renderPresetSelects() {
     }
   }
 
-  // Оновлення полів цін та бейджа з активного пресету формомаси
+  // Оновлення полів цін та бейджів з активного пресету формомаси
   const activeInvIdx = invSel ? parseInt(invSel.value, 10) : 0;
   if (activeInvIdx >= 0 && state.investments[activeInvIdx]) {
     const activeInv = state.investments[activeInvIdx];
@@ -2415,6 +2454,7 @@ function renderPresetSelects() {
     const burnoutPowderEl = document.getElementById("price-powder-kg");
     const burnoutWaterEl = document.getElementById("price-water-l");
     const ratioBadge = document.getElementById("preset-inv-ratio-badge");
+    const burnoutRatioBadge = document.getElementById("cost-powder-ratio-badge");
     const pVal = activeInv.priceKg !== undefined ? activeInv.priceKg : 160;
     const wVal = activeInv.priceWater !== undefined ? activeInv.priceWater : 8;
 
@@ -2424,6 +2464,10 @@ function renderPresetSelects() {
     if (ratioBadge) {
       ratioBadge.innerText = `${activeInv.ratio}:100`;
       ratioBadge.title = `Вода: ${activeInv.ratio} мл на 100 г сухого порошку`;
+    }
+    if (burnoutRatioBadge) {
+      burnoutRatioBadge.innerText = `W/P ${activeInv.ratio}:100`;
+      burnoutRatioBadge.title = `Співвідношення води: ${activeInv.ratio} мл на 100 г сухої суміші`;
     }
   }
   
@@ -2656,6 +2700,12 @@ function applyInvestmentPreset(source = "casting") {
       ratioBadge.title = `Вода: ${inv.ratio} мл на 100 г сухого порошку`;
     }
 
+    const burnoutRatioBadge = document.getElementById("cost-powder-ratio-badge");
+    if (burnoutRatioBadge) {
+      burnoutRatioBadge.innerText = `W/P ${inv.ratio}:100`;
+      burnoutRatioBadge.title = `Співвідношення води: ${inv.ratio} мл на 100 г сухої суміші`;
+    }
+
     showToast(`🔄 Синхронізовано формомасу: ${inv.name.split('(')[0].trim()} (${inv.ratio}:100 | ${priceVal} грн/кг)`);
   }
 
@@ -2667,16 +2717,35 @@ function applyMaterialPricePreset() {
   applyInvestmentPreset("burnout");
 }
 
-function onInvestmentPriceDirectInput(val) {
+function onInvestmentPriceDirectInput(val, source = "casting") {
   const pVal = parseFloat(val);
   if (!isNaN(pVal) && pVal >= 0) {
+    const castPriceInput = document.getElementById("preset-investment-price");
     const powderInput = document.getElementById("price-powder-kg");
-    if (powderInput) powderInput.value = pVal;
+    
+    if (source === "casting" && powderInput) {
+      powderInput.value = pVal;
+    } else if (source === "burnout" && castPriceInput) {
+      castPriceInput.value = pVal;
+    }
 
     const castSel = document.getElementById("preset-investment");
     const idx = castSel ? parseInt(castSel.value, 10) : 0;
     if (idx >= 0 && state.investments[idx]) {
       state.investments[idx].priceKg = pVal;
+      localStorage.setItem("cc_investments", JSON.stringify(state.investments));
+    }
+    calculateTotalProductionCost();
+  }
+}
+
+function onWaterPriceDirectInput(val) {
+  const wVal = parseFloat(val);
+  if (!isNaN(wVal) && wVal >= 0) {
+    const castSel = document.getElementById("preset-investment");
+    const idx = castSel ? parseInt(castSel.value, 10) : 0;
+    if (idx >= 0 && state.investments[idx]) {
+      state.investments[idx].priceWater = wVal;
       localStorage.setItem("cc_investments", JSON.stringify(state.investments));
     }
     calculateTotalProductionCost();
@@ -2775,6 +2844,228 @@ function resetDefaultPresets() {
   renderPresetModalLists();
   applyFlaskPreset();
   applyInvestmentPreset("casting");
+  showToast("↩ Пресети скинуто до заводських значень");
+}
+
+// --- ЕКСПОРТ ТА ІМПОРТ ВСІХ ПРЕСЕТІВ НА ПРИСТРІЙ (.JSON) ---
+function exportAllPresetsJSON() {
+  const now = new Date();
+  const presetsBundle = {
+    version: "1.1",
+    appName: "Casting Calc",
+    type: "presets-bundle",
+    exportedAt: now.toISOString(),
+    readableDate: now.toLocaleString('uk-UA'),
+    flasks: state.flasks || [],
+    investments: state.investments || [],
+    burnout: {
+      customPresets: (burnoutConfig && burnoutConfig.customPresets) ? burnoutConfig.customPresets : {},
+      currentPreset: (burnoutConfig && burnoutConfig.currentPreset) ? burnoutConfig.currentPreset : "standard_obukhiv",
+      steps: (burnoutConfig && burnoutConfig.steps) ? burnoutConfig.steps : []
+    }
+  };
+
+  const jsonString = JSON.stringify(presetsBundle, null, 2);
+  const dateStr = getFormattedDate();
+  const filename = `Casting_Presets_Backup_${dateStr}.json`;
+
+  const blob = new Blob([jsonString], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast(`💾 Всі пресети успішно експортовано у файл ${filename}!`);
+}
+
+function triggerImportPresetsJSON() {
+  const fileInput = document.getElementById("presets-file-input");
+  if (fileInput) {
+    fileInput.value = "";
+    fileInput.click();
+  }
+}
+
+function handlePresetsFileSelect(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    parseAndApplyPresetsJSON(e.target.result);
+  };
+  reader.onerror = () => {
+    showToast("❌ Помилка читання файлу пресетів");
+  };
+  reader.readAsText(file, "UTF-8");
+}
+
+function parseAndApplyPresetsJSON(jsonText) {
+  try {
+    const data = typeof jsonText === "string" ? JSON.parse(jsonText) : jsonText;
+    if (!data || typeof data !== "object") {
+      throw new Error("Невалідний формат JSON");
+    }
+
+    let restoredCount = 0;
+
+    // 1. Пресети опок
+    if (Array.isArray(data.flasks) && data.flasks.length > 0) {
+      state.flasks = data.flasks;
+      localStorage.setItem("cc_flasks", JSON.stringify(state.flasks));
+      restoredCount += data.flasks.length;
+    } else if (data.presets && Array.isArray(data.presets.flasks)) {
+      state.flasks = data.presets.flasks;
+      localStorage.setItem("cc_flasks", JSON.stringify(state.flasks));
+      restoredCount += data.presets.flasks.length;
+    }
+
+    // 2. Пресети формомаси
+    if (Array.isArray(data.investments) && data.investments.length > 0) {
+      state.investments = data.investments;
+      localStorage.setItem("cc_investments", JSON.stringify(state.investments));
+      restoredCount += data.investments.length;
+    } else if (data.presets && Array.isArray(data.presets.investments)) {
+      state.investments = data.presets.investments;
+      localStorage.setItem("cc_investments", JSON.stringify(state.investments));
+      restoredCount += data.presets.investments.length;
+    }
+
+    // 3. Пресети випалювання
+    if (data.burnout) {
+      if (data.burnout.customPresets && typeof data.burnout.customPresets === 'object') {
+        burnoutConfig.customPresets = Object.assign(burnoutConfig.customPresets || {}, data.burnout.customPresets);
+      }
+      if (data.burnout.steps && Array.isArray(data.burnout.steps) && data.burnout.steps.length > 0) {
+        burnoutConfig.steps = data.burnout.steps;
+      }
+      if (data.burnout.currentPreset) {
+        burnoutConfig.currentPreset = data.burnout.currentPreset;
+      }
+      saveBurnoutConfigLocal();
+    } else if (data.customPresets && typeof data.customPresets === 'object') {
+      burnoutConfig.customPresets = Object.assign(burnoutConfig.customPresets || {}, data.customPresets);
+      saveBurnoutConfigLocal();
+    }
+
+    renderPresetSelects();
+    renderPresetModalLists();
+    applyFlaskPreset();
+    applyInvestmentPreset("casting");
+    renderBurnoutPresetOptions();
+    renderBurnoutStepsTable();
+    calculateBurnoutCycle();
+    calculateTotalProductionCost();
+
+    showToast("✅ Всі пресети успішно імпортовано та відновлено!");
+  } catch (err) {
+    console.error("Presets import error:", err);
+    showToast(`❌ Помилка імпорту пресетів: ${err.message || "Некоректний файл"}`);
+  }
+}
+
+// --- ЕКСПОРТ ТА ІМПОРТ ОКРЕМОГО ПРОФІЛЮ ВИПАЛЮВАННЯ ---
+function exportBurnoutProfileJSON() {
+  if (!burnoutConfig.steps || burnoutConfig.steps.length === 0) {
+    showToast("⚠️ Немає кроків для експорту графіка");
+    return;
+  }
+  const now = new Date();
+  const allPresets = getAllBurnoutPresets();
+  const presetName = (allPresets[burnoutConfig.currentPreset] ? allPresets[burnoutConfig.currentPreset].name : "Custom_Profile").replace(/[^\w\dа-яА-ЯіїєґІЇЄҐ_-]/gi, '_');
+  const dateStr = getFormattedDate();
+  const filename = `BurnoutProfile_${presetName}_${dateStr}.json`;
+
+  const profileBundle = {
+    version: "1.1",
+    appName: "Casting Calc",
+    type: "burnout-profile",
+    exportedAt: now.toISOString(),
+    readableDate: now.toLocaleString('uk-UA'),
+    name: allPresets[burnoutConfig.currentPreset] ? allPresets[burnoutConfig.currentPreset].name : "Користувацький графік",
+    furnacePower: burnoutConfig.furnacePower,
+    powerReserve: burnoutConfig.powerReserve,
+    steps: burnoutConfig.steps
+  };
+
+  const jsonString = JSON.stringify(profileBundle, null, 2);
+  const blob = new Blob([jsonString], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast(`💾 Графік випалювання експортовано у файл ${filename}!`);
+}
+
+function triggerImportBurnoutProfileJSON() {
+  const fileInput = document.getElementById("burnout-profile-file-input");
+  if (fileInput) {
+    fileInput.value = "";
+    fileInput.click();
+  }
+}
+
+function handleBurnoutProfileFileSelect(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    parseAndApplyBurnoutProfileJSON(e.target.result);
+  };
+  reader.onerror = () => {
+    showToast("❌ Помилка читання файлу графіка");
+  };
+  reader.readAsText(file, "UTF-8");
+}
+
+function parseAndApplyBurnoutProfileJSON(jsonText) {
+  try {
+    const data = typeof jsonText === "string" ? JSON.parse(jsonText) : jsonText;
+    if (!data) throw new Error("Порожні дані");
+
+    let steps = null;
+    if (Array.isArray(data)) {
+      steps = data;
+    } else if (Array.isArray(data.steps)) {
+      steps = data.steps;
+      if (data.furnacePower) burnoutConfig.furnacePower = data.furnacePower;
+      if (data.powerReserve) burnoutConfig.powerReserve = data.powerReserve;
+    }
+
+    if (!steps || steps.length === 0) {
+      throw new Error("У файлі не знайдено кроків температурного графіка");
+    }
+
+    burnoutConfig.steps = steps.map((s, idx) => ({
+      stepNum: s.stepNum !== undefined ? s.stepNum : idx + 1,
+      startT: typeof s.startT === 'number' ? s.startT : 20,
+      endT: typeof s.endT === 'number' ? s.endT : 150,
+      durationMin: typeof s.durationMin === 'number' ? s.durationMin : 60,
+      type: s.type || (s.startT === s.endT ? 'hold' : (s.endT > s.startT ? 'ramp' : 'cool')),
+      note: s.note || ''
+    }));
+
+    burnoutConfig.currentPreset = "custom";
+    saveBurnoutConfigLocal();
+    syncBurnoutInputsToUI();
+    renderBurnoutPresetOptions();
+    renderBurnoutStepsTable();
+    calculateBurnoutCycle();
+    calculateTotalProductionCost();
+
+    showToast(`✅ Графік випалювання (${burnoutConfig.steps.length} кроків) успішно завантажено!`);
+  } catch (err) {
+    console.error("Burnout profile import error:", err);
+    showToast(`❌ Помилка імпорту графіка: ${err.message || "Некоректний файл"}`);
+  }
 }
 
 // --- МАТЕМАТИЧНИЙ ЯДРО РОЗРАХУНКІВ ---
@@ -5140,187 +5431,21 @@ function calculateTotalProductionCost() {
 }
 
 // -------------------------------------------------------------
-// ПРЕСЕТИ МАТЕРІАЛІВ (ФОРМОМАСА ТА ДИСТИЛЬОВАНА ВОДА)
+// ПРЕСЕТИ МАТЕРІАЛІВ (ФОРМОМАСА ТА ДИСТИЛЬОВАНА ВОДА) - СИНХРОНІЗОВАНО
 // -------------------------------------------------------------
-const DEFAULT_MATERIAL_PRESETS = {
-  satin_cast_20: {
-    id: "satin_cast_20",
-    name: "Satin Cast 20 + Дистилят (160 грн/кг | 8 грн/л)",
-    powderKg: 160,
-    waterL: 8
-  },
-  gold_star_omega: {
-    id: "gold_star_omega",
-    name: "Gold Star Omega + Вода (185 грн/кг | 8 грн/л)",
-    powderKg: 185,
-    waterL: 8
-  },
-  kerr_diamond: {
-    id: "kerr_diamond",
-    name: "Kerr Satin Cast Diamond (210 грн/кг | 10 грн/л)",
-    powderKg: 210,
-    waterL: 10
-  },
-  budget_mix: {
-    id: "budget_mix",
-    name: "Бюджетна формомаса (130 грн/кг | 5 грн/л)",
-    powderKg: 130,
-    waterL: 5
-  }
-};
-
-function getMaterialPricePresets() {
-  const saved = localStorage.getItem("cc_material_presets");
-  let custom = {};
-  if (saved) {
-    try {
-      custom = JSON.parse(saved) || {};
-    } catch (e) {
-      console.warn("Could not parse custom material presets", e);
-    }
-  }
-  return { ...DEFAULT_MATERIAL_PRESETS, ...custom };
-}
-
 function initMaterialPricePresets() {
-  renderMaterialPricePresetOptions();
+  renderPresetSelects();
 }
 
 function renderMaterialPricePresetOptions() {
-  const select = document.getElementById("material-price-preset-select");
-  if (!select) return;
-
-  const presets = getMaterialPricePresets();
-  const currentPowder = parseFloat(document.getElementById("price-powder-kg")?.value) || 160;
-  const currentWater = parseFloat(document.getElementById("price-water-l")?.value) || 8;
-
-  let currentKey = "custom";
-  for (const key in presets) {
-    if (presets[key].powderKg === currentPowder && presets[key].waterL === currentWater) {
-      currentKey = key;
-      break;
-    }
-  }
-
-  let html = `<option value="" disabled>-- Оберіть шаблон цін --</option>`;
-  html += `<optgroup label="⭐ Заводські та популярні матеріали">`;
-  Object.keys(DEFAULT_MATERIAL_PRESETS).forEach(k => {
-    const p = DEFAULT_MATERIAL_PRESETS[k];
-    const isSel = k === currentKey ? "selected" : "";
-    html += `<option value="${k}" ${isSel}>${escapeHtml(p.name)}</option>`;
-  });
-  html += `</optgroup>`;
-
-  const saved = localStorage.getItem("cc_material_presets");
-  if (saved) {
-    try {
-      const custom = JSON.parse(saved) || {};
-      const customKeys = Object.keys(custom);
-      if (customKeys.length > 0) {
-        html += `<optgroup label="💾 Ваші власні збережені пресети">`;
-        customKeys.forEach(k => {
-          const p = custom[k];
-          const isSel = k === currentKey ? "selected" : "";
-          html += `<option value="${k}" ${isSel}>💾 ${escapeHtml(p.name)}</option>`;
-        });
-        html += `</optgroup>`;
-      }
-    } catch (e) {}
-  }
-
-  html += `<optgroup label="✏️ Ручний режим">`;
-  html += `<option value="custom" ${currentKey === 'custom' ? 'selected' : ''}>✏️ Користувацькі ціни</option>`;
-  html += `</optgroup>`;
-
-  select.innerHTML = html;
-
-  // Відображення кнопки видалення якщо активний користувацький пресет
-  const btnDel = document.getElementById("btn-delete-mat-preset");
-  if (btnDel) {
-    const isCustomSaved = saved && JSON.parse(saved || "{}")[currentKey];
-    btnDel.style.display = isCustomSaved ? "inline-flex" : "none";
-  }
-}
-
-function applyMaterialPricePreset() {
-  const select = document.getElementById("material-price-preset-select");
-  if (!select) return;
-
-  const key = select.value;
-  if (key === "custom") return;
-
-  const presets = getMaterialPricePresets();
-  const preset = presets[key];
-  if (preset) {
-    const powderInput = document.getElementById("price-powder-kg");
-    const waterInput = document.getElementById("price-water-l");
-    if (powderInput) powderInput.value = preset.powderKg;
-    if (waterInput) waterInput.value = preset.waterL;
-    calculateTotalProductionCost();
-    renderMaterialPricePresetOptions();
-    showToast(`✅ Застосовано ціновий пресет: ${preset.name.split('(')[0]}`);
-  }
+  renderPresetSelects();
 }
 
 function onMaterialPriceManualInput() {
-  const select = document.getElementById("material-price-preset-select");
-  if (select) select.value = "custom";
-  const btnDel = document.getElementById("btn-delete-mat-preset");
-  if (btnDel) btnDel.style.display = "none";
-  calculateTotalProductionCost();
-}
-
-function promptSaveMaterialPricePreset() {
-  const powderVal = parseFloat(document.getElementById("price-powder-kg")?.value) || 160;
-  const waterVal = parseFloat(document.getElementById("price-water-l")?.value) || 8;
-  const defaultName = `Пресет (${powderVal} грн/кг | ${waterVal} грн/л)`;
-
-  const name = prompt("Введіть назву для нового пресету цін формомаси та води:", defaultName);
-  if (!name || !name.trim()) return;
-
-  const saved = localStorage.getItem("cc_material_presets");
-  let custom = {};
-  if (saved) {
-    try { custom = JSON.parse(saved) || {}; } catch (e) {}
+  const powderInput = document.getElementById("price-powder-kg");
+  if (powderInput) {
+    onInvestmentPriceDirectInput(powderInput.value, "burnout");
   }
-
-  const presetId = "mat_preset_" + Date.now();
-  custom[presetId] = {
-    id: presetId,
-    name: name.trim(),
-    powderKg: powderVal,
-    waterL: waterVal
-  };
-
-  localStorage.setItem("cc_material_presets", JSON.stringify(custom));
-  renderMaterialPricePresetOptions();
-  const select = document.getElementById("material-price-preset-select");
-  if (select) select.value = presetId;
-  renderMaterialPricePresetOptions();
-  showToast(`💾 Пресет цін "${name.trim()}" успішно збережено!`);
-}
-
-function deleteCurrentMaterialPricePreset() {
-  const select = document.getElementById("material-price-preset-select");
-  if (!select) return;
-  const key = select.value;
-  if (!key || key === "custom" || DEFAULT_MATERIAL_PRESETS[key]) {
-    showToast("⚠️ Цей шаблон є базовим і не може бути видалений.");
-    return;
-  }
-
-  const saved = localStorage.getItem("cc_material_presets");
-  if (!saved) return;
-  try {
-    const custom = JSON.parse(saved) || {};
-    const name = custom[key]?.name || "Пресет";
-    if (confirm(`Ви впевнені, що бажаєте видалити пресет "${name}"?`)) {
-      delete custom[key];
-      localStorage.setItem("cc_material_presets", JSON.stringify(custom));
-      renderMaterialPricePresetOptions();
-      showToast(`🗑️ Пресет "${name}" видалено.`);
-    }
-  } catch (e) {}
 }
 
 // -------------------------------------------------------------
