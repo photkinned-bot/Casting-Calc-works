@@ -555,9 +555,9 @@
 
   <!-- Верхня панель перемикання вкладок -->
   <nav class="app-nav-tabs" id="app-nav-tabs">
-    <button type="button" class="nav-tab-btn active" id="tab-btn-casting" onclick="switchAppTab('casting')" title="Калькулятор литва, формомаси та шихтовки металу">
+    <button type="button" class="nav-tab-btn active" id="tab-btn-casting" onclick="switchAppTab('casting')" title="Формування опок, формомаса та шихтовка металу">
       <span class="tab-icon">🔥</span>
-      <span class="tab-label">Литва і формомаса</span>
+      <span class="tab-label">Формування опок</span>
     </button>
     <button type="button" class="nav-tab-btn" id="tab-btn-burnout" onclick="switchAppTab('burnout')" title="Калькулятор випалювання опок та розрахунок собівартості">
       <span class="tab-icon">🌡️</span>
@@ -566,7 +566,7 @@
     </button>
   </nav>
 
-  <!-- Вкладка 1: Литва і формомаса -->
+  <!-- Вкладка 1: Формування опок -->
   <div id="tab-content-casting" class="tab-pane active">
     <!-- Блок управління проектом (JSON Збереження / Завантаження) -->
     <div class="project-card">
@@ -855,7 +855,7 @@
         </div>
       </div>
       <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 12px;">
-        Ці параметри автоматично підтягуються з розділу <strong>"Литва і формомаса"</strong> для точного розрахунку вартості матеріалів та розподілу витрат печі на садку:
+        Ці параметри автоматично підтягуються з розділу <strong>"Формування опок"</strong> для точного розрахунку вартості матеріалів та розподілу витрат печі на садку:
       </p>
       <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px;">
         <div style="background: rgba(15,23,42,0.7); border: 1px solid var(--border); border-radius: 8px; padding: 12px;">
@@ -1289,7 +1289,7 @@
               </div>
             </div>
 
-            <!-- Вибір формомаси (пресети) - 100% синхронізований із вкладкою 'Литва і формомаса' -->
+            <!-- Вибір формомаси (пресети) - 100% синхронізований із вкладкою 'Формування опок' -->
             <div class="form-group" style="margin-top: 6px; margin-bottom: 8px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                 <label for="material-price-preset-select" style="font-size: 0.76rem; color: #cbd5e1; margin-bottom: 0;">
@@ -1659,6 +1659,15 @@
           </button>
           <button type="button" class="btn btn-secondary" onclick="saveBurnoutSettingsToProject()" style="font-size: 0.85rem; padding: 8px 14px;">
             💾 Зберегти налаштування в JSON
+          </button>
+        </div>
+
+        <!-- Кнопка швидкого переходу до вкладки "Формування опок" знизу -->
+        <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--border);">
+          <button type="button" class="btn" id="btn-bottom-go-to-casting" onclick="switchAppTab('casting')" style="width: 100%; padding: 14px 20px; font-size: 1.05rem; font-weight: 700; background: linear-gradient(135deg, rgba(217, 119, 6, 0.95), rgba(180, 83, 9, 0.95)); border: 1px solid #f59e0b; box-shadow: 0 4px 16px rgba(217, 119, 6, 0.35); display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: all 0.2s ease;">
+            <span style="font-size: 1.25rem;">🔥</span>
+            <span>Формування опок</span>
+            <span style="font-size: 1.1rem; margin-left: 4px;">➡</span>
           </button>
         </div>
       </div>
@@ -6310,7 +6319,7 @@ function escapeHtml(str) {
 // 📚 ДОВІДКОВИЙ ДОВІДНИК ТА ПІДКАЗКИ ФОРМУЛ (HELP_TOPICS)
 // ==========================================
 const HELP_TOPICS = {
-  // ---------------- Вкладка 1: Литва і формомаса ----------------
+  // ---------------- Вкладка 1: Формування опок ----------------
   preset_manager: {
     title: "Менеджер типових пресетів майстерні",
     badge: "Конфігурація майстерні",
@@ -6485,7 +6494,7 @@ const HELP_TOPICS = {
   calc_model_flask: {
     title: "Модель розрахунку об'єму форми",
     badge: "Алгоритм заповнення",
-    category: "Литва і формомаса",
+    category: "Формування опок",
     formula: "V_корисний = V_опоки × k_заповнення",
     desc: "Визначає рівень заповнення опоки формомасою: повний об'єм (100%) або з технологічним недоливом (5-10 мм до верхнього краю гільзи для запобігання переливу під час вакуумування).",
     impact: "Забезпечує мінімально необхідну товщину формомаси над верхівкою ялинки (не менше 10–15 мм) для витримування тиску вакууму або відцентрової сили.",
@@ -6494,7 +6503,7 @@ const HELP_TOPICS = {
   custom_volume: {
     title: "Прямий розрахунок за об'ємом (мл)",
     badge: "Нестандартні форми",
-    category: "Литва і формомаса",
+    category: "Формування опок",
     formula: "V = об'єм у мілілітрах (см³)",
     desc: "Дозволяє задати довільний об'єм форми, якщо використовується прямокутна, конусна або нестандартна гумова основа.",
     impact: "Дає можливість точно замішувати масу для індивідуальних спеціальних форм без підгонки під циліндр.",
@@ -6503,7 +6512,7 @@ const HELP_TOPICS = {
   investment_type: {
     title: "Формомаса та пропорція W/P (Вода/Порошок)",
     badge: "Технологія замісу",
-    category: "Литва і формомаса",
+    category: "Формування опок",
     formula: "M_порошок = V × k_щільн (напр. 1.45 г/мл) | V_води = M_порошок × (W/100)",
     desc: "Співвідношення дистильованої води до сухого порошку формомаси (наприклад, 35:100, 38:100, 40:100). Визначає плинність суміші при вакуумуванні та кінцеву міцність гіпсової форми.",
     impact: "Занадто густа суміш призводить до повітряних бульбашок на восковках. Занадто рідка — знижує газопроникність і міцність форми, спричиняючи тріщини та водяні жили (water marks) на виливках.",
@@ -6624,7 +6633,7 @@ const HELP_TOPICS = {
     badge: "Інтеграція модулів",
     category: "Випалювання печі",
     formula: "Опоки, Порошок, Вода, Метал -> підтягуються з Вкладки 1",
-    desc: "Автоматично передає кількість опок, масу формомаси, води та металу з розділу «Литва і формомаса» для розрахунку витрат на завантаження печі.",
+    desc: "Автоматично передає кількість опок, масу формомаси, води та металу з розділу «Формування опок» для розрахунку витрат на завантаження печі.",
     impact: "Виключає повторне ручне введення даних та забезпечує 100% відповідність фінансового розрахунку реальному складу замісу.",
     tip: "Якщо ви додали нову опоку у кошик на першій вкладці, просто натисніть «🔄 Оновити з кошика»."
   },
