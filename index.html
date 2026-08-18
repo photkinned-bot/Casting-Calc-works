@@ -823,30 +823,20 @@
       <button class="btn btn-secondary" id="btn-download-txt" onclick="downloadTXT()">📄 Зберегти TXT файл</button>
       <button class="btn btn-secondary" id="btn-export-txt" onclick="exportTXT()">📋 Копіювати текст</button>
     </div>
+
+    <!-- Кнопка швидкого переходу до вкладки "Випалювання і вартість" знизу -->
+    <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--border);">
+      <button type="button" class="btn" id="btn-bottom-go-to-burnout" onclick="switchAppTab('burnout')" style="width: 100%; padding: 14px 20px; font-size: 1.05rem; font-weight: 700; background: linear-gradient(135deg, rgba(217, 119, 6, 0.95), rgba(180, 83, 9, 0.95)); border: 1px solid #f59e0b; box-shadow: 0 4px 16px rgba(217, 119, 6, 0.35); display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: all 0.2s ease;">
+        <span style="font-size: 1.25rem;">🌡️</span>
+        <span>Випалювання і вартість</span>
+        <span style="font-size: 1.1rem; margin-left: 4px;">➡</span>
+      </button>
+    </div>
   </div>
   </div><!-- Кінець вкладки 1 (tab-content-casting) -->
 
   <!-- Вкладка 2: Випалювання і вартість -->
   <div id="tab-content-burnout" class="tab-pane" style="display: none;">
-    <!-- Заголовок та опис робочого простору випалювання -->
-    <div class="project-card" style="border-color: rgba(245, 158, 11, 0.45); background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(22, 27, 46, 0.95));">
-      <div class="card-title" style="margin-bottom: 8px;">
-        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-          <span style="font-size: 1.15rem; font-weight: 700; color: #fbbf24;">🌡️ Калькулятор випалювання опок та собівартості виробництва</span>
-          <button type="button" class="help-btn help-btn-amber" onclick="openHelpModal('burnout_general')" title="Довідка: Випалювання опок та розрахунок собівартості">?</button>
-          <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border-color: #f59e0b; font-size: 0.76rem;">Двофазний розрахунок</span>
-        </div>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <button type="button" class="btn btn-secondary btn-sm" onclick="switchAppTab('casting')" style="font-size: 0.8rem; border-color: var(--accent); color: var(--accent);">
-            ↩ До розрахунку литва
-          </button>
-        </div>
-      </div>
-      <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; margin-bottom: 4px;">
-        Професійний розрахунок енерговитрат муфельної печі з урахуванням нагріву (100% потужність), імпульсного утримання полиць (30–50%), двозонного тарифу (день/ніч) та повної собівартості матеріалів литва.
-      </p>
-    </div>
-
     <!-- Блок автоматичної синхронізації з кошиком замісу -->
     <div class="card" style="border-left: 4px solid var(--accent);">
       <div class="card-title" style="font-size: 1rem;">
@@ -2239,6 +2229,12 @@ function switchAppTab(tabId) {
     if (btnCasting) btnCasting.classList.add("active");
     if (paneBurnout) paneBurnout.style.display = "none";
     if (paneCasting) paneCasting.style.display = "flex";
+  }
+
+  try {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (e) {
+    window.scrollTo(0, 0);
   }
 }
 
