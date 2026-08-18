@@ -1509,6 +1509,99 @@
               <strong style="color: #f87171; font-size: 1rem;" id="cost-melting-total">65.00 грн</strong>
             </div>
           </div>
+
+          <!-- 4. Вакуумний насос (вакуумування формомаси/опок та вакуумне лиття) -->
+          <div class="burnout-feature-box" style="border-color: rgba(56,189,248,0.35); grid-column: 1 / -1; background: rgba(56, 189, 248, 0.03);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-weight: 700; color: #38bdf8; font-size: 0.95rem;">4. Вакуумний насос (вакуумування формомаси та литво)</span>
+                <button type="button" class="help-btn" onclick="openHelpModal('cost_vacuum_pump')" title="Довідка: Вакуумний насос у ливарному циклі">?</button>
+              </div>
+              <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                <span class="badge" style="font-size: 0.7rem; background: rgba(56,189,248,0.15); color: #38bdf8; border-color: #38bdf8;">Дегазація + Вакуумний підсос</span>
+              </div>
+            </div>
+
+            <p style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 8px;">
+              Враховує електроенергію вакуумного насоса (дегазація формомаси та опок + вакуум під час заливки розплаву) та амортизацію/заміну вакуумного мастила (ВМ-4/Leybonol).
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-top: 4px;">
+              <!-- Потужність насоса (кВт) -->
+              <div class="form-group" style="min-width: 0;">
+                <label for="vacuum-power-kw" style="font-size: 0.78rem; line-height: 1.2;">
+                  Потужність насоса (кВт):
+                  <button type="button" class="help-btn" onclick="openHelpModal('cost_vacuum_pump')" title="Довідка: Потужність вакуумного насоса">?</button>
+                </label>
+                <input type="number" id="vacuum-power-kw" value="0.75" step="0.05" min="0.1" max="5.0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onVacuumParamsChange()">
+                <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+                  <button type="button" class="quick-chip" onclick="setVacuumPowerKw(0.55)">0.55 кВт</button>
+                  <button type="button" class="quick-chip" onclick="setVacuumPowerKw(0.75)">0.75 кВт (Станд)</button>
+                  <button type="button" class="quick-chip" onclick="setVacuumPowerKw(1.1)">1.1 кВт</button>
+                  <button type="button" class="quick-chip" onclick="setVacuumPowerKw(1.5)">1.5 кВт</button>
+                </div>
+              </div>
+
+              <!-- Час вакуумування формомаси (хв/опока) -->
+              <div class="form-group" style="min-width: 0;">
+                <label for="vacuum-investment-min" style="font-size: 0.78rem; line-height: 1.2;">
+                  Вакуум формомаси (хв/оп):
+                  <button type="button" class="help-btn" onclick="openHelpModal('vacuum_investment')" title="Довідка: Вакуумування розчину та опок">?</button>
+                </label>
+                <input type="number" id="vacuum-investment-min" value="4.0" step="0.5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onVacuumParamsChange()">
+                <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+                  <button type="button" class="quick-chip" onclick="setVacuumInvestmentMin(2.5)">2.5 хв</button>
+                  <button type="button" class="quick-chip" onclick="setVacuumInvestmentMin(4.0)">4.0 хв (1.5+2.5)</button>
+                  <button type="button" class="quick-chip" onclick="setVacuumInvestmentMin(6.0)">6.0 хв</button>
+                </div>
+              </div>
+
+              <!-- Час вакуумування литва (хв/опока) -->
+              <div class="form-group" style="min-width: 0;">
+                <label for="vacuum-casting-min" style="font-size: 0.78rem; line-height: 1.2;">
+                  Вакуум литва (хв/оп):
+                  <button type="button" class="help-btn" onclick="openHelpModal('vacuum_casting')" title="Довідка: Вакуумне лиття розплаву">?</button>
+                </label>
+                <input type="number" id="vacuum-casting-min" value="2.0" step="0.5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onVacuumParamsChange()">
+                <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+                  <button type="button" class="quick-chip" onclick="setVacuumCastingMin(1.5)">1.5 хв</button>
+                  <button type="button" class="quick-chip" onclick="setVacuumCastingMin(2.0)">2.0 хв (Станд)</button>
+                  <button type="button" class="quick-chip" onclick="setVacuumCastingMin(3.0)">3.0 хв</button>
+                </div>
+              </div>
+
+              <!-- Масло та амортизація (грн/опока) -->
+              <div class="form-group" style="min-width: 0;">
+                <label for="price-vacuum-oil-flask" style="font-size: 0.78rem; line-height: 1.2;">
+                  🛢️ Масло / аморт. (грн/оп):
+                  <button type="button" class="help-btn" onclick="openHelpModal('vacuum_oil')" title="Довідка: Заміна вакуумного мастила та знос">?</button>
+                </label>
+                <input type="number" id="price-vacuum-oil-flask" value="8.0" step="1" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onVacuumParamsChange()">
+                <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+                  <button type="button" class="quick-chip" onclick="setVacuumOilFlask(5)">5 грн</button>
+                  <button type="button" class="quick-chip" onclick="setVacuumOilFlask(8)">8 грн (Станд)</button>
+                  <button type="button" class="quick-chip" onclick="setVacuumOilFlask(12)">12 грн</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Деталізація розрахунку вакууму на 1 опоку та сума -->
+            <div class="calc-subpanel" style="border-color: rgba(56, 189, 248, 0.25); background: rgba(15, 23, 42, 0.6); margin-top: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                <div style="font-size: 0.8rem; color: #bae6fd;">
+                  Час роботи на 1 оп: <strong id="vacuum-time-per-flask-calc" style="color: #38bdf8;">6.0 хв</strong> (енергія: <span id="vacuum-kwh-per-flask-calc">0.075 кВт·г</span> / <span id="vacuum-power-cost-calc">0.32 грн</span>)
+                </div>
+                <div style="font-size: 0.82rem; color: #7dd3fc;">
+                  На 1 опоку: <strong id="vacuum-cost-per-flask-calc" style="color: #38bdf8; font-size: 0.95rem;">8.32 грн</strong>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 0.88rem;">
+              <span>Разом вакуумний насос (вакуумування + литво + масло):</span>
+              <strong style="color: #38bdf8; font-size: 1rem;" id="cost-vacuum-total">8.32 грн</strong>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1521,12 +1614,12 @@
               <button type="button" class="help-btn help-btn-green" onclick="openHelpModal('cost_grand_total')" title="Довідка: Повна собівартість циклу">?</button>
             </div>
             <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
-              Формомаса + Вода + Випалювання + Плавка (робота, бензин, компресор) + Чад
+              Формомаса + Вода + Випалювання + Плавка (робота, бензин, компр.) + Вакуум (формовка, литво, масло) + Чад
             </div>
           </div>
           <div style="text-align: right;">
-            <span style="font-size: 1.6rem; font-weight: 800; color: #34d399;" id="cost-grand-total">78.91 грн</span>
-            <div style="font-size: 0.76rem; color: var(--text-muted);" id="cost-per-flask-grand">78.91 грн / опока</div>
+            <span style="font-size: 1.6rem; font-weight: 800; color: #34d399;" id="cost-grand-total">87.23 грн</span>
+            <div style="font-size: 0.76rem; color: var(--text-muted);" id="cost-per-flask-grand">87.23 грн / опока</div>
           </div>
         </div>
 
@@ -1542,6 +1635,10 @@
           <div class="results-row">
             <span>🔥 Робота плавки, бензин, компресор та витратні:</span>
             <span class="val" style="color: #f87171;" id="summary-cost-melting">65.00 грн</span>
+          </div>
+          <div class="results-row">
+            <span>🌪️ Вакуумний насос (вакуумування опок + вакуумне лиття + масло):</span>
+            <span class="val" style="color: #38bdf8;" id="summary-cost-vacuum">8.32 грн</span>
           </div>
           <div class="results-row">
             <span>⚖️ Технологічні безповоротні втрати металу (угар):</span>
@@ -4324,8 +4421,14 @@ let burnoutConfig = {
     powderKg: 160,
     waterL: 8,
     meltingFlask: 45,
-    gasolineFlask: 15,
+    gasolineFlask: 14.40,
+    gasolinePriceLiter: 180,
+    gasolineMlFlask: 80,
     compressorFlask: 5,
+    vacuumPowerKw: 0.75,
+    vacuumInvestmentMin: 4.0,
+    vacuumCastingMin: 2.0,
+    vacuumOilFlask: 8.0,
     metalLossPercent: 1.0,
     metalPriceGram: 2600
   }
@@ -4365,6 +4468,10 @@ function initBurnoutCalculator() {
             gasolinePriceLiter: 180,
             gasolineMlFlask: 80,
             compressorFlask: 5,
+            vacuumPowerKw: 0.75,
+            vacuumInvestmentMin: 4.0,
+            vacuumCastingMin: 2.0,
+            vacuumOilFlask: 8.0,
             metalLossPercent: 1.0,
             metalPriceGram: 2600
           }, parsed.prices);
@@ -4415,6 +4522,10 @@ function syncBurnoutInputsToUI() {
   const gasolinePriceLit = document.getElementById("gasoline-price-liter");
   const gasolineMl = document.getElementById("gasoline-ml-flask");
   const priceCompressor = document.getElementById("price-compressor-flask");
+  const vacuumPower = document.getElementById("vacuum-power-kw");
+  const vacuumInv = document.getElementById("vacuum-investment-min");
+  const vacuumCast = document.getElementById("vacuum-casting-min");
+  const vacuumOil = document.getElementById("price-vacuum-oil-flask");
   const metalLoss = document.getElementById("metal-loss-percent");
   const metalPrice = document.getElementById("metal-price-gram");
 
@@ -4430,6 +4541,10 @@ function syncBurnoutInputsToUI() {
     if (gasCalcBadge) gasCalcBadge.innerText = `${parseFloat(priceGasoline.value).toFixed(2)} грн / опока`;
   }
   if (priceCompressor && burnoutConfig.prices) priceCompressor.value = burnoutConfig.prices.compressorFlask ?? 5;
+  if (vacuumPower && burnoutConfig.prices) vacuumPower.value = burnoutConfig.prices.vacuumPowerKw ?? 0.75;
+  if (vacuumInv && burnoutConfig.prices) vacuumInv.value = burnoutConfig.prices.vacuumInvestmentMin ?? 4.0;
+  if (vacuumCast && burnoutConfig.prices) vacuumCast.value = burnoutConfig.prices.vacuumCastingMin ?? 2.0;
+  if (vacuumOil && burnoutConfig.prices) vacuumOil.value = burnoutConfig.prices.vacuumOilFlask ?? 8.0;
   if (metalLoss && burnoutConfig.prices) metalLoss.value = burnoutConfig.prices.metalLossPercent ?? 1.0;
   if (metalPrice && burnoutConfig.prices) metalPrice.value = burnoutConfig.prices.metalPriceGram ?? 2600;
 
@@ -5437,6 +5552,10 @@ function calculateTotalProductionCost() {
   const gasolinePriceLit = parseFloat(document.getElementById("gasoline-price-liter")?.value) || 180;
   const gasolineMl = parseFloat(document.getElementById("gasoline-ml-flask")?.value) || 80;
   const priceCompressorFlask = parseFloat(document.getElementById("price-compressor-flask")?.value) || 5;
+  const vacuumPowerKw = parseFloat(document.getElementById("vacuum-power-kw")?.value) || 0.75;
+  const vacuumInvestmentMin = parseFloat(document.getElementById("vacuum-investment-min")?.value) || 4.0;
+  const vacuumCastingMin = parseFloat(document.getElementById("vacuum-casting-min")?.value) || 2.0;
+  const vacuumOilFlask = parseFloat(document.getElementById("price-vacuum-oil-flask")?.value) || 8.0;
   const metalLossPercent = parseFloat(document.getElementById("metal-loss-percent")?.value) || 1.0;
   const metalPriceGram = parseFloat(document.getElementById("metal-price-gram")?.value) || 2600;
 
@@ -5448,6 +5567,10 @@ function calculateTotalProductionCost() {
     gasolinePriceLiter: gasolinePriceLit,
     gasolineMlFlask: gasolineMl,
     compressorFlask: priceCompressorFlask,
+    vacuumPowerKw: vacuumPowerKw,
+    vacuumInvestmentMin: vacuumInvestmentMin,
+    vacuumCastingMin: vacuumCastingMin,
+    vacuumOilFlask: vacuumOilFlask,
     metalLossPercent: metalLossPercent,
     metalPriceGram: metalPriceGram
   };
@@ -5464,11 +5587,29 @@ function calculateTotalProductionCost() {
   const costCompressor = priceCompressorFlask * flasksCount;
   const costMeltingConsumables = costMeltingLabor + costGasoline + costCompressor;
 
+  // Розрахунок витрат на вакуумний насос (електроенергія + масло/амортизація)
+  let activeTariff = burnoutConfig.tariffSingle || 4.32;
+  if (burnoutConfig.tariffType === 'commercial') {
+    activeTariff = burnoutConfig.tariffCommercial || 9.60;
+  } else if (burnoutConfig.tariffType === 'dual') {
+    activeTariff = burnoutConfig.tariffDay || 4.32;
+  }
+
+  const totalVacuumMinPerFlask = vacuumInvestmentMin + vacuumCastingMin;
+  const vacuumKwhPerFlask = (totalVacuumMinPerFlask / 60) * vacuumPowerKw;
+  const costVacuumPowerPerFlask = vacuumKwhPerFlask * activeTariff;
+  const costVacuumPerFlask = costVacuumPowerPerFlask + vacuumOilFlask;
+
+  const totalVacuumKwh = vacuumKwhPerFlask * flasksCount;
+  const costVacuumPowerTotal = costVacuumPowerPerFlask * flasksCount;
+  const costVacuumOilTotal = vacuumOilFlask * flasksCount;
+  const costVacuumTotal = costVacuumPerFlask * flasksCount;
+
   const metalLostG = totalMetalG * (metalLossPercent / 100);
   const costMetalLoss = metalLostG * metalPriceGram;
   const costMeltingTotal = costMeltingConsumables + costMetalLoss;
 
-  const grandTotal = costMaterials + costBurnout + costMeltingTotal;
+  const grandTotal = costMaterials + costBurnout + costMeltingTotal + costVacuumTotal;
   const grandPerFlask = grandTotal / Math.max(1, flasksCount);
   const costPerGram = totalMetalG > 0 ? (grandTotal / totalMetalG) : 0;
 
@@ -5479,12 +5620,18 @@ function calculateTotalProductionCost() {
   const burnoutKwhDisp = document.getElementById("cost-burnout-kwh-disp");
   const burnoutTotalDisp = document.getElementById("cost-burnout-total");
   const meltingTotalDisp = document.getElementById("cost-melting-total");
+  const vacuumTimeCalc = document.getElementById("vacuum-time-per-flask-calc");
+  const vacuumKwhCalc = document.getElementById("vacuum-kwh-per-flask-calc");
+  const vacuumPowerCostCalc = document.getElementById("vacuum-power-cost-calc");
+  const vacuumCostPerFlaskCalc = document.getElementById("vacuum-cost-per-flask-calc");
+  const vacuumTotalDisp = document.getElementById("cost-vacuum-total");
   const grandTotalDisp = document.getElementById("cost-grand-total");
   const perFlaskGrandDisp = document.getElementById("cost-per-flask-grand");
 
   const sumMaterials = document.getElementById("summary-cost-materials");
   const sumBurnout = document.getElementById("summary-cost-burnout");
   const sumMelting = document.getElementById("summary-cost-melting");
+  const sumVacuum = document.getElementById("summary-cost-vacuum");
   const sumLoss = document.getElementById("summary-cost-loss");
   const sumPerGram = document.getElementById("summary-cost-per-gram");
 
@@ -5497,12 +5644,19 @@ function calculateTotalProductionCost() {
 
   if (meltingTotalDisp) meltingTotalDisp.innerText = `${costMeltingTotal.toFixed(2)} грн (робота: ${costMeltingLabor.toFixed(0)} + бензин: ${costGasoline.toFixed(0)} + компр: ${costCompressor.toFixed(0)} + угар: ${costMetalLoss.toFixed(2)} грн)`;
 
+  if (vacuumTimeCalc) vacuumTimeCalc.innerText = `${totalVacuumMinPerFlask.toFixed(1)} хв`;
+  if (vacuumKwhCalc) vacuumKwhCalc.innerText = `${vacuumKwhPerFlask.toFixed(3)} кВт·г`;
+  if (vacuumPowerCostCalc) vacuumPowerCostCalc.innerText = `${costVacuumPowerPerFlask.toFixed(2)} грн`;
+  if (vacuumCostPerFlaskCalc) vacuumCostPerFlaskCalc.innerText = `${costVacuumPerFlask.toFixed(2)} грн`;
+  if (vacuumTotalDisp) vacuumTotalDisp.innerText = `${costVacuumTotal.toFixed(2)} грн (енергія: ${costVacuumPowerTotal.toFixed(2)} + масло: ${costVacuumOilTotal.toFixed(2)} грн)`;
+
   if (grandTotalDisp) grandTotalDisp.innerText = `${grandTotal.toFixed(2)} грн`;
   if (perFlaskGrandDisp) perFlaskGrandDisp.innerText = `${grandPerFlask.toFixed(2)} грн / опока`;
 
   if (sumMaterials) sumMaterials.innerText = `${costMaterials.toFixed(2)} грн (порошок: ${costPowder.toFixed(2)} + вода: ${costWater.toFixed(2)})`;
   if (sumBurnout) sumBurnout.innerText = `${costBurnout.toFixed(2)} грн (${lastBurnoutCalculations.totalActualKwh.toFixed(2)} кВт·год)`;
   if (sumMelting) sumMelting.innerText = `${costMeltingConsumables.toFixed(2)} грн (${flasksCount} оп. × ${priceMeltingFlask}+${priceGasolineFlask}+${priceCompressorFlask} грн)`;
+  if (sumVacuum) sumVacuum.innerText = `${costVacuumTotal.toFixed(2)} грн (${flasksCount} оп. × ${costVacuumPerFlask.toFixed(2)} грн | ${totalVacuumKwh.toFixed(2)} кВт·г)`;
   if (sumLoss) sumLoss.innerText = `${costMetalLoss.toFixed(2)} грн (${metalLostG.toFixed(2)} г угару при ${metalLossPercent}%)`;
   if (sumPerGram) sumPerGram.innerText = totalMetalG > 0 ? `${costPerGram.toFixed(2)} грн/г (на ${totalMetalG.toFixed(2)} г металу)` : `0.00 грн/г`;
 
@@ -5565,6 +5719,45 @@ function setGasolineMl(val) {
   if (input) {
     input.value = val;
     onGasolineParamsChange();
+  }
+}
+
+// -------------------------------------------------------------
+// КАЛЬКУЛЯТОР ВАКУУМНОГО НАСОСА (ФОРМОМАСА + ЛИТВО + МАСЛО)
+// -------------------------------------------------------------
+function onVacuumParamsChange() {
+  calculateTotalProductionCost();
+}
+
+function setVacuumPowerKw(val) {
+  const input = document.getElementById("vacuum-power-kw");
+  if (input) {
+    input.value = val;
+    onVacuumParamsChange();
+  }
+}
+
+function setVacuumInvestmentMin(val) {
+  const input = document.getElementById("vacuum-investment-min");
+  if (input) {
+    input.value = val;
+    onVacuumParamsChange();
+  }
+}
+
+function setVacuumCastingMin(val) {
+  const input = document.getElementById("vacuum-casting-min");
+  if (input) {
+    input.value = val;
+    onVacuumParamsChange();
+  }
+}
+
+function setVacuumOilFlask(val) {
+  const input = document.getElementById("price-vacuum-oil-flask");
+  if (input) {
+    input.value = val;
+    onVacuumParamsChange();
   }
 }
 
@@ -5957,21 +6150,41 @@ function getCostReportText() {
 
   const powderKg = totalPowderG / 1000;
   const waterL = totalWaterMl / 1000;
-  const prices = burnoutConfig.prices || { powderKg: 160, waterL: 8, meltingFlask: 45, gasolineFlask: 15, compressorFlask: 5, metalLossPercent: 1.0, metalPriceGram: 2600 };
+  const prices = burnoutConfig.prices || { powderKg: 160, waterL: 8, meltingFlask: 45, gasolineFlask: 14.40, compressorFlask: 5, vacuumPowerKw: 0.75, vacuumInvestmentMin: 4.0, vacuumCastingMin: 2.0, vacuumOilFlask: 8.0, metalLossPercent: 1.0, metalPriceGram: 2600 };
 
   const costPowder = powderKg * (prices.powderKg || 160);
   const costWater = waterL * (prices.waterL || 8);
   const costMaterials = costPowder + costWater;
   const costBurnout = lastBurnoutCalculations.totalCost || 0;
   const costMeltingLabor = (prices.meltingFlask || 45) * flasksCount;
-  const costGasoline = (prices.gasolineFlask ?? 15) * flasksCount;
+  const costGasoline = (prices.gasolineFlask ?? 14.40) * flasksCount;
   const costCompressor = (prices.compressorFlask ?? 5) * flasksCount;
   const costMeltingConsumables = costMeltingLabor + costGasoline + costCompressor;
+
+  // Вакуумний насос
+  let activeTariff = burnoutConfig.tariffSingle || 4.32;
+  if (burnoutConfig.tariffType === 'commercial') {
+    activeTariff = burnoutConfig.tariffCommercial || 9.60;
+  } else if (burnoutConfig.tariffType === 'dual') {
+    activeTariff = burnoutConfig.tariffDay || 4.32;
+  }
+  const vacKw = prices.vacuumPowerKw ?? 0.75;
+  const vacInvMin = prices.vacuumInvestmentMin ?? 4.0;
+  const vacCastMin = prices.vacuumCastingMin ?? 2.0;
+  const vacOilFlask = prices.vacuumOilFlask ?? 8.0;
+  const totalVacMinPerFlask = vacInvMin + vacCastMin;
+  const vacKwhPerFlask = (totalVacMinPerFlask / 60) * vacKw;
+  const costVacPowerPerFlask = vacKwhPerFlask * activeTariff;
+  const costVacPerFlask = costVacPowerPerFlask + vacOilFlask;
+  const totalVacKwh = vacKwhPerFlask * flasksCount;
+  const costVacPowerTotal = costVacPowerPerFlask * flasksCount;
+  const costVacOilTotal = vacOilFlask * flasksCount;
+  const costVacuumTotal = costVacPerFlask * flasksCount;
 
   const metalLossG = totalMetalG * ((prices.metalLossPercent || 1.0) / 100);
   const costMetalLoss = metalLossG * (prices.metalPriceGram || 2600);
   const costMeltingTotal = costMeltingConsumables + costMetalLoss;
-  const grandTotal = costMaterials + costBurnout + costMeltingTotal;
+  const grandTotal = costMaterials + costBurnout + costMeltingTotal + costVacuumTotal;
   const costPerFlask = grandTotal / Math.max(1, flasksCount);
   const costPerGram = totalMetalG > 0 ? (grandTotal / totalMetalG) : 0;
 
@@ -6011,19 +6224,30 @@ function getCostReportText() {
   txt += `🔥 3. ПЛАВКА МЕТАЛУ, БЕНЗИН, КОМПРЕСОР ТА УГАР:\n`;
   txt += `-------------------------------------------------------\n`;
   txt += ` • Робота плавки:       ${flasksCount} опок × ${prices.meltingFlask || 45} грн = ${costMeltingLabor.toFixed(2)} грн\n`;
-  txt += ` • Бензин для пальника: ${flasksCount} опок × ${prices.gasolineFlask ?? 15} грн = ${costGasoline.toFixed(2)} грн\n`;
+  txt += ` • Бензин для пальника: ${flasksCount} опок × ${prices.gasolineFlask ?? 14.40} грн = ${costGasoline.toFixed(2)} грн\n`;
   txt += ` • Робота компресора:   ${flasksCount} опок × ${prices.compressorFlask ?? 5} грн = ${costCompressor.toFixed(2)} грн\n`;
   txt += ` • Норма чаду металу:   ${prices.metalLossPercent}% від ${totalMetalG.toFixed(2)} г = ${metalLossG.toFixed(2)} г угару\n`;
   txt += ` • Вартість втрат:      ${metalLossG.toFixed(2)} г × ${prices.metalPriceGram} грн/г = ${costMetalLoss.toFixed(2)} грн\n`;
   txt += ` • РАЗОМ ПЛАВКА ТА ЧАД: ${costMeltingTotal.toFixed(2)} грн\n\n`;
 
+  txt += `-------------------------------------------------------\n`;
+  txt += `🌪️ 4. ВАКУУМНИЙ НАСОС (ВАКУУМУВАННЯ + ЛИТВО + МАСЛО):\n`;
+  txt += `-------------------------------------------------------\n`;
+  txt += ` • Потужність насоса:   ${vacKw} кВт\n`;
+  txt += ` • Вакуум формомаси:    ${vacInvMin} хв/опока (дегазація суміші + опоки)\n`;
+  txt += ` • Вакуумне лиття:      ${vacCastMin} хв/опока (заливка під вакуумом)\n`;
+  txt += ` • Електроенергія:      ${totalVacKwh.toFixed(3)} кВт·г (${flasksCount} оп. × ${totalVacMinPerFlask} хв) = ${costVacPowerTotal.toFixed(2)} грн\n`;
+  txt += ` • Мастило/амортизація: ${flasksCount} оп. × ${vacOilFlask} грн = ${costVacOilTotal.toFixed(2)} грн\n`;
+  txt += ` • РАЗОМ ВАКУУМ:        ${costVacuumTotal.toFixed(2)} грн (${costVacPerFlask.toFixed(2)} грн/опока)\n\n`;
+
   txt += `=======================================================\n`;
-  txt += `💎 4. ПОВНА ЗВЕДЕНА СОБІВАРТІСТЬ ТЕХНОЛОГІЧНОГО ЦИКЛУ:\n`;
+  txt += `💎 5. ПОВНА ЗВЕДЕНА СОБІВАРТІСТЬ ТЕХНОЛОГІЧНОГО ЦИКЛУ:\n`;
   txt += `=======================================================\n`;
   txt += ` 1. Формомаса + вода:        ${costMaterials.toFixed(2)} грн\n`;
   txt += ` 2. Енергія випалювання:      ${costBurnout.toFixed(2)} грн\n`;
   txt += ` 3. Плавка, бензин, компресор:${costMeltingConsumables.toFixed(2)} грн\n`;
-  txt += ` 4. Угар металу:             ${costMetalLoss.toFixed(2)} грн\n`;
+  txt += ` 4. Вакуумний насос + масло: ${costVacuumTotal.toFixed(2)} грн\n`;
+  txt += ` 5. Угар металу:             ${costMetalLoss.toFixed(2)} грн\n`;
   txt += `-------------------------------------------------------\n`;
   txt += ` 🏁 ВСЬОГО СОБІВАРТІСТЬ:      ${grandTotal.toFixed(2)} грн\n`;
   txt += ` 🏺 НА 1 ОПОКУ:               ${costPerFlask.toFixed(2)} грн / опока\n`;
@@ -6625,8 +6849,8 @@ const HELP_TOPICS = {
     title: "Повна собівартість технологічного циклу (РАЗОМ)",
     badge: "Фінальний результат",
     category: "Зведена собівартість",
-    formula: "Total = Матеріали + Електроенергія + Робота + Пальне + Компресор + Чад",
-    desc: "Підсумкова сума всіх витрат на здійснення повного ливарного циклу для даної садки опок.",
+    formula: "Total = Матеріали + Піч + Плавка (робота, бензин, компресор) + Вакуумний насос + Чад",
+    desc: "Підсумкова сума всіх прямих технологічних витрат на здійснення повного ливарного циклу для даної садки опок: формомаса з водою, електрика печі, робота ливарника, пальне пальника, стиснене повітря, робота вакуумного насоса (дегазація та підсос) та угар дорогоцінного металу.",
     impact: "Базова цифра для економіки підприємства: на її основі формується відпускна ціна виробів, розраховується маржинальність та рентабельність цеху.",
     tip: "Цю суму можна скопіювати або експортувати у текстовий фінансовий звіт кнопками внизу картки."
   },
@@ -6638,6 +6862,42 @@ const HELP_TOPICS = {
     desc: "Показує, скільки гривень технологічних витрат закладено в кожен грам готової ювелірної продукції (без урахування вартості самого дорогоцінного металу).",
     impact: "Універсальний ювелірний показник собівартості литва (наприклад, 8–15 грн/г для срібла, 15–25 грн/г для золота). Дозволяє миттєво оцінити собівартість литва для виробу будь-якої ваги.",
     tip: "Чим більша вага виробів на ялинці при однаковій кількості опок, тим нижча собівартість у перерахунку на 1 грам."
+  },
+  cost_vacuum_pump: {
+    title: "Вакуумний насос у ливарному циклі (Формовка + Лиття)",
+    badge: "Вакуумні процеси",
+    category: "Зведена собівартість",
+    formula: "Вартість = (Електроенергія на дегазацію + Електроенергія на литво) + Амортизація/Мастило",
+    desc: "Розраховує витрати на експлуатацію пластинчасто-роторного або мембранного вакуумного насоса (наприклад, Value, Busch, Edwards потужністю 0.55–1.5 кВт). Враховує подвійне використання вакууму: 1) під час замішування і дегазації формомаси та залитих опок; 2) під час вакуумного підсосу розплавленого металу у форму під час заливки.",
+    impact: "Закриває невраховані раніше витрати на електроенергію, регулярну заміну дорогого вакуумного мастила (типу ВМ-4, Leybonol) та амортизацію насоса.",
+    tip: "Для надійного вакууму регулярно перевіряйте рівень та прозорість мастила у вічку насоса. Помутніле або емульговане мастило (від вологи формомаси) різко знижує глибину вакууму."
+  },
+  vacuum_investment: {
+    title: "Вакуумування формомаси та опок (хв / опока)",
+    badge: "Дегазація гіпсу",
+    category: "Вакуумні процеси",
+    formula: "Час = Дегазація міксера (~1.5–2 хв) + Вакуумування опоки під ковпаком (~2–3 хв)",
+    desc: "Час роботи насоса для видалення розчиненого повітря з рідкої формомаси спочатку в чаші (міксері), а потім повторно після заливки гіпсу в опоку під вакуумним ковпаком.",
+    impact: "Повне видалення бульбашок повітря виключає появу кульок (дробу) з металу на поверхні ювелірних виробів після литва, заощаджуючи години ручної монтировки.",
+    tip: "Не перевищуйте сумарний час роботи з формомасою (4–6 хв від контакту з водою до початку схоплювання глянцю)."
+  },
+  vacuum_casting: {
+    title: "Вакуумування під час литва металу (хв / опока)",
+    badge: "Вакуумний підсос",
+    category: "Вакуумні процеси",
+    formula: "Час вакууму при заливці розплаву: ~1.5–2.5 хв на 1 опоку",
+    desc: "Час, протягом якого вакуумний насос створює розрідження (до -0.9...-1.0 бар) у камері вакуумної ливарної машини під перфорованою або фланцевою опокою під час і після заливки металу до повного кристалізації.",
+    impact: "Забезпечує якісне заповнення тонких ажурних елементів, кастів під закріпку каміння та щільну структуру металу без пор.",
+    tip: "Утримуйте вакуум включеним ще 1–2 хвилини після заливки металу, поки ливник не потемніє, для компенсації усадки розплаву."
+  },
+  vacuum_oil: {
+    title: "Вакуумне мастило та амортизація насоса (грн / опока)",
+    badge: "Витратні матеріали насоса",
+    category: "Вакуумні процеси",
+    formula: "Вартість на опоку = Вартість літра мастила / Ресурс (кількість опок між замінами) + Амортизація пластин",
+    desc: "Амортизаційні відрахування на заміну мінерального/синтетичного вакуумного мастила (Leybonol LVO, ВМ-4), фільтрів-масловловлювачів та знос графітових/композитних лопаток ротора.",
+    impact: "Водяна пара та пари кислот з формомаси забруднюють мастило. Заміна мастила кожні 30–50 ливарних циклів є обов'язковою для збереження ресурсу насоса.",
+    tip: "Стандартна норма накладних витрат на мастило та обслуговування насоса становить 5–12 грн на одну опоку."
   }
 };
 
