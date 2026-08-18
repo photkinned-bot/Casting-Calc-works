@@ -2199,8 +2199,87 @@ function showToast(message, duration = 2800) {
   }, duration);
 }
 
+// --- АВТОВИДІЛЕННЯ ЧИСЕЛ ТА ТЕКСТУ ПРИ КЛІКУ / ТАПІ ---
+function selectElementValue(el) {
+  if (!el || el.readOnly || el.disabled) return;
+  try {
+    if (typeof el.select === "function") {
+      el.select();
+    }
+  } catch (err) {}
+  try {
+    if (typeof el.setSelectionRange === "function" && el.type !== "number") {
+      el.setSelectionRange(0, el.value ? el.value.length : 9999);
+    }
+  } catch (err) {}
+}
+
+function initAutoSelectInputs() {
+  let focusedInput = null;
+  let focusTime = 0;
+
+  function isEditableInput(el) {
+    if (!el) return false;
+    const tag = el.tagName;
+    if (tag !== 'INPUT' && tag !== 'TEXTAREA') return false;
+    if (el.readOnly || el.disabled) return false;
+    const type = (el.type || 'text').toLowerCase();
+    const ignoredTypes = ['button', 'submit', 'reset', 'checkbox', 'radio', 'file', 'image', 'color', 'range'];
+    return !ignoredTypes.includes(type);
+  }
+
+  function doSelect(el) {
+    if (!isEditableInput(el)) return;
+    selectElementValue(el);
+    requestAnimationFrame(() => selectElementValue(el));
+    setTimeout(() => selectElementValue(el), 30);
+    setTimeout(() => selectElementValue(el), 100);
+  }
+
+  // Обробник отримання фокусу (клік, тап, клавіша Tab)
+  document.addEventListener('focusin', function(e) {
+    const target = e.target;
+    if (isEditableInput(target)) {
+      focusedInput = target;
+      focusTime = Date.now();
+      doSelect(target);
+    }
+  }, true);
+
+  // Обробник відпускання миші (mouseup скидає стандартне виділення браузера)
+  document.addEventListener('mouseup', function(e) {
+    const target = e.target;
+    if (isEditableInput(target) && target === focusedInput) {
+      if (Date.now() - focusTime < 450) {
+        doSelect(target);
+      }
+    }
+  }, true);
+
+  // Обробник завершення тапу на мобільних пристроях (iOS Safari / Android)
+  document.addEventListener('touchend', function(e) {
+    const target = e.target;
+    if (isEditableInput(target)) {
+      focusedInput = target;
+      focusTime = Date.now();
+      doSelect(target);
+    }
+  }, { passive: true, capture: true });
+
+  // Обробник кліку
+  document.addEventListener('click', function(e) {
+    const target = e.target;
+    if (isEditableInput(target) && target === focusedInput) {
+      if (Date.now() - focusTime < 450) {
+        doSelect(target);
+      }
+    }
+  }, true);
+}
+
 // --- ІНІЦІАЛІЗАЦІЯ ---
 window.addEventListener("DOMContentLoaded", () => {
+  initAutoSelectInputs();
   initProjectState();
   renderPresetSelects();
   applyFlaskPreset();
