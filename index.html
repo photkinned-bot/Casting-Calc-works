@@ -892,7 +892,7 @@
     </div>
 
     <!-- БЛОК 1: НАЛАШТУВАННЯ ОБЛАДНАННЯ ТА ТАРИФУ (РОЗКРИВНИЙ) -->
-    <div class="card burnout-collapsible-card" id="card-burnout-block1">
+    <div class="card burnout-collapsible-card collapsed" id="card-burnout-block1">
       <div class="card-title burnout-collapsible-header" onclick="toggleBurnoutCard('card-burnout-block1')">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="burnout-collapse-arrow" id="arrow-burnout-block1">▼</span>
@@ -901,7 +901,7 @@
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="badge" style="font-size: 0.75rem; background: rgba(56,189,248,0.15); color: #38bdf8; border-color: #38bdf8;">Вхідні параметри</span>
-          <span class="burnout-collapse-hint" id="hint-burnout-block1">Згорнути ▲</span>
+          <span class="burnout-collapse-hint" id="hint-burnout-block1">Розгорнути ▼</span>
         </div>
       </div>
 
@@ -1063,7 +1063,7 @@
     </div>
 
     <!-- БЛОК 2: РЕДАКТОР ТЕМПЕРАТУРНОГО ПРОФІЛЮ (ГРАФІК ВИПАЛЮВАННЯ) (РОЗКРИВНИЙ З КЕРУВАННЯМ ПРЕСЕТАМИ) -->
-    <div class="card burnout-collapsible-card" id="card-burnout-block2">
+    <div class="card burnout-collapsible-card collapsed" id="card-burnout-block2">
       <div class="card-title burnout-collapsible-header" onclick="toggleBurnoutCard('card-burnout-block2')">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="burnout-collapse-arrow" id="arrow-burnout-block2">▼</span>
@@ -1072,7 +1072,7 @@
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="badge badge-pending" style="font-size: 0.75rem;">Графік & Пресети</span>
-          <span class="burnout-collapse-hint" id="hint-burnout-block2">Згорнути ▲</span>
+          <span class="burnout-collapse-hint" id="hint-burnout-block2">Розгорнути ▼</span>
         </div>
       </div>
 
@@ -1183,7 +1183,7 @@
     </div>
 
     <!-- БЛОК 3: ПІДСУМКОВИЙ РОЗРАХУНОК ВАРТОСТІ ВИПАЛЮВАННЯ (РОЗКРИВНИЙ) -->
-    <div class="card burnout-collapsible-card" style="border-left: 4px solid #10b981;" id="card-burnout-block3">
+    <div class="card burnout-collapsible-card collapsed" style="border-left: 4px solid #10b981;" id="card-burnout-block3">
       <div class="card-title burnout-collapsible-header" onclick="toggleBurnoutCard('card-burnout-block3')">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="burnout-collapse-arrow" id="arrow-burnout-block3">▼</span>
@@ -1192,7 +1192,7 @@
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="badge badge-success" style="font-size: 0.75rem;">Результати калькуляції</span>
-          <span class="burnout-collapse-hint" id="hint-burnout-block3">Згорнути ▲</span>
+          <span class="burnout-collapse-hint" id="hint-burnout-block3">Розгорнути ▼</span>
         </div>
       </div>
 
@@ -1233,8 +1233,8 @@
           </div>
         </div>
 
-        <!-- РОЗКРИВНЕ ПОЛЕ: Деталізація формул та зон лічильника (День / Ніч) -->
-        <div id="burnout-dual-breakdown-box" class="results-box burnout-collapsible-box" style="margin-top: 14px;">
+        <!-- РОЗКРИВНЕ ПОЛЕ: Деталізація формул та зон лічильника (День / Ніч) (ЗГОРНУТО ЗА ЗАМОВЧУВАННЯМ) -->
+        <div id="burnout-dual-breakdown-box" class="results-box burnout-collapsible-box collapsed" style="margin-top: 14px;">
           <div class="burnout-box-toggle-header" onclick="toggleBurnoutZoneBreakdown()">
             <div style="display: flex; align-items: center; gap: 8px;">
               <span class="burnout-collapse-arrow" id="arrow-burnout-zones">▼</span>
@@ -1243,7 +1243,7 @@
             </div>
             <div style="display: flex; align-items: center; gap: 6px;">
               <span id="burnout-night-saving-badge" class="badge badge-success" style="font-size: 0.74rem;">Економія: -50% на нічних годинах</span>
-              <span class="burnout-collapse-hint" id="hint-burnout-zones">Згорнути ▲</span>
+              <span class="burnout-collapse-hint" id="hint-burnout-zones">Розгорнути ▼</span>
             </div>
           </div>
 
@@ -1266,7 +1266,7 @@
     </div>
 
     <!-- БЛОК 4: ПІДСУМКОВА ЗВЕДЕНА СОБІВАРТІСТЬ ТА ІНТЕГРАЦІЯ ЗВІТУ (РОЗКРИВНИЙ З ПОСТІЙНИМ ЗЕЛЕНИМ ПІДСУМКОМ) -->
-    <div class="card burnout-collapsible-card" id="card-burnout-block4" style="border-color: rgba(56,189,248,0.5);">
+    <div class="card burnout-collapsible-card collapsed" id="card-burnout-block4" style="border-color: rgba(56,189,248,0.5);">
       <div class="card-title burnout-collapsible-header" onclick="toggleBurnoutCard('card-burnout-block4')">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="burnout-collapse-arrow" id="arrow-burnout-block4">▼</span>
@@ -1275,7 +1275,7 @@
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
           <span class="badge" style="background: rgba(56,189,248,0.2); color: #38bdf8; border-color: #38bdf8; font-size: 0.75rem;">Повний виробничий розрахунок</span>
-          <span class="burnout-collapse-hint" id="hint-burnout-block4">Згорнути ▲</span>
+          <span class="burnout-collapse-hint" id="hint-burnout-block4">Розгорнути ▼</span>
         </div>
       </div>
 
@@ -1510,96 +1510,102 @@
             </div>
           </div>
 
-          <!-- 4. Вакуумний насос (вакуумування формомаси/опок та вакуумне лиття) -->
-          <div class="burnout-feature-box" style="border-color: rgba(56,189,248,0.35); grid-column: 1 / -1; background: rgba(56, 189, 248, 0.03);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <span style="font-weight: 700; color: #38bdf8; font-size: 0.95rem;">4. Вакуумний насос (вакуумування формомаси та литво)</span>
-                <button type="button" class="help-btn" onclick="openHelpModal('cost_vacuum_pump')" title="Довідка: Вакуумний насос у ливарному циклі">?</button>
+          <!-- 4. Вакуумний насос (вакуумування формомаси/опок та вакуумне лиття) (РОЗКРИВНИЙ, ЗГОРНУТИЙ ЗА ЗАМОВЧУВАННЯМ) -->
+          <div class="burnout-feature-box burnout-collapsible-box collapsed" id="cost-vacuum-collapsible-box" style="border-color: rgba(56,189,248,0.35); grid-column: 1 / -1; background: rgba(56, 189, 248, 0.03);">
+            <div class="burnout-box-toggle-header" onclick="toggleVacuumBox()">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="burnout-collapse-arrow" id="arrow-vacuum-box">▼</span>
+                <span style="font-weight: 700; color: #38bdf8; font-size: 0.95rem;">🌪️ 4. Вакуумний насос (вакуумування формомаси та литво)</span>
+                <button type="button" class="help-btn" onclick="event.stopPropagation(); openHelpModal('cost_vacuum_pump')" title="Довідка: Вакуумний насос у ливарному циклі">?</button>
               </div>
-              <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                 <span class="badge" style="font-size: 0.7rem; background: rgba(56,189,248,0.15); color: #38bdf8; border-color: #38bdf8;">Дегазація + Вакуумний підсос</span>
+                <span id="vacuum-header-cost-badge" style="font-size: 0.82rem; font-weight: 700; color: #38bdf8;">8.32 грн</span>
+                <span class="burnout-collapse-hint" id="hint-vacuum-box">Розгорнути ▼</span>
               </div>
             </div>
 
-            <p style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 8px;">
-              Враховує електроенергію вакуумного насоса (дегазація формомаси та опок + вакуум під час заливки розплаву) та амортизацію/заміну вакуумного мастила (ВМ-4/Leybonol).
-            </p>
+            <!-- Тіло блоку вакууму (згортається) -->
+            <div class="burnout-box-content" id="vacuum-box-content" style="margin-top: 10px;">
+              <p style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 8px;">
+                Враховує електроенергію вакуумного насоса (дегазація формомаси та опок + вакуум під час заливки розплаву) та амортизацію/заміну вакуумного мастила (ВМ-4/Leybonol).
+              </p>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-top: 4px;">
-              <!-- Потужність насоса (кВт) -->
-              <div class="form-group" style="min-width: 0;">
-                <label for="vacuum-power-kw" style="font-size: 0.78rem; line-height: 1.2;">
-                  Потужність насоса (кВт):
-                  <button type="button" class="help-btn" onclick="openHelpModal('cost_vacuum_pump')" title="Довідка: Потужність вакуумного насоса">?</button>
-                </label>
-                <input type="number" id="vacuum-power-kw" value="0.75" step="0.05" min="0.1" max="5.0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onVacuumParamsChange()">
-                <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
-                  <button type="button" class="quick-chip" onclick="setVacuumPowerKw(0.55)">0.55 кВт</button>
-                  <button type="button" class="quick-chip" onclick="setVacuumPowerKw(0.75)">0.75 кВт (Станд)</button>
-                  <button type="button" class="quick-chip" onclick="setVacuumPowerKw(1.1)">1.1 кВт</button>
-                  <button type="button" class="quick-chip" onclick="setVacuumPowerKw(1.5)">1.5 кВт</button>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-top: 4px;">
+                <!-- Потужність насоса (кВт) -->
+                <div class="form-group" style="min-width: 0;">
+                  <label for="vacuum-power-kw" style="font-size: 0.78rem; line-height: 1.2;">
+                    Потужність насоса (кВт):
+                    <button type="button" class="help-btn" onclick="openHelpModal('cost_vacuum_pump')" title="Довідка: Потужність вакуумного насоса">?</button>
+                  </label>
+                  <input type="number" id="vacuum-power-kw" value="0.75" step="0.05" min="0.1" max="5.0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onVacuumParamsChange()">
+                  <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+                    <button type="button" class="quick-chip" onclick="setVacuumPowerKw(0.55)">0.55 кВт</button>
+                    <button type="button" class="quick-chip" onclick="setVacuumPowerKw(0.75)">0.75 кВт (Станд)</button>
+                    <button type="button" class="quick-chip" onclick="setVacuumPowerKw(1.1)">1.1 кВт</button>
+                    <button type="button" class="quick-chip" onclick="setVacuumPowerKw(1.5)">1.5 кВт</button>
+                  </div>
+                </div>
+
+                <!-- Час вакуумування формомаси (хв/опока) -->
+                <div class="form-group" style="min-width: 0;">
+                  <label for="vacuum-investment-min" style="font-size: 0.78rem; line-height: 1.2;">
+                    Вакуум формомаси (хв/оп):
+                    <button type="button" class="help-btn" onclick="openHelpModal('vacuum_investment')" title="Довідка: Вакуумування розчину та опок">?</button>
+                  </label>
+                  <input type="number" id="vacuum-investment-min" value="4.0" step="0.5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onVacuumParamsChange()">
+                  <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+                    <button type="button" class="quick-chip" onclick="setVacuumInvestmentMin(2.5)">2.5 хв</button>
+                    <button type="button" class="quick-chip" onclick="setVacuumInvestmentMin(4.0)">4.0 хв (1.5+2.5)</button>
+                    <button type="button" class="quick-chip" onclick="setVacuumInvestmentMin(6.0)">6.0 хв</button>
+                  </div>
+                </div>
+
+                <!-- Час вакуумування литва (хв/опока) -->
+                <div class="form-group" style="min-width: 0;">
+                  <label for="vacuum-casting-min" style="font-size: 0.78rem; line-height: 1.2;">
+                    Вакуум литва (хв/оп):
+                    <button type="button" class="help-btn" onclick="openHelpModal('vacuum_casting')" title="Довідка: Вакуумне лиття розплаву">?</button>
+                  </label>
+                  <input type="number" id="vacuum-casting-min" value="2.0" step="0.5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onVacuumParamsChange()">
+                  <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+                    <button type="button" class="quick-chip" onclick="setVacuumCastingMin(1.5)">1.5 хв</button>
+                    <button type="button" class="quick-chip" onclick="setVacuumCastingMin(2.0)">2.0 хв (Станд)</button>
+                    <button type="button" class="quick-chip" onclick="setVacuumCastingMin(3.0)">3.0 хв</button>
+                  </div>
+                </div>
+
+                <!-- Масло та амортизація (грн/опока) -->
+                <div class="form-group" style="min-width: 0;">
+                  <label for="price-vacuum-oil-flask" style="font-size: 0.78rem; line-height: 1.2;">
+                    🛢️ Масло / аморт. (грн/оп):
+                    <button type="button" class="help-btn" onclick="openHelpModal('vacuum_oil')" title="Довідка: Заміна вакуумного мастила та знос">?</button>
+                  </label>
+                  <input type="number" id="price-vacuum-oil-flask" value="8.0" step="1" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onVacuumParamsChange()">
+                  <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+                    <button type="button" class="quick-chip" onclick="setVacuumOilFlask(5)">5 грн</button>
+                    <button type="button" class="quick-chip" onclick="setVacuumOilFlask(8)">8 грн (Станд)</button>
+                    <button type="button" class="quick-chip" onclick="setVacuumOilFlask(12)">12 грн</button>
+                  </div>
                 </div>
               </div>
 
-              <!-- Час вакуумування формомаси (хв/опока) -->
-              <div class="form-group" style="min-width: 0;">
-                <label for="vacuum-investment-min" style="font-size: 0.78rem; line-height: 1.2;">
-                  Вакуум формомаси (хв/оп):
-                  <button type="button" class="help-btn" onclick="openHelpModal('vacuum_investment')" title="Довідка: Вакуумування розчину та опок">?</button>
-                </label>
-                <input type="number" id="vacuum-investment-min" value="4.0" step="0.5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onVacuumParamsChange()">
-                <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
-                  <button type="button" class="quick-chip" onclick="setVacuumInvestmentMin(2.5)">2.5 хв</button>
-                  <button type="button" class="quick-chip" onclick="setVacuumInvestmentMin(4.0)">4.0 хв (1.5+2.5)</button>
-                  <button type="button" class="quick-chip" onclick="setVacuumInvestmentMin(6.0)">6.0 хв</button>
+              <!-- Деталізація розрахунку вакууму на 1 опоку та сума -->
+              <div class="calc-subpanel" style="border-color: rgba(56, 189, 248, 0.25); background: rgba(15, 23, 42, 0.6); margin-top: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                  <div style="font-size: 0.8rem; color: #bae6fd;">
+                    Час роботи на 1 оп: <strong id="vacuum-time-per-flask-calc" style="color: #38bdf8;">6.0 хв</strong> (енергія: <span id="vacuum-kwh-per-flask-calc">0.075 кВт·г</span> / <span id="vacuum-power-cost-calc">0.32 грн</span>)
+                  </div>
+                  <div style="font-size: 0.82rem; color: #7dd3fc;">
+                    На 1 опоку: <strong id="vacuum-cost-per-flask-calc" style="color: #38bdf8; font-size: 0.95rem;">8.32 грн</strong>
+                  </div>
                 </div>
               </div>
 
-              <!-- Час вакуумування литва (хв/опока) -->
-              <div class="form-group" style="min-width: 0;">
-                <label for="vacuum-casting-min" style="font-size: 0.78rem; line-height: 1.2;">
-                  Вакуум литва (хв/оп):
-                  <button type="button" class="help-btn" onclick="openHelpModal('vacuum_casting')" title="Довідка: Вакуумне лиття розплаву">?</button>
-                </label>
-                <input type="number" id="vacuum-casting-min" value="2.0" step="0.5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onVacuumParamsChange()">
-                <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
-                  <button type="button" class="quick-chip" onclick="setVacuumCastingMin(1.5)">1.5 хв</button>
-                  <button type="button" class="quick-chip" onclick="setVacuumCastingMin(2.0)">2.0 хв (Станд)</button>
-                  <button type="button" class="quick-chip" onclick="setVacuumCastingMin(3.0)">3.0 хв</button>
-                </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 0.88rem;">
+                <span>Разом вакуумний насос (вакуумування + литво + масло):</span>
+                <strong style="color: #38bdf8; font-size: 1rem;" id="cost-vacuum-total">8.32 грн</strong>
               </div>
-
-              <!-- Масло та амортизація (грн/опока) -->
-              <div class="form-group" style="min-width: 0;">
-                <label for="price-vacuum-oil-flask" style="font-size: 0.78rem; line-height: 1.2;">
-                  🛢️ Масло / аморт. (грн/оп):
-                  <button type="button" class="help-btn" onclick="openHelpModal('vacuum_oil')" title="Довідка: Заміна вакуумного мастила та знос">?</button>
-                </label>
-                <input type="number" id="price-vacuum-oil-flask" value="8.0" step="1" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onVacuumParamsChange()">
-                <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
-                  <button type="button" class="quick-chip" onclick="setVacuumOilFlask(5)">5 грн</button>
-                  <button type="button" class="quick-chip" onclick="setVacuumOilFlask(8)">8 грн (Станд)</button>
-                  <button type="button" class="quick-chip" onclick="setVacuumOilFlask(12)">12 грн</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Деталізація розрахунку вакууму на 1 опоку та сума -->
-            <div class="calc-subpanel" style="border-color: rgba(56, 189, 248, 0.25); background: rgba(15, 23, 42, 0.6); margin-top: 8px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-                <div style="font-size: 0.8rem; color: #bae6fd;">
-                  Час роботи на 1 оп: <strong id="vacuum-time-per-flask-calc" style="color: #38bdf8;">6.0 хв</strong> (енергія: <span id="vacuum-kwh-per-flask-calc">0.075 кВт·г</span> / <span id="vacuum-power-cost-calc">0.32 грн</span>)
-                </div>
-                <div style="font-size: 0.82rem; color: #7dd3fc;">
-                  На 1 опоку: <strong id="vacuum-cost-per-flask-calc" style="color: #38bdf8; font-size: 0.95rem;">8.32 грн</strong>
-                </div>
-              </div>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 0.88rem;">
-              <span>Разом вакуумний насос (вакуумування + литво + масло):</span>
-              <strong style="color: #38bdf8; font-size: 1rem;" id="cost-vacuum-total">8.32 грн</strong>
             </div>
           </div>
         </div>
@@ -4723,17 +4729,13 @@ function toggleBurnoutCard(cardId) {
   card.classList.toggle("collapsed");
   const isCollapsed = card.classList.contains("collapsed");
 
-  let arrowId = "";
   let hintId = "";
-  if (cardId === "card-burnout-block1") { arrowId = "arrow-burnout-block1"; hintId = "hint-burnout-block1"; }
-  else if (cardId === "card-burnout-block2") { arrowId = "arrow-burnout-block2"; hintId = "hint-burnout-block2"; }
-  else if (cardId === "card-burnout-block3") { arrowId = "arrow-burnout-block3"; hintId = "hint-burnout-block3"; }
-  else if (cardId === "card-burnout-block4") { arrowId = "arrow-burnout-block4"; hintId = "hint-burnout-block4"; }
+  if (cardId === "card-burnout-block1") { hintId = "hint-burnout-block1"; }
+  else if (cardId === "card-burnout-block2") { hintId = "hint-burnout-block2"; }
+  else if (cardId === "card-burnout-block3") { hintId = "hint-burnout-block3"; }
+  else if (cardId === "card-burnout-block4") { hintId = "hint-burnout-block4"; }
 
-  const arrow = document.getElementById(arrowId);
   const hint = document.getElementById(hintId);
-
-  if (arrow) arrow.innerText = isCollapsed ? "▶" : "▼";
   if (hint) hint.innerText = isCollapsed ? "Розгорнути ▼" : "Згорнути ▲";
 }
 
@@ -4743,9 +4745,17 @@ function toggleBurnoutZoneBreakdown() {
   box.classList.toggle("collapsed");
   const isCollapsed = box.classList.contains("collapsed");
 
-  const arrow = document.getElementById("arrow-burnout-zones");
   const hint = document.getElementById("hint-burnout-zones");
-  if (arrow) arrow.innerText = isCollapsed ? "▶" : "▼";
+  if (hint) hint.innerText = isCollapsed ? "Розгорнути ▼" : "Згорнути ▲";
+}
+
+function toggleVacuumBox() {
+  const box = document.getElementById("cost-vacuum-collapsible-box");
+  if (!box) return;
+  box.classList.toggle("collapsed");
+  const isCollapsed = box.classList.contains("collapsed");
+
+  const hint = document.getElementById("hint-vacuum-box");
   if (hint) hint.innerText = isCollapsed ? "Розгорнути ▼" : "Згорнути ▲";
 }
 
@@ -5649,6 +5659,8 @@ function calculateTotalProductionCost() {
   if (vacuumPowerCostCalc) vacuumPowerCostCalc.innerText = `${costVacuumPowerPerFlask.toFixed(2)} грн`;
   if (vacuumCostPerFlaskCalc) vacuumCostPerFlaskCalc.innerText = `${costVacuumPerFlask.toFixed(2)} грн`;
   if (vacuumTotalDisp) vacuumTotalDisp.innerText = `${costVacuumTotal.toFixed(2)} грн (енергія: ${costVacuumPowerTotal.toFixed(2)} + масло: ${costVacuumOilTotal.toFixed(2)} грн)`;
+  const vacuumHeaderBadge = document.getElementById("vacuum-header-cost-badge");
+  if (vacuumHeaderBadge) vacuumHeaderBadge.innerText = `${costVacuumTotal.toFixed(2)} грн`;
 
   if (grandTotalDisp) grandTotalDisp.innerText = `${grandTotal.toFixed(2)} грн`;
   if (perFlaskGrandDisp) perFlaskGrandDisp.innerText = `${grandPerFlask.toFixed(2)} грн / опока`;
