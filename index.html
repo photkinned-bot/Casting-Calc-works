@@ -629,13 +629,21 @@
         </select>
       </div>
       <div class="form-group">
-        <label>
-          Формомаса W/P (Пресет)
-          <button type="button" class="help-btn" onclick="openHelpModal('preset_investment')" title="Довідка: Пресети формомаси W/P">?</button>
-        </label>
-        <select id="preset-investment" onchange="applyInvestmentPreset()">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label for="preset-investment">
+            Формомаса W/P (Пресет)
+            <button type="button" class="help-btn" onclick="openHelpModal('preset_investment')" title="Довідка: Пресети формомаси W/P">?</button>
+          </label>
+          <span id="preset-inv-ratio-badge" class="badge badge-success" style="font-size: 0.72rem; padding: 1px 6px;">35:100</span>
+        </div>
+        <select id="preset-investment" onchange="applyInvestmentPreset('casting')">
           <!-- Динамічні варіанти -->
         </select>
+        <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+          <label for="preset-investment-price" style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; margin-bottom: 0;">Ціна (грн/кг):</label>
+          <input type="number" id="preset-investment-price" value="165" step="5" min="0" style="padding: 4px 8px; font-size: 0.85rem; font-weight: 600; width: 95px; color: #a7f3d0;" oninput="onInvestmentPriceDirectInput(this.value)" title="Ціна формомаси за 1 кг (синхронізована із вкладкою 'Випалювання і вартість')">
+          <span id="preset-inv-sync-info" style="font-size: 0.72rem; color: #38bdf8; margin-left: auto;">⚡ Синхронізовано</span>
+        </div>
       </div>
       <div class="form-group">
         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -1271,20 +1279,18 @@
                 <span style="font-weight: 700; color: #a7f3d0; font-size: 0.95rem;">1. Формомаса і вода</span>
                 <button type="button" class="help-btn help-btn-green" onclick="openHelpModal('cost_materials')" title="Довідка: Собівартість формомаси та води">?</button>
               </div>
-              <span class="badge badge-success" style="font-size: 0.7rem;">З кошика</span>
+              <span class="badge badge-success" id="cost-powder-source-badge" style="font-size: 0.7rem;">⚡ Синхронізовано</span>
             </div>
 
-            <!-- Пресети цін формомаси та води -->
-            <div class="preset-toolbar-inline" style="margin-top: 4px;">
-              <select id="material-price-preset-select" class="preset-select-sm" onchange="applyMaterialPricePreset()" title="Виберіть збережений пресет цін або створіть новий">
-                <!-- Опції пресетів генеруються динамічно -->
+            <!-- Вибір формомаси (пресети) - повністю синхронізований із вкладкою "Литва і формомаса" -->
+            <div class="form-group" style="margin-top: 6px; margin-bottom: 8px;">
+              <label for="material-price-preset-select" style="font-size: 0.76rem; color: #cbd5e1; display: flex; justify-content: space-between; align-items: center;">
+                <span>Вибір формомаси (пресет):</span>
+                <span style="font-size: 0.7rem; color: #38bdf8;">🔄 Синхрон із вкладкою "Литва"</span>
+              </label>
+              <select id="material-price-preset-select" class="preset-select-sm" style="width: 100%; padding: 6px 10px; font-weight: 600;" onchange="applyMaterialPricePreset()" title="Вибір формомаси - автоматично синхронізується з Preset Manager вкладки 'Литва і формомаса'">
+                <!-- Опції пресетів формомаси -->
               </select>
-              <button type="button" class="btn-preset-action" id="btn-save-material-preset" onclick="promptSaveMaterialPricePreset()" title="Зберегти поточні ціни порошку та води як пресет">
-                💾 Зберегти
-              </button>
-              <button type="button" class="btn-preset-action" id="btn-delete-material-preset" onclick="deleteCurrentMaterialPricePreset()" title="Видалити поточний пресет">
-                🗑️
-              </button>
             </div>
 
             <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px;">
@@ -1296,7 +1302,7 @@
                   Ціна порошку (грн/кг):
                   <button type="button" class="help-btn" onclick="openHelpModal('cost_powder_kg')" title="Довідка: Ціна формомаси за кг">?</button>
                 </label>
-                <input type="number" id="price-powder-kg" value="160" step="5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onMaterialPriceManualInput()">
+                <input type="number" id="price-powder-kg" value="165" step="5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem; font-weight: 600; color: #a7f3d0;" oninput="onMaterialPriceManualInput()">
               </div>
               <div class="form-group" style="min-width: 0;">
                 <label for="price-water-l" style="font-size: 0.76rem; line-height: 1.2;">
@@ -1421,15 +1427,16 @@
                   <button type="button" class="help-btn" onclick="openHelpModal('cost_metal_loss_rate')" title="Довідка: Норми угару та курси НБУ">?</button>
                 </div>
                 <button type="button" class="btn-preset-action" id="btn-fetch-nbu" onclick="fetchNBUMetalRates(true)" style="border-color: #38bdf8; color: #38bdf8; background: rgba(56, 189, 248, 0.1);">
-                  <span id="nbu-loading-icon">🌐</span> Оновити курси НБУ
+                  <span id="nbu-loading-icon">🌐</span> <span id="nbu-btn-label">Оновити курси НБУ</span>
                 </button>
               </div>
 
               <!-- Інформаційна плашка актуальних курсів металів -->
               <div id="nbu-rates-bar" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; font-size: 0.78rem;">
-                <span class="nbu-metal-badge" id="nbu-badge-gold">🟡 Au 999.9: <strong>3 875.50 грн/г</strong></span>
-                <span class="nbu-metal-badge" id="nbu-badge-silver">🔘 Ag 999.9: <strong>46.80 грн/г</strong></span>
-                <span class="nbu-metal-badge" id="nbu-badge-plat">💎 Pt 999.9: <strong>1 360.00 грн/г</strong></span>
+                <span class="nbu-metal-badge" id="nbu-badge-gold">🟡 Au 999.9: <strong id="nbu-gold-rate">6 318.00 грн/г</strong></span>
+                <span class="nbu-metal-badge" id="nbu-badge-silver">🔘 Ag 999.9: <strong id="nbu-silver-rate">94.37 грн/г</strong></span>
+                <span class="nbu-metal-badge" id="nbu-badge-plat">💎 Pt 999.9: <strong id="nbu-pt-rate">2 529.00 грн/г</strong></span>
+                <span class="nbu-metal-badge" id="nbu-badge-pd" style="background: rgba(148, 163, 184, 0.12); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 4px; padding: 2px 6px;">⚪ Pd 999.9: <strong id="nbu-pd-rate">1 907.00 грн/г</strong></span>
                 <span id="nbu-status-indicator" style="font-size: 0.72rem; color: var(--text-muted); align-self: center; margin-left: auto;"></span>
               </div>
 
@@ -1470,7 +1477,7 @@
                     Розрахункова ціна металу (грн / г):
                     <button type="button" class="help-btn" onclick="openHelpModal('cost_metal_price_gram')" title="Довідка: Ринкова ціна металу для оцінки чаду">?</button>
                   </label>
-                  <input type="number" id="metal-price-gram" value="2600" step="20" min="0" style="width: 100%; min-width: 0; padding: 6px 8px; font-size: 0.95rem; font-weight: 700; color: #fde047;" oninput="calculateTotalProductionCost()">
+                  <input type="number" id="metal-price-gram" value="3708" step="20" min="0" style="width: 100%; min-width: 0; padding: 6px 8px; font-size: 0.95rem; font-weight: 700; color: #fde047;" oninput="calculateTotalProductionCost()">
                   <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">
                     Можна змінювати вручну або застосувати з кошика
                   </div>
@@ -1683,18 +1690,19 @@
 
       <!-- Секція пресетів формомаси -->
       <div style="border-bottom: 1px solid var(--border); padding-bottom: 16px;">
-        <label style="font-weight: 600; color: var(--accent); display: block; margin-bottom: 8px;">Збережені пресети формомаси (W/P)</label>
+        <label style="font-weight: 600; color: var(--accent); display: block; margin-bottom: 8px;">Збережені пресети формомаси (W/P та ціна)</label>
         <div id="inv-presets-list" style="max-height: 180px; overflow-y: auto; margin-bottom: 10px;">
           <!-- Динамічний список пресетів формомаси з кнопками видалення -->
         </div>
 
         <div style="background: rgba(15,23,42,0.4); padding: 10px; border-radius: 8px; border: 1px dashed var(--border);">
           <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 6px;">+ Додати новий пресет формомаси</label>
-          <div class="grid" style="margin-top: 4px;">
+          <div class="grid" style="margin-top: 4px; grid-template-columns: 1.2fr 1fr 1fr; gap: 8px;">
             <input type="text" id="new-inv-name" placeholder="Назва (напр. Satin Cast 35)" style="font-size: 0.85rem;">
-            <input type="number" id="new-inv-ratio" placeholder="Води на 100г порошку (мл)" style="font-size: 0.85rem;">
+            <input type="number" id="new-inv-ratio" placeholder="Вода мл/100г (35)" style="font-size: 0.85rem;">
+            <input type="number" id="new-inv-price" placeholder="Ціна грн/кг (165)" style="font-size: 0.85rem;">
           </div>
-          <button class="btn btn-sm" id="btn-save-inv-preset" style="margin-top: 8px; width: 100%;" onclick="saveInvestmentPreset()">Зберегти пропорцію</button>
+          <button class="btn btn-sm" id="btn-save-inv-preset" style="margin-top: 8px; width: 100%;" onclick="saveInvestmentPreset()">Зберегти пресет формомаси</button>
         </div>
       </div>
 
@@ -1900,10 +1908,13 @@ const DEFAULT_FLASKS = [
 ];
 
 const DEFAULT_INVESTMENTS = [
-  { name: "Satin Cast (35:100)", ratio: 35 },
-  { name: "Kerr / Gold Star (36:100)", ratio: 36 },
-  { name: "Стандарт (38:100)", ratio: 38 },
-  { name: "Рідка (40:100)", ratio: 40 }
+  { name: "Satin Cast (35:100)", ratio: 35, priceKg: 165, priceWater: 8 },
+  { name: "Kerr / Gold Star (36:100)", ratio: 36, priceKg: 185, priceWater: 8 },
+  { name: "Стандарт (38:100)", ratio: 38, priceKg: 160, priceWater: 8 },
+  { name: "Gold Star Omega (38:100)", ratio: 38, priceKg: 195, priceWater: 8 },
+  { name: "Kerr Diamond (38:100)", ratio: 38, priceKg: 210, priceWater: 10 },
+  { name: "Рідка (40:100)", ratio: 40, priceKg: 150, priceWater: 8 },
+  { name: "Бюджетна формомаса (40:100)", ratio: 40, priceKg: 130, priceWater: 5 }
 ];
 
 // Фіксовані алгоритми проб та колірні сплави металів за ювелірною специфікацією
@@ -2022,9 +2033,38 @@ function getMetalColorMeta(metal) {
   };
 }
 
+function getInitialInvestments() {
+  const saved = localStorage.getItem("cc_investments");
+  if (!saved) return JSON.parse(JSON.stringify(DEFAULT_INVESTMENTS));
+  try {
+    const list = JSON.parse(saved);
+    if (!Array.isArray(list) || list.length === 0) return JSON.parse(JSON.stringify(DEFAULT_INVESTMENTS));
+    return list.map(inv => {
+      let pKg = inv.priceKg;
+      if (!pKg || isNaN(pKg)) {
+        const n = (inv.name || "").toLowerCase();
+        if (n.includes("diamond")) pKg = 210;
+        else if (n.includes("omega")) pKg = 195;
+        else if (n.includes("kerr") || n.includes("gold star")) pKg = 185;
+        else if (n.includes("satin")) pKg = 165;
+        else if (n.includes("бюджет")) pKg = 130;
+        else pKg = 160;
+      }
+      return {
+        name: inv.name || "Формомаса",
+        ratio: inv.ratio || 38,
+        priceKg: pKg,
+        priceWater: inv.priceWater || 8
+      };
+    });
+  } catch (e) {
+    return JSON.parse(JSON.stringify(DEFAULT_INVESTMENTS));
+  }
+}
+
 let state = {
   flasks: JSON.parse(localStorage.getItem("cc_flasks")) || DEFAULT_FLASKS,
-  investments: JSON.parse(localStorage.getItem("cc_investments")) || DEFAULT_INVESTMENTS,
+  investments: getInitialInvestments(),
   batch: JSON.parse(localStorage.getItem("cc_batch")) || []
 };
 
@@ -2330,35 +2370,73 @@ function onRecalcNoteInput() {
 // --- РОБОТА З ПРЕСЕТАМИ ---
 function renderPresetSelects() {
   const flaskSel = document.getElementById("preset-flask");
-  const prevFlaskVal = flaskSel.value;
-  if (state.flasks.length === 0) {
-    flaskSel.innerHTML = `<option value="-1">Немає пресетів (введіть розміри)</option>`;
-  } else {
-    flaskSel.innerHTML = state.flasks.map((f, i) => `<option value="${i}">${f.name} (${f.d}x${f.h} мм)</option>`).join("");
-    if (prevFlaskVal !== "" && parseInt(prevFlaskVal, 10) < state.flasks.length && parseInt(prevFlaskVal, 10) >= 0) {
-      flaskSel.value = prevFlaskVal;
+  const prevFlaskVal = flaskSel ? flaskSel.value : "";
+  if (flaskSel) {
+    if (state.flasks.length === 0) {
+      flaskSel.innerHTML = `<option value="-1">Немає пресетів (введіть розміри)</option>`;
+    } else {
+      flaskSel.innerHTML = state.flasks.map((f, i) => `<option value="${i}">${escapeHtml(f.name)} (${f.d}x${f.h} мм)</option>`).join("");
+      if (prevFlaskVal !== "" && parseInt(prevFlaskVal, 10) < state.flasks.length && parseInt(prevFlaskVal, 10) >= 0) {
+        flaskSel.value = prevFlaskVal;
+      }
     }
   }
   
   const invSel = document.getElementById("preset-investment");
-  const prevInvVal = invSel.value;
-  if (state.investments.length === 0) {
-    invSel.innerHTML = `<option value="-1">Стандарт (38:100)</option>`;
-  } else {
-    invSel.innerHTML = state.investments.map((inv, i) => `<option value="${i}">${inv.name} (${inv.ratio}:100)</option>`).join("");
+  const matSel = document.getElementById("material-price-preset-select");
+  const prevInvVal = invSel ? invSel.value : "";
+
+  const invOptionsHTML = state.investments.length === 0 
+    ? `<option value="-1">Стандарт (38:100 — 160 грн/кг)</option>`
+    : state.investments.map((inv, i) => {
+        const pKg = inv.priceKg !== undefined ? inv.priceKg : 160;
+        return `<option value="${i}">${escapeHtml(inv.name)} (W/P ${inv.ratio}:100 — ${pKg} грн/кг)</option>`;
+      }).join("");
+
+  if (invSel) {
+    invSel.innerHTML = invOptionsHTML;
     if (prevInvVal !== "" && parseInt(prevInvVal, 10) < state.investments.length && parseInt(prevInvVal, 10) >= 0) {
       invSel.value = prevInvVal;
     }
   }
+
+  if (matSel) {
+    matSel.innerHTML = invOptionsHTML;
+    if (invSel && invSel.value !== "") {
+      matSel.value = invSel.value;
+    }
+  }
+
+  // Оновлення полів цін та бейджа з активного пресету формомаси
+  const activeInvIdx = invSel ? parseInt(invSel.value, 10) : 0;
+  if (activeInvIdx >= 0 && state.investments[activeInvIdx]) {
+    const activeInv = state.investments[activeInvIdx];
+    const castPriceEl = document.getElementById("preset-investment-price");
+    const burnoutPowderEl = document.getElementById("price-powder-kg");
+    const burnoutWaterEl = document.getElementById("price-water-l");
+    const ratioBadge = document.getElementById("preset-inv-ratio-badge");
+    const pVal = activeInv.priceKg !== undefined ? activeInv.priceKg : 160;
+    const wVal = activeInv.priceWater !== undefined ? activeInv.priceWater : 8;
+
+    if (castPriceEl && (!castPriceEl.value || castPriceEl.value === "0")) castPriceEl.value = pVal;
+    if (burnoutPowderEl && (!burnoutPowderEl.value || burnoutPowderEl.value === "0")) burnoutPowderEl.value = pVal;
+    if (burnoutWaterEl && (!burnoutWaterEl.value || burnoutWaterEl.value === "0")) burnoutWaterEl.value = wVal;
+    if (ratioBadge) {
+      ratioBadge.innerText = `${activeInv.ratio}:100`;
+      ratioBadge.title = `Вода: ${activeInv.ratio} мл на 100 г сухого порошку`;
+    }
+  }
   
   const metalSel = document.getElementById("preset-metal");
-  const prevMetalVal = metalSel.value;
-  metalSel.innerHTML = METALS.map((m, i) => {
-    const meta = getMetalColorMeta(m);
-    return `<option value="${i}">${meta.icon} ${m.name} (ρ = ${m.density.toFixed(2)} г/см³)</option>`;
-  }).join("");
-  if (prevMetalVal !== "" && parseInt(prevMetalVal, 10) < METALS.length) {
-    metalSel.value = prevMetalVal;
+  const prevMetalVal = metalSel ? metalSel.value : "";
+  if (metalSel) {
+    metalSel.innerHTML = METALS.map((m, i) => {
+      const meta = getMetalColorMeta(m);
+      return `<option value="${i}">${meta.icon} ${m.name} (ρ = ${m.density.toFixed(2)} г/см³)</option>`;
+    }).join("");
+    if (prevMetalVal !== "" && parseInt(prevMetalVal, 10) < METALS.length) {
+      metalSel.value = prevMetalVal;
+    }
   }
 
   updateFlaskHeaderDisplay();
@@ -2502,7 +2580,7 @@ function renderPresetModalLists() {
       flaskListEl.innerHTML = state.flasks.map((f, i) => `
         <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15,23,42,0.6); padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; border: 1px solid var(--border);">
           <div>
-            <span style="font-weight: 600; font-size: 0.9rem;">${f.name}</span>
+            <span style="font-weight: 600; font-size: 0.9rem;">${escapeHtml(f.name)}</span>
             <span style="font-size: 0.8rem; color: var(--text-muted); margin-left: 6px;">⌀${f.d} × ${f.h} мм</span>
           </div>
           <button class="btn btn-danger btn-sm" id="btn-delete-flask-${i}" onclick="deleteFlaskPreset(${i})" title="Видалити цей пресет" style="padding: 4px 8px; font-size: 0.75rem;">Видалити</button>
@@ -2516,15 +2594,18 @@ function renderPresetModalLists() {
     if (state.investments.length === 0) {
       invListEl.innerHTML = `<div style="font-size: 0.85rem; color: var(--text-muted); padding: 8px 0; text-align: center;">Список пресетів формомаси порожній</div>`;
     } else {
-      invListEl.innerHTML = state.investments.map((inv, i) => `
+      invListEl.innerHTML = state.investments.map((inv, i) => {
+        const pKg = inv.priceKg !== undefined ? inv.priceKg : 160;
+        return `
         <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15,23,42,0.6); padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; border: 1px solid var(--border);">
           <div>
-            <span style="font-weight: 600; font-size: 0.9rem;">${inv.name}</span>
+            <span style="font-weight: 600; font-size: 0.9rem;">${escapeHtml(inv.name)}</span>
             <span style="font-size: 0.8rem; color: #a7f3d0; margin-left: 6px;">${inv.ratio} мл / 100 г</span>
+            <span style="font-size: 0.78rem; color: #fde047; margin-left: 8px; background: rgba(234,179,8,0.15); padding: 2px 6px; border-radius: 4px;">${pKg} грн/кг</span>
           </div>
           <button class="btn btn-danger btn-sm" id="btn-delete-inv-${i}" onclick="deleteInvestmentPreset(${i})" title="Видалити цей пресет" style="padding: 4px 8px; font-size: 0.75rem;">Видалити</button>
         </div>
-      `).join("");
+      `;}).join("");
     }
   }
 }
@@ -2542,8 +2623,64 @@ function applyFlaskPreset() {
   }
 }
 
-function applyInvestmentPreset() {
+function applyInvestmentPreset(source = "casting") {
+  const castSel = document.getElementById("preset-investment");
+  const matSel = document.getElementById("material-price-preset-select");
+  let idx = 0;
+
+  if (source === "burnout" && matSel) {
+    idx = parseInt(matSel.value, 10);
+    if (castSel) castSel.value = idx;
+  } else if (castSel) {
+    idx = parseInt(castSel.value, 10);
+    if (matSel) matSel.value = idx;
+  }
+
+  if (idx >= 0 && state.investments[idx]) {
+    const inv = state.investments[idx];
+    const priceVal = inv.priceKg !== undefined ? inv.priceKg : 160;
+    const waterVal = inv.priceWater !== undefined ? inv.priceWater : 8;
+
+    const castPriceInput = document.getElementById("preset-investment-price");
+    if (castPriceInput) castPriceInput.value = priceVal;
+
+    const powderInput = document.getElementById("price-powder-kg");
+    if (powderInput) powderInput.value = priceVal;
+
+    const waterInput = document.getElementById("price-water-l");
+    if (waterInput) waterInput.value = waterVal;
+
+    const ratioBadge = document.getElementById("preset-inv-ratio-badge");
+    if (ratioBadge) {
+      ratioBadge.innerText = `${inv.ratio}:100`;
+      ratioBadge.title = `Вода: ${inv.ratio} мл на 100 г сухого порошку`;
+    }
+
+    showToast(`🔄 Синхронізовано формомасу: ${inv.name.split('(')[0].trim()} (${inv.ratio}:100 | ${priceVal} грн/кг)`);
+  }
+
   calculateSingle();
+  calculateTotalProductionCost();
+}
+
+function applyMaterialPricePreset() {
+  applyInvestmentPreset("burnout");
+}
+
+function onInvestmentPriceDirectInput(val) {
+  const pVal = parseFloat(val);
+  if (!isNaN(pVal) && pVal >= 0) {
+    const powderInput = document.getElementById("price-powder-kg");
+    if (powderInput) powderInput.value = pVal;
+
+    const castSel = document.getElementById("preset-investment");
+    const idx = castSel ? parseInt(castSel.value, 10) : 0;
+    if (idx >= 0 && state.investments[idx]) {
+      state.investments[idx].priceKg = pVal;
+      localStorage.setItem("cc_investments", JSON.stringify(state.investments));
+    }
+    calculateTotalProductionCost();
+  }
 }
 
 function applyMetalPreset() {
@@ -2583,17 +2720,29 @@ function saveFlaskPreset() {
 function saveInvestmentPreset() {
   const nameEl = document.getElementById("new-inv-name");
   const ratioEl = document.getElementById("new-inv-ratio");
-  const name = nameEl.value.trim();
-  const ratio = parseFloat(ratioEl.value);
+  const priceEl = document.getElementById("new-inv-price");
+  const name = nameEl ? nameEl.value.trim() : "";
+  const ratio = ratioEl ? parseFloat(ratioEl.value) : NaN;
+  const priceKg = priceEl && !isNaN(parseFloat(priceEl.value)) ? parseFloat(priceEl.value) : 165;
+
   if (name && !isNaN(ratio) && ratio > 0) {
-    state.investments.push({ name, ratio });
+    state.investments.push({ 
+      name, 
+      ratio,
+      priceKg: priceKg,
+      priceWater: 8
+    });
     localStorage.setItem("cc_investments", JSON.stringify(state.investments));
-    nameEl.value = "";
-    ratioEl.value = "";
+    if (nameEl) nameEl.value = "";
+    if (ratioEl) ratioEl.value = "";
+    if (priceEl) priceEl.value = "";
     renderPresetSelects();
     renderPresetModalLists();
-    document.getElementById("preset-investment").value = state.investments.length - 1;
-    calculateSingle();
+    const newIdx = state.investments.length - 1;
+    const invSel = document.getElementById("preset-investment");
+    if (invSel) invSel.value = newIdx;
+    applyInvestmentPreset("casting");
+    showToast(`💾 Пресет формомаси "${name}" збережено та синхронізовано!`);
   }
 }
 
@@ -2613,7 +2762,7 @@ function deleteInvestmentPreset(index) {
     localStorage.setItem("cc_investments", JSON.stringify(state.investments));
     renderPresetSelects();
     renderPresetModalLists();
-    calculateSingle();
+    applyInvestmentPreset("casting");
   }
 }
 
@@ -2625,6 +2774,7 @@ function resetDefaultPresets() {
   renderPresetSelects();
   renderPresetModalLists();
   applyFlaskPreset();
+  applyInvestmentPreset("casting");
 }
 
 // --- МАТЕМАТИЧНИЙ ЯДРО РОЗРАХУНКІВ ---

@@ -19,15 +19,25 @@ app.use((req, res, next) => {
 app.use(express.static(__dirname, { etag: false, maxAge: 0 }));
 
 app.get('/api/nbu-metals', async (req, res) => {
+  const TROY_OUNCE_TO_GRAM = 31.1034768;
+  
+  // Актуальні реалістичні резервні курси (грн / грам 999.9 чистоти)
+  const fallbackMetals = {
+    gold: 6277.10,      // Au 999.9 (~6277 грн/г)
+    silver: 93.38,      // Ag 999.9 (~93.38 грн/г)
+    platinum: 2497.96,  // Pt 999.9
+    palladium: 1895.10  // Pd 999.9
+  };
+
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 4500);
 
-    const response = await fetch('https://bank.gov.ua/NBUStatService/v1/statdirectory/bankmetals?json', {
+    const response = await fetch('https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json', {
       signal: controller.signal,
       headers: {
         'Accept': 'application/json',
-        'User-Agent': 'CastingCalc/1.0 (Jewelry Production Engine)'
+        'User-Agent': 'CastingCalc/2.0 (Jewelry Production Engine)'
       }
     });
     clearTimeout(timeoutId);
@@ -36,22 +46,48 @@ app.get('/api/nbu-metals', async (req, res) => {
       throw new Error(`NBU API responded with status ${response.status}`);
     }
 
-    const data = await response.json();
-    return res.json({ success: true, source: 'nbu_live', data, timestamp: new Date().toISOString() });
+    const rawList = await response.json();
+    const metals = { ...fallbackMetals };
+    let exchangeDate = new Date().toLocaleDateString('uk-UA');
+
+    if (Array.isArray(rawList)) {
+      rawList.forEach(item => {
+        if (!item || !item.rate) return;
+        const ratePerOunce = parseFloat(item.rate);
+        if (isNaN(ratePerOunce) || ratePerOunce <= 0) return;
+        
+        const ratePerGram = ratePerOunce / TROY_OUNCE_TO_GRAM;
+        
+        if (item.r030 === 959 || item.cc === 'XAU') {
+          metals.gold = Number(ratePerGram.toFixed(2));
+          if (item.exchangedate) exchangeDate = item.exchangedate;
+        } else if (item.r030 === 961 || item.cc === 'XAG') {
+          metals.silver = Number(ratePerGram.toFixed(2));
+        } else if (item.r030 === 962 || item.cc === 'XPT') {
+          metals.platinum = Number(ratePerGram.toFixed(2));
+        } else if (item.r030 === 964 || item.cc === 'XPD') {
+          metals.palladium = Number(ratePerGram.toFixed(2));
+        }
+      });
+    }
+
+    return res.json({
+      success: true,
+      source: 'nbu_live',
+      date: exchangeDate,
+      metals: metals,
+      troyOunceGram: TROY_OUNCE_TO_GRAM,
+      timestamp: new Date().toISOString()
+    });
   } catch (err) {
     console.warn('NBU API fetch fallback:', err.message);
-    // Fallback current realistic reference rates
-    const fallbackRates = [
-      { r030: 959, txt: "Золото", rate: 3875.50, cc: "XAU", perGram: true },
-      { r030: 961, txt: "Срібло", rate: 46.80, cc: "XAG", perGram: true },
-      { r030: 962, txt: "Платина", rate: 1360.00, cc: "XPT", perGram: true },
-      { r030: 964, txt: "Паладій", rate: 1250.00, cc: "XPD", perGram: true }
-    ];
     return res.json({
       success: true,
       source: 'fallback',
       message: 'Використано актуальні довідкові курси дорогоцінних металів',
-      data: fallbackRates,
+      date: new Date().toLocaleDateString('uk-UA'),
+      metals: fallbackMetals,
+      troyOunceGram: TROY_OUNCE_TO_GRAM,
       timestamp: new Date().toISOString()
     });
   }
