@@ -57,7 +57,7 @@
 
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
-    label { font-size: 0.85rem; color: var(--text-muted); }
+    label { font-size: 0.85rem; color: var(--text-muted); display: inline-flex; align-items: center; flex-wrap: wrap; gap: 4px; }
     
     input, select { background-color: var(--bg-input); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
     input:focus, select:focus { border-color: var(--accent); }
@@ -356,38 +356,40 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 17px;
-      height: 17px;
-      min-width: 17px;
-      min-height: 17px;
+      width: 18px;
+      height: 18px;
+      min-width: 18px;
+      min-height: 18px;
       border-radius: 50%;
-      background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.4);
+      background: rgba(56, 189, 248, 0.14);
+      border: 1px solid rgba(56, 189, 248, 0.45);
       color: #38bdf8;
-      font-size: 0.72rem;
+      font-size: 0.74rem;
       font-weight: 700;
       font-family: inherit;
       cursor: pointer;
       padding: 0;
-      margin-left: 4px;
+      margin: 0 6px;
       vertical-align: middle;
       line-height: 1;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
       user-select: none;
       flex-shrink: 0;
+      position: relative;
+      z-index: 2;
     }
     .help-btn:hover, .help-btn:focus {
       background: #38bdf8;
       color: #0f172a;
       border-color: #38bdf8;
-      transform: scale(1.22);
+      transform: scale(1.15);
       box-shadow: 0 0 8px rgba(56, 189, 248, 0.7);
       outline: none;
     }
     .help-btn-amber {
-      background: rgba(245, 158, 11, 0.14);
-      border-color: rgba(245, 158, 11, 0.45);
+      background: rgba(245, 158, 11, 0.16);
+      border-color: rgba(245, 158, 11, 0.5);
       color: #fbbf24;
     }
     .help-btn-amber:hover, .help-btn-amber:focus {
@@ -397,8 +399,8 @@
       box-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
     }
     .help-btn-green {
-      background: rgba(16, 185, 129, 0.14);
-      border-color: rgba(16, 185, 129, 0.45);
+      background: rgba(16, 185, 129, 0.16);
+      border-color: rgba(16, 185, 129, 0.5);
       color: #34d399;
     }
     .help-btn-green:hover, .help-btn-green:focus {
@@ -408,8 +410,8 @@
       box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
     }
     .help-btn-danger {
-      background: rgba(239, 68, 68, 0.14);
-      border-color: rgba(239, 68, 68, 0.45);
+      background: rgba(239, 68, 68, 0.16);
+      border-color: rgba(239, 68, 68, 0.5);
       color: #f87171;
     }
     .help-btn-danger:hover, .help-btn-danger:focus {
@@ -570,8 +572,8 @@
   <div id="tab-content-casting" class="tab-pane active">
     <!-- Блок управління проектом (JSON Збереження / Завантаження) -->
     <div class="project-card">
-    <div class="card-title" style="margin-bottom: 8px;">
-      <div style="display: flex; align-items: center; gap: 8px;">
+    <div class="card-title" style="margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+      <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
         <span>📦 Проект литва (JSON)</span>
         <button type="button" class="help-btn" onclick="openHelpModal('project_json')" title="Довідка: Проект литва та JSON">?</button>
         <span id="project-flasks-badge" class="badge" style="font-size: 0.78rem;">0 опок</span>
@@ -615,7 +617,7 @@
 
   <!-- Блок керування пресетами -->
   <div class="card">
-    <div class="card-title">
+    <div class="card-title" style="flex-wrap: wrap; gap: 8px;">
       <div style="display: flex; align-items: center; gap: 6px;">
         <span>Пресет-менеджер</span>
         <button type="button" class="help-btn" onclick="openHelpModal('preset_manager')" title="Довідка: Пресет-менеджер">?</button>
@@ -628,8 +630,8 @@
     </div>
     <div class="grid">
       <div class="form-group">
-        <label>
-          Опока (Пресет)
+        <label style="display: inline-flex; align-items: center; gap: 6px;">
+          <span>Опока (Пресет)</span>
           <button type="button" class="help-btn" onclick="openHelpModal('preset_flask')" title="Довідка: Пресети опок">?</button>
         </label>
         <select id="preset-flask" onchange="applyFlaskPreset()">
@@ -637,9 +639,9 @@
         </select>
       </div>
       <div class="form-group">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <label for="preset-investment">
-            Формомаса W/P (Пресет)
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; margin-bottom: 2px;">
+          <label for="preset-investment" style="display: inline-flex; align-items: center; gap: 6px; margin-bottom: 0;">
+            <span>Формомаса W/P (Пресет)</span>
             <button type="button" class="help-btn" onclick="openHelpModal('preset_investment')" title="Довідка: Пресети формомаси W/P">?</button>
           </label>
           <span id="preset-inv-ratio-badge" class="badge badge-success" style="font-size: 0.72rem; padding: 1px 6px;">35:100</span>
@@ -647,16 +649,16 @@
         <select id="preset-investment" onchange="applyInvestmentPreset('casting')">
           <!-- Динамічні варіанти -->
         </select>
-        <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap;">
           <label for="preset-investment-price" style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; margin-bottom: 0;">Ціна (грн/кг):</label>
           <input type="number" id="preset-investment-price" value="165" step="5" min="0" style="padding: 4px 8px; font-size: 0.85rem; font-weight: 600; width: 95px; color: #a7f3d0;" oninput="onInvestmentPriceDirectInput(this.value, 'casting')" title="Ціна формомаси за 1 кг (100% синхронізована із вкладкою 'Випалювання і вартість')">
           <span id="preset-inv-sync-info" style="font-size: 0.72rem; color: #38bdf8; margin-left: auto;">⚡ Синхронізовано</span>
         </div>
       </div>
       <div class="form-group">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <label for="preset-metal">
-            Сплав металу (Пресет)
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; margin-bottom: 2px;">
+          <label for="preset-metal" style="display: inline-flex; align-items: center; gap: 6px; margin-bottom: 0;">
+            <span>Сплав металу (Пресет)</span>
             <button type="button" class="help-btn" onclick="openHelpModal('preset_metal')" title="Довідка: Сплави металів та лігатури">?</button>
           </label>
           <span id="preset-metal-color-badge" class="badge" style="font-size: 0.72rem; padding: 1px 6px;"></span>
@@ -675,7 +677,7 @@
 
   <!-- Робочий калькулятор одиночної опоки -->
   <div class="card">
-    <div class="card-title">
+    <div class="card-title" style="flex-wrap: wrap; gap: 6px;">
       <div style="display: flex; align-items: center; gap: 6px;">
         <span>Розрахунок одиночної опоки</span>
         <button type="button" class="help-btn" onclick="openHelpModal('single_calc')" title="Довідка: Розрахунок одиночної опоки">?</button>
@@ -839,13 +841,13 @@
   <div id="tab-content-burnout" class="tab-pane" style="display: none;">
     <!-- Блок автоматичної синхронізації з кошиком замісу -->
     <div class="card" style="border-left: 4px solid var(--accent);">
-      <div class="card-title" style="font-size: 1rem;">
-        <div style="display: flex; align-items: center; gap: 8px;">
+      <div class="card-title" style="font-size: 1rem; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
           <span>🛒 Дані з кошика замісу (Автосинхронізація)</span>
           <button type="button" class="help-btn" onclick="openHelpModal('burnout_sync')" title="Довідка: Автосинхронізація з кошиком замісу">?</button>
           <span id="burnout-batch-badge" class="badge" style="font-size: 0.78rem;">0 опок</span>
         </div>
-        <div style="display: flex; gap: 6px;">
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
           <button type="button" class="quick-chip" onclick="syncBurnoutWithBatch()" style="font-size: 0.75rem; color: #38bdf8; border-color: #38bdf8;">
             🔄 Оновити з кошика
           </button>
@@ -883,13 +885,13 @@
 
     <!-- БЛОК 1: НАЛАШТУВАННЯ ОБЛАДНАННЯ ТА ТАРИФУ (РОЗКРИВНИЙ) -->
     <div class="card burnout-collapsible-card collapsed" id="card-burnout-block1">
-      <div class="card-title burnout-collapsible-header" onclick="toggleBurnoutCard('card-burnout-block1')">
-        <div style="display: flex; align-items: center; gap: 8px;">
+      <div class="card-title burnout-collapsible-header" onclick="toggleBurnoutCard('card-burnout-block1')" style="flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
           <span class="burnout-collapse-arrow" id="arrow-burnout-block1">▼</span>
           <span>⚡ Блок 1. Налаштування обладнання та тарифу електроенергії</span>
           <button type="button" class="help-btn" onclick="event.stopPropagation(); openHelpModal('furnace_power')" title="Довідка: Потужність та тарифи печі">?</button>
         </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
           <span class="badge" style="font-size: 0.75rem; background: rgba(56,189,248,0.15); color: #38bdf8; border-color: #38bdf8;">Вхідні параметри</span>
           <span class="burnout-collapse-hint" id="hint-burnout-block1">Розгорнути ▼</span>
         </div>
@@ -899,7 +901,7 @@
         <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
           <!-- Параметри печі -->
           <div class="burnout-tariff-card">
-            <div style="font-weight: 700; color: #fbbf24; margin-bottom: 10px; font-size: 0.92rem; display: flex; align-items: center; justify-content: space-between;">
+            <div style="font-weight: 700; color: #fbbf24; margin-bottom: 10px; font-size: 0.92rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
               <div style="display: flex; align-items: center; gap: 6px;">
                 <span>🔥 Параметри муфельної печі</span>
                 <button type="button" class="help-btn help-btn-amber" onclick="openHelpModal('furnace_power')" title="Довідка: Потужність печі">?</button>
@@ -909,12 +911,12 @@
 
             <div style="display: flex; flex-direction: column; gap: 10px;">
               <div class="form-group">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <label for="burnout-furnace-power">
-                    Номінальна потужність печі (кВт):
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 2px;">
+                  <label for="burnout-furnace-power" style="display: inline-flex; align-items: center; gap: 6px; margin-bottom: 0;">
+                    <span>Номінальна потужність печі (кВт):</span>
                     <button type="button" class="help-btn" onclick="openHelpModal('furnace_power')" title="Довідка: Номінальна потужність печі">?</button>
                   </label>
-                  <span style="font-weight: 700; color: #38bdf8;" id="burnout-power-display">1.8 кВт</span>
+                  <span style="font-weight: 700; color: #38bdf8; margin-left: auto;" id="burnout-power-display">1.8 кВт</span>
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center;">
                   <input type="number" id="burnout-furnace-power" value="1.8" step="0.1" min="0.5" max="10.0" style="width: 100px;" oninput="onBurnoutConfigChange()">
@@ -923,12 +925,12 @@
               </div>
 
               <div class="form-group">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <label for="burnout-power-reserve">
-                    Запас потужності / Похибка (%):
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 2px;">
+                  <label for="burnout-power-reserve" style="display: inline-flex; align-items: center; gap: 6px; margin-bottom: 0;">
+                    <span>Запас потужності / Похибка (%):</span>
                     <button type="button" class="help-btn" onclick="openHelpModal('furnace_overhead')" title="Довідка: Запас потужності та похибка ТЕНів">?</button>
                   </label>
-                  <span style="font-weight: 600; color: #fde047;" id="burnout-reserve-display">+10%</span>
+                  <span style="font-weight: 600; color: #fde047; margin-left: auto;" id="burnout-reserve-display">+10%</span>
                 </div>
                 <input type="number" id="burnout-power-reserve" value="10" step="1" min="0" max="50" oninput="onBurnoutConfigChange()">
                 <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 2px;">
@@ -940,12 +942,12 @@
               </div>
 
               <div class="form-group">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                  <label for="burnout-flasks-count">
-                    Кількість опок у садці печі (шт):
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 2px;">
+                  <label for="burnout-flasks-count" style="display: inline-flex; align-items: center; gap: 6px; margin-bottom: 0;">
+                    <span>Кількість опок у садці печі (шт):</span>
                     <button type="button" class="help-btn" onclick="openHelpModal('furnace_flasks_count')" title="Довідка: Кількість опок у садці">?</button>
                   </label>
-                  <button type="button" class="quick-chip" onclick="syncFlasksCountFromBatch()" style="font-size: 0.72rem;">Взяти з кошика</button>
+                  <button type="button" class="quick-chip" onclick="syncFlasksCountFromBatch()" style="font-size: 0.72rem; margin-left: auto;">Взяти з кошика</button>
                 </div>
                 <input type="number" id="burnout-flasks-count" value="1" min="1" step="1" oninput="onBurnoutConfigChange()">
               </div>
@@ -954,7 +956,7 @@
 
           <!-- Тарифна сітка -->
           <div class="burnout-tariff-card">
-            <div style="font-weight: 700; color: #38bdf8; margin-bottom: 10px; font-size: 0.92rem; display: flex; align-items: center; justify-content: space-between;">
+            <div style="font-weight: 700; color: #38bdf8; margin-bottom: 10px; font-size: 0.92rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
               <div style="display: flex; align-items: center; gap: 6px;">
                 <span>💡 Тарифна сітка електроенергії</span>
                 <button type="button" class="help-btn" onclick="openHelpModal('tariff_dual')" title="Довідка: Тарифна сітка">?</button>
@@ -979,8 +981,8 @@
               <!-- Поля для фіксованого тарифу -->
               <div id="tariff-fields-single" style="display: flex; flex-direction: column; gap: 8px;">
                 <div class="form-group">
-                  <label for="burnout-tariff-single">
-                    Тариф електроенергії (грн/кВт·год):
+                  <label for="burnout-tariff-single" style="display: inline-flex; align-items: center; gap: 6px;">
+                    <span>Тариф електроенергії (грн/кВт·год):</span>
                     <button type="button" class="help-btn" onclick="openHelpModal('tariff_dual')" title="Довідка: Тариф електроенергії">?</button>
                   </label>
                   <input type="number" id="burnout-tariff-single" value="4.32" step="0.01" min="0" oninput="onBurnoutConfigChange()">
@@ -991,15 +993,15 @@
               <div id="tariff-fields-dual" style="display: none; flex-direction: column; gap: 8px;">
                 <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 8px;">
                   <div class="form-group">
-                    <label for="burnout-tariff-day" style="color: #fbbf24;">
-                      ☀️ Денний тариф (07–23):
+                    <label for="burnout-tariff-day" style="color: #fbbf24; display: inline-flex; align-items: center; gap: 6px;">
+                      <span>☀️ Денний тариф (07–23):</span>
                       <button type="button" class="help-btn help-btn-amber" onclick="openHelpModal('tariff_dual')" title="Довідка: Денний тариф">?</button>
                     </label>
                     <input type="number" id="burnout-tariff-day" value="4.32" step="0.01" min="0" oninput="onBurnoutConfigChange()">
                   </div>
                   <div class="form-group">
-                    <label for="burnout-tariff-night" style="color: #a5b4fc;">
-                      🌙 Нічний коеф. 0.5 (23–07):
+                    <label for="burnout-tariff-night" style="color: #a5b4fc; display: inline-flex; align-items: center; gap: 6px;">
+                      <span>🌙 Нічний коеф. 0.5 (23–07):</span>
                       <button type="button" class="help-btn" onclick="openHelpModal('tariff_dual')" title="Довідка: Нічний тариф (коеф 0.5)">?</button>
                     </label>
                     <input type="number" id="burnout-tariff-night" value="2.16" step="0.01" min="0" oninput="onBurnoutConfigChange()">
@@ -1007,14 +1009,14 @@
                 </div>
 
                 <div class="form-group">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <label for="burnout-start-time">
-                      ⏰ Час старту випалювання (для розрахунку Ніч/День):
+                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 2px;">
+                    <label for="burnout-start-time" style="display: inline-flex; align-items: center; gap: 6px; margin-bottom: 0;">
+                      <span>⏰ Час старту випалювання (для розрахунку Ніч/День):</span>
                       <button type="button" class="help-btn" onclick="openHelpModal('burnout_start_time')" title="Довідка: Час старту випалювання">?</button>
                     </label>
-                    <span style="font-size: 0.75rem; color: var(--text-muted);" id="burnout-finish-time-preview">Фініш: ~05:39</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: auto;" id="burnout-finish-time-preview">Фініш: ~05:39</span>
                   </div>
-                  <div style="display: flex; gap: 6px; align-items: center;">
+                  <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
                     <input type="time" id="burnout-start-time" value="23:00" style="font-size: 0.95rem; font-weight: 600;" onchange="onBurnoutConfigChange()">
                     <button type="button" class="quick-chip" onclick="setStartTime('22:00')">22:00</button>
                     <button type="button" class="quick-chip" onclick="setStartTime('23:00')">23:00 (Ніч)</button>
@@ -1026,8 +1028,8 @@
               <!-- Поля для комерційного тарифу -->
               <div id="tariff-fields-commercial" style="display: none; flex-direction: column; gap: 8px;">
                 <div class="form-group">
-                  <label for="burnout-tariff-commercial">
-                    Тариф для бізнесу / ФОП (грн/кВт·год):
+                  <label for="burnout-tariff-commercial" style="display: inline-flex; align-items: center; gap: 6px;">
+                    <span>Тариф для бізнесу / ФОП (грн/кВт·год):</span>
                     <button type="button" class="help-btn" onclick="openHelpModal('tariff_commercial')" title="Довідка: Комерційний тариф">?</button>
                   </label>
                   <input type="number" id="burnout-tariff-commercial" value="9.60" step="0.01" min="0" oninput="onBurnoutConfigChange()">
@@ -1054,13 +1056,13 @@
 
     <!-- БЛОК 2: РЕДАКТОР ТЕМПЕРАТУРНОГО ПРОФІЛЮ (ГРАФІК ВИПАЛЮВАННЯ) (РОЗКРИВНИЙ З КЕРУВАННЯМ ПРЕСЕТАМИ) -->
     <div class="card burnout-collapsible-card collapsed" id="card-burnout-block2">
-      <div class="card-title burnout-collapsible-header" onclick="toggleBurnoutCard('card-burnout-block2')">
-        <div style="display: flex; align-items: center; gap: 8px;">
+      <div class="card-title burnout-collapsible-header" onclick="toggleBurnoutCard('card-burnout-block2')" style="flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
           <span class="burnout-collapse-arrow" id="arrow-burnout-block2">▼</span>
           <span>📈 Блок 2. Редактор температурного профілю (Графік випалювання)</span>
           <button type="button" class="help-btn" onclick="event.stopPropagation(); openHelpModal('burnout_profile')" title="Довідка: Графік випалювання">?</button>
         </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
           <span class="badge badge-pending" style="font-size: 0.75rem;">Графік & Пресети</span>
           <span class="burnout-collapse-hint" id="hint-burnout-block2">Розгорнути ▼</span>
         </div>
@@ -1091,8 +1093,8 @@
         <!-- Селектор та кнопки швидкого збереження/видалення пресетів -->
         <div class="form-group" style="margin-bottom: 12px; background: rgba(15,23,42,0.6); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
-            <label for="burnout-preset-select" style="font-weight: 600; color: #fbbf24;">
-              Шаблони температурного графіка (Пресети):
+            <label for="burnout-preset-select" style="font-weight: 600; color: #fbbf24; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 0;">
+              <span>Шаблони температурного графіка (Пресети):</span>
               <button type="button" class="help-btn help-btn-amber" onclick="openHelpModal('burnout_presets')" title="Довідка: Пресети температурних графіків">?</button>
             </label>
             <span style="font-size: 0.74rem; color: #a7f3d0;" id="burnout-preset-info-badge">8 кроків | ~6 год 39 хв</span>
@@ -1113,7 +1115,7 @@
         <!-- Візуальний графік (Термограма муфельної печі SVG) -->
         <div class="burnout-chart-box">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
               <span style="font-weight: 700; color: #f8fafc; font-size: 0.88rem;">📊 Термограма циклу випалювання опок:</span>
               <button type="button" class="help-btn help-btn-green" onclick="openHelpModal('burnout_chart')" title="Довідка: Термограма та криві випалювання">?</button>
               <span class="badge" style="font-size: 0.72rem; background: rgba(16,185,129,0.15); color: #34d399; border-color: #10b981;">Динамічна крива</span>
@@ -1164,23 +1166,23 @@
           <button type="button" class="btn btn-secondary btn-sm" onclick="addBurnoutStep()" style="font-size: 0.8rem;">
             ➕ Додати новий крок до таблиці
           </button>
-          <span style="font-size: 0.78rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: 4px;">
-            💡 Значення <strong>Навантаження %</strong> відображає роботу терморегулятора (100% при наборі, 30–50% при витримці).
+          <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span>💡 Значення <strong>Навантаження %</strong> відображає роботу терморегулятора (100% при наборі, 30–50% при витримуванні).</span>
             <button type="button" class="help-btn" onclick="openHelpModal('burnout_duty_cycle')" title="Довідка: Режими навантаження ТЕНів">?</button>
-          </span>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- БЛОК 3: ПІДСУМКОВИЙ РОЗРАХУНОК ВАРТОСТІ ВИПАЛЮВАННЯ (РОЗКРИВНИЙ) -->
     <div class="card burnout-collapsible-card collapsed" style="border-left: 4px solid #10b981;" id="card-burnout-block3">
-      <div class="card-title burnout-collapsible-header" onclick="toggleBurnoutCard('card-burnout-block3')">
-        <div style="display: flex; align-items: center; gap: 8px;">
+      <div class="card-title burnout-collapsible-header" onclick="toggleBurnoutCard('card-burnout-block3')" style="flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
           <span class="burnout-collapse-arrow" id="arrow-burnout-block3">▼</span>
           <span>💰 Блок 3. Підсумковий розрахунок вартості випалювання (Output)</span>
           <button type="button" class="help-btn help-btn-green" onclick="event.stopPropagation(); openHelpModal('burnout_output_cost')" title="Довідка: Розрахунок вартості випалювання">?</button>
         </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
           <span class="badge badge-success" style="font-size: 0.75rem;">Результати калькуляції</span>
           <span class="burnout-collapse-hint" id="hint-burnout-block3">Розгорнути ▼</span>
         </div>
@@ -1196,7 +1198,7 @@
           </div>
 
           <div class="burnout-stat-card">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap;">
               <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">⚡ Споживання електроенергії</span>
               <button type="button" class="help-btn" onclick="openHelpModal('burnout_kwh')" title="Довідка: Споживання кВт·год">?</button>
             </div>
@@ -1205,7 +1207,7 @@
           </div>
 
           <div class="burnout-stat-card" style="background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(15,23,42,0.85)); border-color: rgba(16,185,129,0.4);">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap;">
               <span style="font-size: 0.75rem; color: #34d399; text-transform: uppercase; font-weight: 700;">💰 Вартість випалювання</span>
               <button type="button" class="help-btn help-btn-green" onclick="openHelpModal('burnout_output_cost')" title="Довідка: Вартість електроенергії">?</button>
             </div>
@@ -1214,7 +1216,7 @@
           </div>
 
           <div class="burnout-stat-card">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap;">
               <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">🏺 Собівартість на 1 опоку</span>
               <button type="button" class="help-btn" onclick="openHelpModal('burnout_cost_per_flask')" title="Довідка: Собівартість на 1 опоку">?</button>
             </div>
@@ -1225,13 +1227,13 @@
 
         <!-- РОЗКРИВНЕ ПОЛЕ: Деталізація формул та зон лічильника (День / Ніч) (ЗГОРНУТО ЗА ЗАМОВЧУВАННЯМ) -->
         <div id="burnout-dual-breakdown-box" class="results-box burnout-collapsible-box collapsed" style="margin-top: 14px;">
-          <div class="burnout-box-toggle-header" onclick="toggleBurnoutZoneBreakdown()">
-            <div style="display: flex; align-items: center; gap: 8px;">
+          <div class="burnout-box-toggle-header" onclick="toggleBurnoutZoneBreakdown()" style="flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
               <span class="burnout-collapse-arrow" id="arrow-burnout-zones">▼</span>
               <span style="font-weight: 700; color: #38bdf8; font-size: 0.88rem;">🌙 Формули та розподіл за зонами лічильника (День / Ніч)</span>
               <button type="button" class="help-btn" onclick="event.stopPropagation(); openHelpModal('burnout_zones_breakdown')" title="Довідка: Розподіл зон лічильника">?</button>
             </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 6px; margin-left: auto;">
               <span id="burnout-night-saving-badge" class="badge badge-success" style="font-size: 0.74rem;">Економія: -50% на нічних годинах</span>
               <span class="burnout-collapse-hint" id="hint-burnout-zones">Розгорнути ▼</span>
             </div>
@@ -1257,13 +1259,13 @@
 
     <!-- БЛОК 4: ПІДСУМКОВА ЗВЕДЕНА СОБІВАРТІСТЬ ТА ІНТЕГРАЦІЯ ЗВІТУ (РОЗКРИВНИЙ З ПОСТІЙНИМ ЗЕЛЕНИМ ПІДСУМКОМ) -->
     <div class="card burnout-collapsible-card collapsed" id="card-burnout-block4" style="border-color: rgba(56,189,248,0.5);">
-      <div class="card-title burnout-collapsible-header" onclick="toggleBurnoutCard('card-burnout-block4')">
-        <div style="display: flex; align-items: center; gap: 8px;">
+      <div class="card-title burnout-collapsible-header" onclick="toggleBurnoutCard('card-burnout-block4')" style="flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
           <span class="burnout-collapse-arrow" id="arrow-burnout-block4">▼</span>
           <span>📦 Блок 4. Зведена собівартість технологічних процесів замісу</span>
           <button type="button" class="help-btn" onclick="event.stopPropagation(); openHelpModal('cost_block4_summary')" title="Довідка: Зведена собівартість замісу">?</button>
         </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
           <span class="badge" style="background: rgba(56,189,248,0.2); color: #38bdf8; border-color: #38bdf8; font-size: 0.75rem;">Повний виробничий розрахунок</span>
           <span class="burnout-collapse-hint" id="hint-burnout-block4">Розгорнути ▼</span>
         </div>
@@ -1279,11 +1281,11 @@
           <!-- 1. Формомаса і вода -->
           <div class="burnout-feature-box" style="border-color: rgba(52,211,153,0.3);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 4px;">
-              <div style="display: flex; align-items: center; gap: 6px;">
+              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                 <span style="font-weight: 700; color: #a7f3d0; font-size: 0.95rem;">1. Формомаса і вода</span>
                 <button type="button" class="help-btn help-btn-green" onclick="openHelpModal('cost_materials')" title="Довідка: Собівартість формомаси та води">?</button>
               </div>
-              <div style="display: flex; align-items: center; gap: 6px;">
+              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                 <span class="badge badge-success" id="cost-powder-source-badge" style="font-size: 0.7rem;">⚡ Синхронізовано</span>
                 <button type="button" class="btn btn-secondary btn-sm" onclick="openPresetModal()" style="font-size: 0.72rem; padding: 2px 7px;" title="Керування пресетами формомаси та опок">⚙️ Пресети</button>
               </div>
@@ -1291,7 +1293,7 @@
 
             <!-- Вибір формомаси (пресети) - 100% синхронізований із вкладкою 'Формування опок' -->
             <div class="form-group" style="margin-top: 6px; margin-bottom: 8px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; flex-wrap: wrap; gap: 4px;">
                 <label for="material-price-preset-select" style="font-size: 0.76rem; color: #cbd5e1; margin-bottom: 0;">
                   Формомаса W/P (Пресет):
                 </label>
@@ -1307,15 +1309,15 @@
             </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 4px;">
               <div class="form-group" style="min-width: 0;">
-                <label for="price-powder-kg" style="font-size: 0.76rem; line-height: 1.2;">
-                  Ціна порошку (грн/кг):
+                <label for="price-powder-kg" style="font-size: 0.76rem; line-height: 1.2; display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                  <span>Ціна порошку (грн/кг):</span>
                   <button type="button" class="help-btn" onclick="openHelpModal('cost_powder_kg')" title="Довідка: Ціна формомаси за кг">?</button>
                 </label>
                 <input type="number" id="price-powder-kg" value="165" step="5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem; font-weight: 600; color: #a7f3d0;" oninput="onInvestmentPriceDirectInput(this.value, 'burnout')" title="Ціна порошку за 1 кг (синхронізована із першою вкладкою)">
               </div>
               <div class="form-group" style="min-width: 0;">
-                <label for="price-water-l" style="font-size: 0.76rem; line-height: 1.2;">
-                  Ціна води (грн/л):
+                <label for="price-water-l" style="font-size: 0.76rem; line-height: 1.2; display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                  <span>Ціна води (грн/л):</span>
                   <button type="button" class="help-btn" onclick="openHelpModal('cost_water_l')" title="Довідка: Ціна води за літр">?</button>
                 </label>
                 <input type="number" id="price-water-l" value="8" step="1" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onWaterPriceDirectInput(this.value)" title="Ціна дистильованої води за 1 л">
@@ -1330,7 +1332,7 @@
           <!-- 2. Випалювання печі -->
           <div class="burnout-feature-box" style="border-color: rgba(245,158,11,0.3);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-              <div style="display: flex; align-items: center; gap: 6px;">
+              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                 <span style="font-weight: 700; color: #fbbf24; font-size: 0.95rem;">2. Випалювання опок</span>
                 <button type="button" class="help-btn help-btn-amber" onclick="openHelpModal('cost_burnout_item')" title="Довідка: Витрати на випалювання">?</button>
               </div>
@@ -1351,7 +1353,7 @@
           <!-- 3. Плавка, бензин, компресор та чад -->
           <div class="burnout-feature-box" style="border-color: rgba(239,68,68,0.3); grid-column: 1 / -1;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
-              <div style="display: flex; align-items: center; gap: 6px;">
+              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                 <span style="font-weight: 700; color: #f87171; font-size: 0.95rem;">3. Плавка та чад металу</span>
                 <button type="button" class="help-btn help-btn-danger" onclick="openHelpModal('cost_melting_loss')" title="Довідка: Плавка, бензин, компресор та угар">?</button>
               </div>
@@ -1363,16 +1365,16 @@
             <!-- Базові тарифи: Робота ливарника та Компресор -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 4px;">
               <div class="form-group" style="min-width: 0;">
-                <label for="price-melting-flask" style="font-size: 0.78rem; line-height: 1.2;">
-                  Робота ливарника (грн / опока):
+                <label for="price-melting-flask" style="font-size: 0.78rem; line-height: 1.2; display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                  <span>Робота ливарника (грн / опока):</span>
                   <button type="button" class="help-btn" onclick="openHelpModal('cost_melting_work')" title="Довідка: Робота ливарника">?</button>
                 </label>
                 <input type="number" id="price-melting-flask" value="45" step="5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
               </div>
 
               <div class="form-group" style="min-width: 0;">
-                <label for="price-compressor-flask" style="font-size: 0.78rem; line-height: 1.2;" title="Вартість роботи компресора повітря для бензинового пальника на 1 опоку">
-                  💨 Компресор (грн / опока):
+                <label for="price-compressor-flask" style="font-size: 0.78rem; line-height: 1.2; display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap;" title="Вартість роботи компресора повітря для бензинового пальника на 1 опоку">
+                  <span>💨 Компресор (грн / опока):</span>
                   <button type="button" class="help-btn" onclick="openHelpModal('cost_compressor')" title="Довідка: Компресор повітря">?</button>
                 </label>
                 <input type="number" id="price-compressor-flask" value="5" step="1" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="calculateTotalProductionCost()">
@@ -1382,7 +1384,7 @@
             <!-- Розрахунок вартості бензину: Ціна за літр + Витрата на плавку (мл) -->
             <div class="calc-subpanel" style="border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.04);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
-                <div style="display: flex; align-items: center; gap: 6px;">
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                   <span style="font-weight: 600; color: #fbbf24; font-size: 0.85rem;">⛽ Бензин для пальника («Калоша» / Б-70 / Нефрас):</span>
                   <button type="button" class="help-btn help-btn-amber" onclick="openHelpModal('cost_gasoline')" title="Довідка: Вартість бензину та розрахунок витрати">?</button>
                 </div>
@@ -1431,7 +1433,7 @@
             <!-- Автоматизація чаду металу з прив'язкою до сплавів у кошику та банківських курсів НБУ -->
             <div class="calc-subpanel" style="border-color: rgba(56, 189, 248, 0.35); background: rgba(15, 23, 42, 0.85); margin-top: 10px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
-                <div style="display: flex; align-items: center; gap: 6px;">
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                   <span style="font-weight: 700; color: #38bdf8; font-size: 0.88rem;">⚖️ Чад металу (Угар) та офіційні курси НБУ:</span>
                   <button type="button" class="help-btn" onclick="openHelpModal('cost_metal_loss_rate')" title="Довідка: Норми угару та курси НБУ">?</button>
                 </div>
@@ -1456,8 +1458,8 @@
 
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px;">
                 <div class="form-group" style="min-width: 0;">
-                  <label for="metal-loss-percent" style="font-size: 0.74rem;">
-                    Норма чаду металу (%):
+                  <label for="metal-loss-percent" style="font-size: 0.74rem; display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                    <span>Норма чаду металу (%):</span>
                     <button type="button" class="help-btn" onclick="openHelpModal('cost_metal_loss_rate')" title="Довідка: Норма безповоротних втрат">?</button>
                   </label>
                   <input type="number" id="metal-loss-percent" value="1.0" step="0.1" min="0" max="10" style="width: 100%; min-width: 0; padding: 6px 8px; font-size: 0.88rem;" oninput="calculateTotalProductionCost()">
@@ -1482,8 +1484,8 @@
                 </div>
 
                 <div class="form-group" style="min-width: 0;">
-                  <label for="metal-price-gram" style="font-size: 0.74rem;">
-                    Розрахункова ціна металу (грн / г):
+                  <label for="metal-price-gram" style="font-size: 0.74rem; display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                    <span>Ціна металу (грн / г):</span>
                     <button type="button" class="help-btn" onclick="openHelpModal('cost_metal_price_gram')" title="Довідка: Ринкова ціна металу для оцінки чаду">?</button>
                   </label>
                   <input type="number" id="metal-price-gram" value="3708" step="20" min="0" style="width: 100%; min-width: 0; padding: 6px 8px; font-size: 0.95rem; font-weight: 700; color: #fde047;" oninput="calculateTotalProductionCost()">
@@ -1502,13 +1504,13 @@
 
           <!-- 4. Вакуумний насос (вакуумування формомаси/опок та вакуумне лиття) (РОЗКРИВНИЙ, ЗГОРНУТИЙ ЗА ЗАМОВЧУВАННЯМ) -->
           <div class="burnout-feature-box burnout-collapsible-box collapsed" id="cost-vacuum-collapsible-box" style="border-color: rgba(56,189,248,0.35); grid-column: 1 / -1; background: rgba(56, 189, 248, 0.03);">
-            <div class="burnout-box-toggle-header" onclick="toggleVacuumBox()">
-              <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="burnout-box-toggle-header" onclick="toggleVacuumBox()" style="flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                 <span class="burnout-collapse-arrow" id="arrow-vacuum-box">▼</span>
                 <span style="font-weight: 700; color: #38bdf8; font-size: 0.95rem;">🌪️ 4. Вакуумний насос (вакуумування формомаси та литво)</span>
                 <button type="button" class="help-btn" onclick="event.stopPropagation(); openHelpModal('cost_vacuum_pump')" title="Довідка: Вакуумний насос у ливарному циклі">?</button>
               </div>
-              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
                 <span class="badge" style="font-size: 0.7rem; background: rgba(56,189,248,0.15); color: #38bdf8; border-color: #38bdf8;">Дегазація + Вакуумний підсос</span>
                 <span id="vacuum-header-cost-badge" style="font-size: 0.82rem; font-weight: 700; color: #38bdf8;">8.32 грн</span>
                 <span class="burnout-collapse-hint" id="hint-vacuum-box">Розгорнути ▼</span>
@@ -1524,8 +1526,8 @@
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-top: 4px;">
                 <!-- Потужність насоса (кВт) -->
                 <div class="form-group" style="min-width: 0;">
-                  <label for="vacuum-power-kw" style="font-size: 0.78rem; line-height: 1.2;">
-                    Потужність насоса (кВт):
+                  <label for="vacuum-power-kw" style="font-size: 0.78rem; line-height: 1.2; display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                    <span>Потужність насоса (кВт):</span>
                     <button type="button" class="help-btn" onclick="openHelpModal('cost_vacuum_pump')" title="Довідка: Потужність вакуумного насоса">?</button>
                   </label>
                   <input type="number" id="vacuum-power-kw" value="0.75" step="0.05" min="0.1" max="5.0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onVacuumParamsChange()">
@@ -1539,8 +1541,8 @@
 
                 <!-- Час вакуумування формомаси (хв/опока) -->
                 <div class="form-group" style="min-width: 0;">
-                  <label for="vacuum-investment-min" style="font-size: 0.78rem; line-height: 1.2;">
-                    Вакуум формомаси (хв/оп):
+                  <label for="vacuum-investment-min" style="font-size: 0.78rem; line-height: 1.2; display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                    <span>Вакуум формомаси (хв/оп):</span>
                     <button type="button" class="help-btn" onclick="openHelpModal('vacuum_investment')" title="Довідка: Вакуумування розчину та опок">?</button>
                   </label>
                   <input type="number" id="vacuum-investment-min" value="4.0" step="0.5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onVacuumParamsChange()">
@@ -1553,8 +1555,8 @@
 
                 <!-- Час вакуумування литва (хв/опока) -->
                 <div class="form-group" style="min-width: 0;">
-                  <label for="vacuum-casting-min" style="font-size: 0.78rem; line-height: 1.2;">
-                    Вакуум литва (хв/оп):
+                  <label for="vacuum-casting-min" style="font-size: 0.78rem; line-height: 1.2; display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                    <span>Вакуум литва (хв/оп):</span>
                     <button type="button" class="help-btn" onclick="openHelpModal('vacuum_casting')" title="Довідка: Вакуумне лиття розплаву">?</button>
                   </label>
                   <input type="number" id="vacuum-casting-min" value="2.0" step="0.5" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onVacuumParamsChange()">
@@ -1567,8 +1569,8 @@
 
                 <!-- Масло та амортизація (грн/опока) -->
                 <div class="form-group" style="min-width: 0;">
-                  <label for="price-vacuum-oil-flask" style="font-size: 0.78rem; line-height: 1.2;">
-                    🛢️ Масло / аморт. (грн/оп):
+                  <label for="price-vacuum-oil-flask" style="font-size: 0.78rem; line-height: 1.2; display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                    <span>🛢️ Масло / аморт. (грн/оп):</span>
                     <button type="button" class="help-btn" onclick="openHelpModal('vacuum_oil')" title="Довідка: Заміна вакуумного мастила та знос">?</button>
                   </label>
                   <input type="number" id="price-vacuum-oil-flask" value="8.0" step="1" min="0" style="width: 100%; min-width: 0; padding: 7px 10px; font-size: 0.9rem;" oninput="onVacuumParamsChange()">
@@ -1605,7 +1607,7 @@
       <div class="burnout-cost-summary-card" style="margin-top: 14px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
           <div>
-            <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
               <span style="font-size: 1.1rem; font-weight: 800; color: #10b981;">💎 РАЗОМ: Повна собівартість технологічного циклу</span>
               <button type="button" class="help-btn help-btn-green" onclick="openHelpModal('cost_grand_total')" title="Довідка: Повна собівартість циклу">?</button>
             </div>
@@ -1641,7 +1643,7 @@
             <span class="val" style="color: #fde047;" id="summary-cost-loss">0.00 грн</span>
           </div>
           <div class="results-row" style="background: rgba(16,185,129,0.1); padding: 6px 10px; border-radius: 6px; margin-top: 4px;">
-            <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
               <span style="font-weight: 700; color: #f8fafc;">Собівартість на 1 грам відлитого металу:</span>
               <button type="button" class="help-btn" onclick="openHelpModal('cost_per_gram')" title="Довідка: Собівартість на 1 грам металу">?</button>
             </div>
