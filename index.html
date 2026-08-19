@@ -1642,12 +1642,109 @@
             <span>⚖️ Технологічні безповоротні втрати металу (угар):</span>
             <span class="val" style="color: #fde047;" id="summary-cost-loss">0.00 грн</span>
           </div>
-          <div class="results-row" style="background: rgba(16,185,129,0.1); padding: 6px 10px; border-radius: 6px; margin-top: 4px;">
+          <div class="results-row" style="background: rgba(16,185,129,0.12); padding: 8px 12px; border-radius: 6px; margin-top: 4px; border: 1px solid rgba(16,185,129,0.3); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-              <span style="font-weight: 700; color: #f8fafc;">Собівартість на 1 грам відлитого металу:</span>
+              <span style="font-weight: 700; color: #f8fafc; font-size: 0.95rem;">⚖️ Собівартість на 1 грам відлитого металу:</span>
               <button type="button" class="help-btn" onclick="openHelpModal('cost_per_gram')" title="Довідка: Собівартість на 1 грам металу">?</button>
             </div>
-            <strong style="color: #38bdf8; font-size: 1rem;" id="summary-cost-per-gram">0.00 грн/г</strong>
+            <div style="text-align: right;">
+              <div id="summary-cost-per-gram" style="color: #38bdf8; font-size: 1.15rem; font-weight: 800;">0.00 грн/г</div>
+              <div style="font-size: 0.74rem; color: var(--text-muted);" id="summary-cost-per-gram-sub">на весь метал у садці</div>
+            </div>
+          </div>
+
+          <!-- Окреме віконце: Точний розрахунок собівартості на чисту вагу готових виробів (восковки/полімери без литників) -->
+          <div class="clean-product-cost-card" id="clean-product-cost-box" style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 12px; margin-top: 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; border-bottom: 1px dashed rgba(56, 189, 248, 0.25); padding-bottom: 6px;">
+              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                <span style="font-size: 0.92rem; font-weight: 800; color: #38bdf8;">🎯 Чиста вага виробів (восковки / 3D-полімери без литників)</span>
+                <button type="button" class="help-btn" onclick="openHelpModal('cost_clean_products')" title="Довідка: Розрахунок собівартості на чисту вагу готових виробів">?</button>
+              </div>
+              <span class="badge" id="clean-calc-mode-badge" style="font-size: 0.72rem; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4);">
+                Весь метал (0.00 г)
+              </span>
+            </div>
+
+            <p style="font-size: 0.76rem; color: #94a3b8; margin: 0 0 10px 0; line-height: 1.35;" id="cost-clean-header-desc">
+              Введіть вагу восковок або 3D-фотополімерних моделей <strong>саме готових виробів</strong> (без центрального стояка, живильників та чаші-п'ятки). Якщо для опоки введено <strong>0</strong> — для неї розрахунок ведеться на весь метал опоки. Якщо введено конкретне число — розрахунок собівартості 1 г ведеться на чисту вагу виробів.
+            </p>
+
+            <!-- 1. Контейнер для однієї опоки (Single mode) -->
+            <div id="cost-clean-single-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; align-items: end;">
+              <!-- Вага восковок / полімерних моделей виробів -->
+              <div class="form-group" style="min-width: 0; margin-bottom: 0;">
+                <label for="cost-clean-model-weight" style="font-size: 0.76rem; font-weight: 700; color: #f8fafc; display: flex; justify-content: space-between; align-items: center;">
+                  <span>Вага моделей виробів (г):</span>
+                </label>
+                <input type="number" id="cost-clean-model-weight" value="0" step="0.01" min="0" placeholder="0.00 (на весь метал)" style="width: 100%; padding: 7px 10px; font-size: 0.95rem; font-weight: 700; color: #38bdf8; background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 6px;" oninput="onCleanModelParamsChange()">
+                <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+                  <button type="button" class="quick-chip" onclick="setCleanModelWeight(0)" title="Скинути до 0 (розрахунок на весь метал)">0 г (Весь)</button>
+                  <button type="button" class="quick-chip" onclick="copyPureModelWeightFromSingle()" title="Скопіювати вагу моделі з поточної опоки">З опоки 📋</button>
+                </div>
+              </div>
+
+              <!-- Густина воску або фотополімеру -->
+              <div class="form-group" style="min-width: 0; margin-bottom: 0;">
+                <label for="cost-clean-model-density" style="font-size: 0.76rem; font-weight: 700; color: #f8fafc;">
+                  <span>Густина воску/полімеру (г/см³):</span>
+                </label>
+                <div style="display: flex; gap: 4px;">
+                  <input type="number" id="cost-clean-model-density" value="0.93" step="0.01" min="0.5" max="3.0" style="width: 75px; padding: 7px 8px; font-size: 0.9rem; font-weight: 700; color: #fde047; background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(253, 224, 71, 0.35); border-radius: 6px;" oninput="onCleanModelParamsChange()">
+                  <select id="cost-clean-density-preset" class="preset-select-sm" style="flex: 1; min-width: 0; padding: 6px 6px; font-size: 0.76rem;" onchange="onCleanDensityPresetSelect()">
+                    <option value="0.93">🕯️ Віск інжекц. (0.93)</option>
+                    <option value="0.95">🕯️ Віск моделюв. (0.95)</option>
+                    <option value="1.10">🖨️ 3D-полімер станд. (1.10)</option>
+                    <option value="1.15">🖨️ 3D-полімер Castable (1.15)</option>
+                    <option value="1.20">🖨️ 3D-полімер важкий (1.20)</option>
+                  </select>
+                </div>
+                <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+                  <button type="button" class="quick-chip" onclick="setCleanModelDensity(0.93)">0.93 Віск</button>
+                  <button type="button" class="quick-chip" onclick="setCleanModelDensity(1.10)">1.10 Полімер</button>
+                  <button type="button" class="quick-chip" onclick="setCleanModelDensity(1.15)">1.15 Cast</button>
+                </div>
+              </div>
+
+              <!-- Сплав металу для чистого перерахунку -->
+              <div class="form-group" style="min-width: 0; margin-bottom: 0;">
+                <label for="cost-clean-metal-preset" style="font-size: 0.76rem; font-weight: 700; color: #f8fafc;">
+                  <span>Сплав металу (ρ г/см³):</span>
+                </label>
+                <select id="cost-clean-metal-preset" class="preset-select-sm" style="width: 100%; padding: 7px 8px; font-size: 0.8rem;" onchange="onCleanMetalPresetChange()">
+                  <option value="auto">⚡ Авто (з поточної опоки / кошика)</option>
+                </select>
+                <div style="font-size: 0.72rem; color: #a7f3d0; margin-top: 4px; display: flex; justify-content: space-between;" id="cost-clean-metal-density-disp">
+                  <span>Густина металу: 13.50 г/см³</span>
+                  <span>Коеф: 14.52×</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Контейнер для кількох опок з різними металами (Multi-flask Batch mode) -->
+            <div id="cost-clean-batch-container" style="display: none; margin-top: 4px;">
+              <div style="font-size: 0.8rem; font-weight: 700; color: #fde047; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;">
+                <span>📦 Опоки у завантаженні (налаштування чистої ваги окремо під кожен метал):</span>
+                <span style="font-size: 0.72rem; color: var(--text-muted);">Введіть 0 для розрахунку на весь метал опоки</span>
+              </div>
+              <div id="cost-clean-batch-flasks-list" style="display: flex; flex-direction: column; gap: 8px;">
+                <!-- Динамічно рендериться per-flask список -->
+              </div>
+            </div>
+
+            <!-- Результати розрахунку чистої ваги виробів -->
+            <div id="cost-clean-results-box" style="background: rgba(30, 41, 59, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 6px; padding: 8px 10px; margin-top: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 0.82rem;">
+                <span style="color: #cbd5e1;">✨ Чиста вага виробів у металі:</span>
+                <strong id="cost-clean-metal-weight-disp" style="color: #38bdf8; font-size: 0.95rem;">0.00 г</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 0.82rem; margin-top: 4px;">
+                <span style="color: #cbd5e1;">📊 Собівартість на 1 г готових виробів:</span>
+                <strong id="cost-clean-per-gram-disp" style="color: #34d399; font-size: 1.05rem;">0.00 грн/г</strong>
+              </div>
+              <div id="cost-clean-comparison-line" style="font-size: 0.74rem; color: #94a3b8; margin-top: 4px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 4px;">
+                ℹ️ Вага моделей = 0. Розрахунок ведеться на весь розплавлений метал у садці.
+              </div>
+            </div>
           </div>
         </div>
 
@@ -2676,6 +2773,21 @@ function renderPresetSelects() {
     }
   }
 
+  // Заповнення випадаючого списку сплаву для чистої ваги виробів
+  const cleanMetalSel = document.getElementById("cost-clean-metal-preset");
+  if (cleanMetalSel) {
+    const prevCleanVal = cleanMetalSel.value || "auto";
+    let cleanOptionsHTML = `<option value="auto">⚡ Авто (з поточної опоки / кошика)</option>`;
+    cleanOptionsHTML += METALS.map((m) => {
+      const meta = getMetalColorMeta(m);
+      return `<option value="${m.id}">${meta.icon} ${m.name} (ρ = ${m.density.toFixed(2)} г/см³)</option>`;
+    }).join("");
+    cleanMetalSel.innerHTML = cleanOptionsHTML;
+    if (prevCleanVal) {
+      cleanMetalSel.value = prevCleanVal;
+    }
+  }
+
   updateFlaskHeaderDisplay();
   updateMetalColorBadgeDisplay();
   renderMetalDensityInfoCard();
@@ -3421,6 +3533,13 @@ function recomputeFlaskItem(item, newExistingMetal = null, newSprueMargin = null
     item.note = String(newNote).trim();
   } else if (item.note === undefined) {
     item.note = "";
+  }
+
+  if (item.cleanModelW === undefined) {
+    item.cleanModelW = 0;
+  }
+  if (item.cleanModelD === undefined) {
+    item.cleanModelD = item.polyDensity || 0.93;
   }
 
   // Перевірка об'єму моделі та густини
@@ -4450,7 +4569,10 @@ let burnoutConfig = {
     vacuumCastingMin: 2.0,
     vacuumOilFlask: 8.0,
     metalLossPercent: 1.0,
-    metalPriceGram: 2600
+    metalPriceGram: 2600,
+    cleanModelWeight: 0,
+    cleanModelDensity: 0.93,
+    cleanMetalPreset: "auto"
   }
 };
 
@@ -4493,7 +4615,10 @@ function initBurnoutCalculator() {
             vacuumCastingMin: 2.0,
             vacuumOilFlask: 8.0,
             metalLossPercent: 1.0,
-            metalPriceGram: 2600
+            metalPriceGram: 2600,
+            cleanModelWeight: 0,
+            cleanModelDensity: 0.93,
+            cleanMetalPreset: "auto"
           }, parsed.prices);
         }
       }
@@ -4567,6 +4692,27 @@ function syncBurnoutInputsToUI() {
   if (vacuumOil && burnoutConfig.prices) vacuumOil.value = burnoutConfig.prices.vacuumOilFlask ?? 8.0;
   if (metalLoss && burnoutConfig.prices) metalLoss.value = burnoutConfig.prices.metalLossPercent ?? 1.0;
   if (metalPrice && burnoutConfig.prices) metalPrice.value = burnoutConfig.prices.metalPriceGram ?? 2600;
+
+  // Поля чистої ваги виробів
+  const cleanModelWeightEl = document.getElementById("cost-clean-model-weight");
+  const cleanModelDensityEl = document.getElementById("cost-clean-model-density");
+  const cleanDensityPresetEl = document.getElementById("cost-clean-density-preset");
+  const cleanMetalPresetEl = document.getElementById("cost-clean-metal-preset");
+
+  if (cleanModelWeightEl && burnoutConfig.prices) {
+    cleanModelWeightEl.value = burnoutConfig.prices.cleanModelWeight ?? 0;
+  }
+  if (cleanModelDensityEl && burnoutConfig.prices) {
+    const dVal = burnoutConfig.prices.cleanModelDensity ?? 0.93;
+    cleanModelDensityEl.value = dVal;
+    if (cleanDensityPresetEl) {
+      const matchOpt = Array.from(cleanDensityPresetEl.options).find(o => Math.abs(parseFloat(o.value) - dVal) < 0.01);
+      if (matchOpt) cleanDensityPresetEl.value = matchOpt.value;
+    }
+  }
+  if (cleanMetalPresetEl && burnoutConfig.prices) {
+    cleanMetalPresetEl.value = burnoutConfig.prices.cleanMetalPreset || "auto";
+  }
 
   renderMaterialPricePresetOptions();
   setTariffMode(burnoutConfig.tariffType || "single", false);
@@ -5593,6 +5739,11 @@ function calculateTotalProductionCost() {
   const metalLossPercent = parseFloat(document.getElementById("metal-loss-percent")?.value) || 1.0;
   const metalPriceGram = parseFloat(document.getElementById("metal-price-gram")?.value) || 2600;
 
+  // Параметри чистої ваги виробів (восковок / фотополімерних моделей)
+  const cleanModelW = parseFloat(document.getElementById("cost-clean-model-weight")?.value) || 0;
+  const cleanModelD = parseFloat(document.getElementById("cost-clean-model-density")?.value) || 0.93;
+  const cleanMetalPreset = document.getElementById("cost-clean-metal-preset")?.value || "auto";
+
   burnoutConfig.prices = {
     powderKg: pricePowderKg,
     waterL: priceWaterL,
@@ -5606,7 +5757,10 @@ function calculateTotalProductionCost() {
     vacuumCastingMin: vacuumCastingMin,
     vacuumOilFlask: vacuumOilFlask,
     metalLossPercent: metalLossPercent,
-    metalPriceGram: metalPriceGram
+    metalPriceGram: metalPriceGram,
+    cleanModelWeight: cleanModelW,
+    cleanModelDensity: cleanModelD,
+    cleanMetalPreset: cleanMetalPreset
   };
   saveBurnoutConfigLocal();
 
@@ -5691,6 +5845,161 @@ function calculateTotalProductionCost() {
   const grandPerFlask = grandTotal / Math.max(1, flasksCount);
   const costPerGram = totalMetalG > 0 ? (grandTotal / totalMetalG) : 0;
 
+  // --- КАЛЬКУЛЯЦІЯ СОБІВАРТОСТІ НА ЧИСТУ ВАГУ ВИРОБІВ (ВОСКОВОК / ФОТОПОЛІМЕРУ) ---
+  const isMultiFlaskBatch = state.batch && state.batch.length > 1;
+  const singleContainer = document.getElementById("cost-clean-single-container");
+  const batchContainer = document.getElementById("cost-clean-batch-container");
+  const headerDesc = document.getElementById("cost-clean-header-desc");
+
+  if (isMultiFlaskBatch) {
+    if (singleContainer) singleContainer.style.display = "none";
+    if (batchContainer) batchContainer.style.display = "block";
+    if (headerDesc) {
+      headerDesc.innerHTML = `У замісі <strong>${state.batch.length} опок</strong> з різними сплавами. Вкажіть вагу восковок/полімерів готових виробів окремо під кожну опоку (якщо вказано <strong>0</strong> — собівартість для цієї опоки рахується на весь її метал з литниками):`;
+    }
+  } else {
+    if (singleContainer) singleContainer.style.display = "grid";
+    if (batchContainer) batchContainer.style.display = "none";
+    if (headerDesc) {
+      headerDesc.innerHTML = `Введіть вагу восковок або 3D-фотополімерних моделей <strong>саме готових виробів</strong> (без центрального стояка, живильників та чаші-п'ятки). Якщо значення = <strong>0</strong>, розрахунок собівартості на 1 г ведеться на весь розплав.`;
+    }
+  }
+
+  let totalEffectiveMetalG = 0;
+  let totalCleanProductsMetalG = 0;
+  let cleanFlasksCount = 0;
+  let perFlaskCleanDetails = [];
+
+  let cleanMetalDensity = 13.0;
+  let cleanMetalName = "Золото 585 (Au 585)";
+  let cleanMetalIcon = "💎";
+
+  if (cleanMetalPreset !== "auto") {
+    const foundMetal = METALS.find(m => m.id === cleanMetalPreset);
+    if (foundMetal) {
+      cleanMetalDensity = foundMetal.density || 13.0;
+      cleanMetalName = foundMetal.name;
+      const meta = typeof getMetalColorMeta === 'function' ? getMetalColorMeta(foundMetal) : { icon: "💎" };
+      cleanMetalIcon = meta.icon || "💎";
+    }
+  } else {
+    if (state.batch && state.batch.length > 0 && state.batch[0].metal) {
+      cleanMetalDensity = state.batch[0].metal.density || 13.0;
+      cleanMetalName = state.batch[0].metal.name || "Сплав опоки";
+      const meta = typeof getMetalColorMeta === 'function' ? getMetalColorMeta(state.batch[0].metal) : { icon: "💎" };
+      cleanMetalIcon = meta.icon || "💎";
+    } else {
+      const presetMetalEl = document.getElementById("preset-metal");
+      const mIdx = presetMetalEl ? parseInt(presetMetalEl.value, 10) : 0;
+      const curMetal = METALS[mIdx] || METALS[0];
+      cleanMetalDensity = curMetal.density || 13.0;
+      cleanMetalName = curMetal.name || "Сплав";
+      const meta = typeof getMetalColorMeta === 'function' ? getMetalColorMeta(curMetal) : { icon: "💎" };
+      cleanMetalIcon = meta.icon || "💎";
+    }
+  }
+
+  if (isMultiFlaskBatch) {
+    state.batch.forEach((item, idx) => {
+      recomputeFlaskItem(item);
+      const fullMetal = item.totalMetalNeeded || 0;
+      const modelW = (typeof item.cleanModelW === 'number' && item.cleanModelW > 0) ? item.cleanModelW : 0;
+      const modelD = item.cleanModelD || item.polyDensity || 0.93;
+      const mDensity = item.metal.density || 13.0;
+
+      let effectiveMetal = fullMetal;
+      let cleanMetalW = 0;
+      let isClean = false;
+
+      if (modelW > 0 && modelD > 0) {
+        cleanMetalW = (modelW / modelD) * mDensity;
+        effectiveMetal = cleanMetalW;
+        isClean = true;
+        cleanFlasksCount++;
+        totalCleanProductsMetalG += cleanMetalW;
+      }
+
+      totalEffectiveMetalG += effectiveMetal;
+
+      // Окремий розрахунок витрат для цієї конкретної опоки
+      const powderShareKg = (item.powderWeight || 0) / 1000;
+      const waterShareL = (item.waterVolume || 0) / 1000;
+      const flaskMatCost = (powderShareKg * pricePowderKg) + (waterShareL * priceWaterL);
+      const flaskBurnoutCost = costBurnout / flasksCount;
+      const flaskMeltingConsumables = priceMeltingFlask + priceGasolineFlask + priceCompressorFlask;
+      const flaskVacuumCost = costVacuumPerFlask;
+      const rateG = typeof getMetalAlloyMeta === 'function' ? getMetalAlloyMeta(item.metal).rateGram : metalPriceGram;
+      const flaskLossCost = fullMetal * (metalLossPercent / 100) * rateG;
+      const flaskTotalCost = flaskMatCost + flaskBurnoutCost + flaskMeltingConsumables + flaskVacuumCost + flaskLossCost;
+
+      const flaskPerGramFull = fullMetal > 0 ? (flaskTotalCost / fullMetal) : 0;
+      const flaskPerGramEffective = effectiveMetal > 0 ? (flaskTotalCost / effectiveMetal) : 0;
+
+      perFlaskCleanDetails.push({
+        idx: idx,
+        item: item,
+        modelW: modelW,
+        modelD: modelD,
+        metalDensity: mDensity,
+        fullMetal: fullMetal,
+        cleanMetalW: cleanMetalW,
+        effectiveMetal: effectiveMetal,
+        isClean: isClean,
+        flaskTotalCost: flaskTotalCost,
+        flaskPerGramFull: flaskPerGramFull,
+        flaskPerGramEffective: flaskPerGramEffective
+      });
+    });
+  } else {
+    // 0 або 1 опока
+    let singleFullMetal = totalMetalG;
+    let singleMetalDensity = cleanMetalDensity;
+    let singleMetalName = cleanMetalName;
+    let singleMetalIcon = cleanMetalIcon;
+
+    if (state.batch && state.batch.length === 1 && state.batch[0].metal) {
+      singleFullMetal = state.batch[0].totalMetalNeeded || totalMetalG;
+      singleMetalDensity = state.batch[0].metal.density || cleanMetalDensity;
+      singleMetalName = state.batch[0].metal.name || cleanMetalName;
+      const meta = typeof getMetalColorMeta === 'function' ? getMetalColorMeta(state.batch[0].metal) : { icon: "💎" };
+      singleMetalIcon = meta.icon || cleanMetalIcon;
+    }
+
+    let cleanMetalWeight = 0;
+    let isClean = false;
+    if (cleanModelW > 0 && cleanModelD > 0) {
+      cleanMetalWeight = (cleanModelW / cleanModelD) * singleMetalDensity;
+      totalEffectiveMetalG = cleanMetalWeight;
+      totalCleanProductsMetalG = cleanMetalWeight;
+      cleanFlasksCount = 1;
+      isClean = true;
+    } else {
+      totalEffectiveMetalG = singleFullMetal;
+    }
+
+    perFlaskCleanDetails.push({
+      idx: 0,
+      item: (state.batch && state.batch[0]) ? state.batch[0] : { totalMetalNeeded: singleFullMetal, metal: { name: singleMetalName, density: singleMetalDensity } },
+      modelW: cleanModelW,
+      modelD: cleanModelD,
+      metalDensity: singleMetalDensity,
+      fullMetal: singleFullMetal,
+      cleanMetalW: cleanMetalWeight,
+      effectiveMetal: totalEffectiveMetalG,
+      isClean: isClean,
+      flaskTotalCost: grandTotal,
+      flaskPerGramFull: singleFullMetal > 0 ? (grandTotal / singleFullMetal) : 0,
+      flaskPerGramEffective: totalEffectiveMetalG > 0 ? (grandTotal / totalEffectiveMetalG) : 0
+    });
+  }
+
+  const costPerGramClean = totalEffectiveMetalG > 0 ? (grandTotal / totalEffectiveMetalG) : 0;
+
+  // Оновлення списку карток опок у режимі Multi-flask Batch
+  if (isMultiFlaskBatch) {
+    renderCleanBatchFlasksList(perFlaskCleanDetails);
+  }
+
   // 4. Оновлення інтерфейсу Блоку 4
   const powderDisp = document.getElementById("cost-powder-weight-disp");
   const waterDisp = document.getElementById("cost-water-vol-disp");
@@ -5712,6 +6021,80 @@ function calculateTotalProductionCost() {
   const sumVacuum = document.getElementById("summary-cost-vacuum");
   const sumLoss = document.getElementById("summary-cost-loss");
   const sumPerGram = document.getElementById("summary-cost-per-gram");
+
+  // Оновлення віджету чистої ваги виробів
+  const cleanMetalWeightDisp = document.getElementById("cost-clean-metal-weight-disp");
+  const cleanPerGramDisp = document.getElementById("cost-clean-per-gram-disp");
+  const cleanComparisonLine = document.getElementById("cost-clean-comparison-line");
+  const cleanCalcModeBadge = document.getElementById("clean-calc-mode-badge");
+  const cleanMetalDensityDisp = document.getElementById("cost-clean-metal-density-disp");
+  const sumPerGramSub = document.getElementById("summary-cost-per-gram-sub");
+
+  if (cleanMetalDensityDisp) {
+    const ratio = cleanModelD > 0 ? (cleanMetalDensity / cleanModelD) : 0;
+    cleanMetalDensityDisp.innerHTML = `<span>Густина сплаву: <strong>${cleanMetalDensity.toFixed(2)} г/см³</strong></span> <span>Коефіцієнт: <strong>${ratio.toFixed(2)}×</strong></span>`;
+  }
+
+  if (cleanCalcModeBadge) {
+    if (cleanFlasksCount > 0) {
+      if (isMultiFlaskBatch) {
+        cleanCalcModeBadge.innerText = `Змішано: ${cleanFlasksCount}/${flasksCount} оп. (${totalEffectiveMetalG.toFixed(2)} г)`;
+      } else {
+        cleanCalcModeBadge.innerText = `Чисті вироби (${totalEffectiveMetalG.toFixed(2)} г)`;
+      }
+      cleanCalcModeBadge.style.color = "#34d399";
+      cleanCalcModeBadge.style.background = "rgba(52, 211, 153, 0.15)";
+      cleanCalcModeBadge.style.borderColor = "rgba(52, 211, 153, 0.4)";
+    } else {
+      cleanCalcModeBadge.innerText = `Весь метал (${totalMetalG.toFixed(2)} г)`;
+      cleanCalcModeBadge.style.color = "#38bdf8";
+      cleanCalcModeBadge.style.background = "rgba(56, 189, 248, 0.15)";
+      cleanCalcModeBadge.style.borderColor = "rgba(56, 189, 248, 0.4)";
+    }
+  }
+
+  if (cleanMetalWeightDisp) {
+    if (cleanFlasksCount > 0) {
+      if (isMultiFlaskBatch) {
+        cleanMetalWeightDisp.innerText = `${totalEffectiveMetalG.toFixed(2)} г (чисті вироби: ${totalCleanProductsMetalG.toFixed(2)} г + метал інш. оп.)`;
+      } else {
+        const d0 = perFlaskCleanDetails[0];
+        cleanMetalWeightDisp.innerText = `${d0.cleanMetalW.toFixed(2)} г (${cleanMetalIcon} ${cleanMetalName})`;
+      }
+    } else {
+      cleanMetalWeightDisp.innerText = `0.00 г (${isMultiFlaskBatch ? 'всі опоки рахуються на повний метал' : 'введіть вагу вище'})`;
+    }
+  }
+
+  if (cleanPerGramDisp) {
+    if (cleanFlasksCount > 0 && costPerGramClean > 0) {
+      cleanPerGramDisp.innerText = `${costPerGramClean.toFixed(2)} грн / г`;
+    } else {
+      cleanPerGramDisp.innerText = totalMetalG > 0 ? `${costPerGram.toFixed(2)} грн/г (на весь метал)` : `0.00 грн/г`;
+    }
+  }
+
+  if (cleanComparisonLine) {
+    if (cleanFlasksCount > 0 && costPerGramClean > 0 && costPerGram > 0) {
+      const diffGrn = costPerGramClean - costPerGram;
+      const diffPct = ((costPerGramClean / costPerGram) - 1) * 100;
+      if (diffGrn >= 0) {
+        cleanComparisonLine.innerHTML = `⚠️ Собівартість на розрахункову вагу вища на <strong style="color: #fde047;">+${diffGrn.toFixed(2)} грн/г (+${diffPct.toFixed(0)}%)</strong> через розподіл витрат литва (розрахунковий метал: ${totalEffectiveMetalG.toFixed(2)} г замість ${totalMetalG.toFixed(2)} г у садці).`;
+      } else {
+        cleanComparisonLine.innerHTML = `ℹ️ Загальна розрахункова вага: <strong>${totalEffectiveMetalG.toFixed(2)} г</strong> (у садці всього: ${totalMetalG.toFixed(2)} г).`;
+      }
+    } else {
+      cleanComparisonLine.innerHTML = `ℹ️ Вага моделей = 0. Розрахунок ведеться на весь розплавлений метал у садці (${totalMetalG.toFixed(2)} г).`;
+    }
+  }
+
+  if (sumPerGramSub) {
+    if (cleanFlasksCount > 0 && totalEffectiveMetalG > 0) {
+      sumPerGramSub.innerText = `на ${totalEffectiveMetalG.toFixed(2)} г розрахункового металу (на весь розплав: ${costPerGram.toFixed(2)} грн/г)`;
+    } else {
+      sumPerGramSub.innerText = `на весь розплавлений метал (${totalMetalG.toFixed(2)} г)`;
+    }
+  }
 
   if (powderDisp) powderDisp.innerText = `${powderKg.toFixed(2)} кг (${Math.round(totalPowderG)} г)`;
   if (waterDisp) waterDisp.innerText = `${waterL.toFixed(2)} л (${Math.round(totalWaterMl)} мл)`;
@@ -5747,11 +6130,230 @@ function calculateTotalProductionCost() {
     }
   }
 
-  if (sumPerGram) sumPerGram.innerText = totalMetalG > 0 ? `${costPerGram.toFixed(2)} грн/г (на ${totalMetalG.toFixed(2)} г металу)` : `0.00 грн/г`;
+  // Кінцевий розрахунок собівартості на 1 г відлитого металу:
+  if (sumPerGram) {
+    if (cleanFlasksCount > 0 && totalEffectiveMetalG > 0) {
+      sumPerGram.innerHTML = `<strong>${costPerGramClean.toFixed(2)} грн/г</strong> <span style="color: #10b981; font-weight: 600; font-size: 0.82rem;">(на ${totalEffectiveMetalG.toFixed(2)} г ${isMultiFlaskBatch ? 'розрахункового металу' : 'чистого виробу'})</span> <span style="font-size: 0.74rem; color: var(--text-muted); margin-left: 4px;">[на весь сплав: ${costPerGram.toFixed(2)} грн/г]</span>`;
+    } else {
+      sumPerGram.innerText = totalMetalG > 0 ? `${costPerGram.toFixed(2)} грн/г (на ${totalMetalG.toFixed(2)} г всього металу з литниками)` : `0.00 грн/г`;
+    }
+  }
 
   if (typeof renderBatchMetalSyncBox === 'function') {
     renderBatchMetalSyncBox(perMetalBreakdown, isMixedBatchMode);
   }
+}
+
+// -------------------------------------------------------------
+// ФУНКЦІЇ ДЛЯ ТОЧНОГО РОЗРАХУНКУ СОБІВАРТОСТІ НА ЧИСТУ ВАГУ ВИРОБІВ
+// -------------------------------------------------------------
+function renderCleanBatchFlasksList(perFlaskCleanDetails) {
+  const container = document.getElementById("cost-clean-batch-flasks-list");
+  if (!container || !state.batch || state.batch.length <= 1) return;
+
+  const currentCardsCount = container.children.length;
+  const needsRebuild = currentCardsCount !== state.batch.length;
+
+  if (needsRebuild) {
+    container.innerHTML = state.batch.map((item, i) => {
+      const colorMeta = typeof getMetalColorMeta === 'function' ? getMetalColorMeta(item.metal) : { icon: "💎", badgeClass: "badge-gold" };
+      const modelW = (typeof item.cleanModelW === 'number' && item.cleanModelW >= 0) ? item.cleanModelW : 0;
+      const modelD = item.cleanModelD || item.polyDensity || 0.93;
+      const fullMetal = (item.totalMetalNeeded || 0).toFixed(2);
+      const flaskTitle = item.name || item.flaskId || `Опока ${i + 1}`;
+
+      return `
+        <div class="clean-flask-card" id="clean-flask-card-${i}" style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 6px; padding: 8px 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; margin-bottom: 6px;">
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <span style="font-weight: 800; color: #f8fafc; font-size: 0.84rem;">Опока #${i + 1}: ${escapeHtml(flaskTitle)}</span>
+              <span class="badge ${colorMeta.badgeClass}" style="font-size: 0.72rem; padding: 2px 7px;">${colorMeta.icon} ${item.metal.name} (ρ=${item.metal.density.toFixed(2)} г/см³)</span>
+            </div>
+            <span style="font-size: 0.74rem; color: #94a3b8;">Повний метал опоки: <strong style="color: #fde047;">${fullMetal} г</strong></span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; align-items: end;">
+            <div>
+              <label for="cost-clean-flask-w-${i}" style="font-size: 0.72rem; color: #cbd5e1; display: block; margin-bottom: 2px; font-weight: 600;">
+                Вага моделей виробів (г):
+              </label>
+              <div style="display: flex; gap: 4px;">
+                <input type="number" id="cost-clean-flask-w-${i}" value="${modelW}" step="0.01" min="0" placeholder="0.00" style="width: 100%; padding: 5px 8px; font-size: 0.85rem; font-weight: 700; color: #38bdf8; background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 4px;" oninput="onCleanFlaskWeightInput(${i}, this.value)">
+                <button type="button" class="quick-chip" onclick="setCleanFlaskWeight(${i}, 0)" title="Скинути до 0 (розрахунок на весь метал опоки)" style="padding: 2px 6px; font-size: 0.7rem;">0 (весь)</button>
+              </div>
+            </div>
+
+            <div>
+              <label for="cost-clean-flask-d-${i}" style="font-size: 0.72rem; color: #cbd5e1; display: block; margin-bottom: 2px; font-weight: 600;">
+                Густина воску/полімеру:
+              </label>
+              <div style="display: flex; gap: 4px;">
+                <input type="number" id="cost-clean-flask-d-${i}" value="${modelD}" step="0.01" min="0.5" max="3.0" style="width: 60px; padding: 5px 6px; font-size: 0.85rem; font-weight: 700; color: #fde047; background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(253, 224, 71, 0.3); border-radius: 4px;" oninput="onCleanFlaskDensityInput(${i}, this.value)">
+                <select class="preset-select-sm" style="flex: 1; padding: 4px; font-size: 0.72rem;" onchange="onCleanFlaskPresetSelect(${i}, this.value)">
+                  <option value="0.93" ${Math.abs(modelD - 0.93) < 0.01 ? 'selected' : ''}>0.93 Віск</option>
+                  <option value="0.95" ${Math.abs(modelD - 0.95) < 0.01 ? 'selected' : ''}>0.95 Віск мод.</option>
+                  <option value="1.10" ${Math.abs(modelD - 1.10) < 0.01 ? 'selected' : ''}>1.10 Полімер</option>
+                  <option value="1.15" ${Math.abs(modelD - 1.15) < 0.01 ? 'selected' : ''}>1.15 Castable</option>
+                  <option value="1.20" ${Math.abs(modelD - 1.20) < 0.01 ? 'selected' : ''}>1.20 Важкий</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div id="cost-clean-flask-res-${i}" style="margin-top: 6px; font-size: 0.74rem; padding-top: 4px; border-top: 1px dashed rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;">
+            <!-- Результати для цієї опоки -->
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // Оновлюємо текстові результати кожного блоку опоки
+  if (perFlaskCleanDetails && perFlaskCleanDetails.length > 0) {
+    perFlaskCleanDetails.forEach((detail, i) => {
+      const resEl = document.getElementById(`cost-clean-flask-res-${i}`);
+      const inputW = document.getElementById(`cost-clean-flask-w-${i}`);
+      const inputD = document.getElementById(`cost-clean-flask-d-${i}`);
+
+      if (inputW && document.activeElement !== inputW && inputW.value != detail.modelW) {
+        inputW.value = detail.modelW;
+      }
+      if (inputD && document.activeElement !== inputD && inputD.value != detail.modelD) {
+        inputD.value = detail.modelD;
+      }
+
+      if (resEl) {
+        if (detail.isClean) {
+          const diff = detail.flaskPerGramEffective - detail.flaskPerGramFull;
+          resEl.innerHTML = `
+            <span style="color: #34d399; font-weight: 700;">✨ Чисті вироби: <strong>${detail.cleanMetalW.toFixed(2)} г</strong> (коеф: ${(detail.metalDensity / detail.modelD).toFixed(2)}×)</span>
+            <span style="color: #38bdf8; font-weight: 700;">Собівартість для цієї оп.: <strong>${detail.flaskPerGramEffective.toFixed(2)} грн/г</strong> <span style="font-weight: normal; color: var(--text-muted); font-size: 0.7rem;">(на весь: ${detail.flaskPerGramFull.toFixed(2)} грн/г, ${diff >= 0 ? '+' : ''}${diff.toFixed(2)})</span></span>
+          `;
+        } else {
+          resEl.innerHTML = `
+            <span style="color: #94a3b8;">ℹ️ Вага = 0 ➔ Розрахунок на весь метал опоки: <strong style="color: #f8fafc;">${detail.fullMetal.toFixed(2)} г</strong></span>
+            <span style="color: #e2e8f0; font-weight: 700;">Собівартість для цієї оп.: <strong>${detail.flaskPerGramFull.toFixed(2)} грн/г</strong></span>
+          `;
+        }
+      }
+    });
+  }
+}
+
+function onCleanFlaskWeightInput(idx, val) {
+  const w = parseFloat(val);
+  if (!isNaN(w) && w >= 0 && state.batch[idx]) {
+    state.batch[idx].cleanModelW = w;
+    try {
+      localStorage.setItem("cc_batch", JSON.stringify(state.batch));
+    } catch (e) {}
+    calculateTotalProductionCost();
+  }
+}
+
+function onCleanFlaskDensityInput(idx, val) {
+  const d = parseFloat(val);
+  if (!isNaN(d) && d > 0 && state.batch[idx]) {
+    state.batch[idx].cleanModelD = d;
+    try {
+      localStorage.setItem("cc_batch", JSON.stringify(state.batch));
+    } catch (e) {}
+    calculateTotalProductionCost();
+  }
+}
+
+function setCleanFlaskWeight(idx, val) {
+  if (state.batch[idx]) {
+    state.batch[idx].cleanModelW = Math.max(0, parseFloat(val) || 0);
+    const inputEl = document.getElementById(`cost-clean-flask-w-${idx}`);
+    if (inputEl) inputEl.value = state.batch[idx].cleanModelW;
+    try {
+      localStorage.setItem("cc_batch", JSON.stringify(state.batch));
+    } catch (e) {}
+    calculateTotalProductionCost();
+  }
+}
+
+function onCleanFlaskPresetSelect(idx, val) {
+  const d = parseFloat(val);
+  if (!isNaN(d) && d > 0 && state.batch[idx]) {
+    state.batch[idx].cleanModelD = d;
+    const inputEl = document.getElementById(`cost-clean-flask-d-${idx}`);
+    if (inputEl) inputEl.value = d;
+    try {
+      localStorage.setItem("cc_batch", JSON.stringify(state.batch));
+    } catch (e) {}
+    calculateTotalProductionCost();
+  }
+}
+
+function onCleanModelParamsChange() {
+  calculateTotalProductionCost();
+}
+
+function onCleanDensityPresetSelect() {
+  const sel = document.getElementById("cost-clean-density-preset");
+  const densityInput = document.getElementById("cost-clean-model-density");
+  if (sel && densityInput) {
+    densityInput.value = sel.value;
+    calculateTotalProductionCost();
+  }
+}
+
+function setCleanModelDensity(val) {
+  const densityInput = document.getElementById("cost-clean-model-density");
+  const sel = document.getElementById("cost-clean-density-preset");
+  if (densityInput) {
+    densityInput.value = val;
+    if (sel) {
+      const matchOpt = Array.from(sel.options).find(o => Math.abs(parseFloat(o.value) - val) < 0.01);
+      if (matchOpt) sel.value = matchOpt.value;
+    }
+    calculateTotalProductionCost();
+  }
+}
+
+function setCleanModelWeight(val) {
+  const weightInput = document.getElementById("cost-clean-model-weight");
+  if (weightInput) {
+    weightInput.value = val;
+    calculateTotalProductionCost();
+  }
+}
+
+function copyPureModelWeightFromSingle() {
+  const singleModelInput = document.getElementById("model-weight");
+  const singlePolyInput = document.getElementById("polymer-density");
+  const cleanWeightInput = document.getElementById("cost-clean-model-weight");
+  const cleanDensityInput = document.getElementById("cost-clean-model-density");
+  const cleanDensityPreset = document.getElementById("cost-clean-density-preset");
+
+  let srcW = parseFloat(singleModelInput?.value) || 0;
+  let srcD = parseFloat(singlePolyInput?.value) || 0.93;
+
+  if (srcW <= 0 && state.batch && state.batch.length > 0) {
+    srcW = state.batch.reduce((sum, item) => sum + (parseFloat(item.modelW) || 0), 0);
+    srcD = parseFloat(state.batch[0]?.polyDensity) || 0.93;
+  }
+
+  if (srcW > 0) {
+    if (cleanWeightInput) cleanWeightInput.value = srcW;
+    if (cleanDensityInput) {
+      cleanDensityInput.value = srcD;
+      if (cleanDensityPreset) {
+        const matchOpt = Array.from(cleanDensityPreset.options).find(o => Math.abs(parseFloat(o.value) - srcD) < 0.01);
+        if (matchOpt) cleanDensityPreset.value = matchOpt.value;
+      }
+    }
+    calculateTotalProductionCost();
+    showToast(`✅ Скопійовано чисту вагу моделі з опоки: ${srcW} г (ρ = ${srcD} г/см³)`);
+  } else {
+    showToast("⚠️ У поточній опоці вага моделі дорівнює 0. Введіть вагу вручну.");
+  }
+}
+
+function onCleanMetalPresetChange() {
+  calculateTotalProductionCost();
 }
 
 // -------------------------------------------------------------
@@ -6508,6 +7110,78 @@ function getCostReportText() {
   const costPerFlask = grandTotal / Math.max(1, flasksCount);
   const costPerGram = totalMetalG > 0 ? (grandTotal / totalMetalG) : 0;
 
+  // Калькуляція на чисту вагу восковки/полімеру
+  const cleanModelW = prices.cleanModelWeight || 0;
+  const cleanModelD = prices.cleanModelDensity || 0.93;
+  const cleanMetalPreset = prices.cleanMetalPreset || "auto";
+
+  let cleanMetalDensity = 13.0;
+  let cleanMetalName = "Au 585";
+  if (cleanMetalPreset !== "auto") {
+    const found = METALS.find(m => m.id === cleanMetalPreset);
+    if (found) {
+      cleanMetalDensity = found.density || 13.0;
+      cleanMetalName = found.name;
+    }
+  } else {
+    if (state.batch && state.batch.length > 0 && state.batch[0].metal) {
+      cleanMetalDensity = state.batch[0].metal.density || 13.0;
+      cleanMetalName = state.batch[0].metal.name || "Сплав опоки";
+    }
+  }
+
+  let isMultiBatch = state.batch && state.batch.length > 1;
+  let cleanFlasksCount = 0;
+  let totalEffectiveMetalG = 0;
+  let totalCleanProductsMetalG = 0;
+  let perFlaskReportLines = "";
+
+  if (isMultiBatch) {
+    state.batch.forEach((item, idx) => {
+      const fullMetal = item.totalMetalNeeded || 0;
+      const w = (typeof item.cleanModelW === 'number' && item.cleanModelW > 0) ? item.cleanModelW : 0;
+      const d = item.cleanModelD || item.polyDensity || 0.93;
+      const mDensity = item.metal.density || 13.0;
+      const mName = item.metal.name || "Сплав";
+      const flaskTitle = item.name || item.flaskId || `Опока #${idx + 1}`;
+
+      const powderKgItem = (item.powderWeight || 0) / 1000;
+      const waterLItem = (item.waterVolume || 0) / 1000;
+      const fMatCost = (powderKgItem * (prices.powderKg || 160)) + (waterLItem * (prices.waterL || 8));
+      const fBurnoutCost = costBurnout / flasksCount;
+      const fMeltConsumables = (prices.meltingFlask || 45) + (prices.gasolineFlask ?? 14.40) + (prices.compressorFlask ?? 5);
+      const fVacCost = costVacPerFlask;
+      const rateG = typeof getMetalAlloyMeta === 'function' ? getMetalAlloyMeta(item.metal).rateGram : (prices.metalPriceGram || 2600);
+      const fLossCost = fullMetal * ((prices.metalLossPercent || 1.0) / 100) * rateG;
+      const fTotalCost = fMatCost + fBurnoutCost + fMeltConsumables + fVacCost + fLossCost;
+
+      if (w > 0) {
+        const cleanW = (w / d) * mDensity;
+        cleanFlasksCount++;
+        totalCleanProductsMetalG += cleanW;
+        totalEffectiveMetalG += cleanW;
+        const perGClean = cleanW > 0 ? (fTotalCost / cleanW) : 0;
+        const perGFull = fullMetal > 0 ? (fTotalCost / fullMetal) : 0;
+        perFlaskReportLines += ` • ${flaskTitle} (${mName}): модель ${w.toFixed(2)} г (ρ=${d.toFixed(2)}) ➔ ${cleanW.toFixed(2)} г чистих виробів | ${perGClean.toFixed(2)} грн/г [на весь метал ${fullMetal.toFixed(2)} г: ${perGFull.toFixed(2)} грн/г]\n`;
+      } else {
+        totalEffectiveMetalG += fullMetal;
+        const perGFull = fullMetal > 0 ? (fTotalCost / fullMetal) : 0;
+        perFlaskReportLines += ` • ${flaskTitle} (${mName}): вага 0 г ➔ розрахунок на весь метал опоки: ${fullMetal.toFixed(2)} г | ${perGFull.toFixed(2)} грн/г\n`;
+      }
+    });
+  } else {
+    if (cleanModelW > 0 && cleanModelD > 0) {
+      const cleanW = (cleanModelW / cleanModelD) * cleanMetalDensity;
+      cleanFlasksCount = 1;
+      totalCleanProductsMetalG = cleanW;
+      totalEffectiveMetalG = cleanW;
+    } else {
+      totalEffectiveMetalG = totalMetalG;
+    }
+  }
+
+  const costPerGramClean = totalEffectiveMetalG > 0 ? (grandTotal / totalEffectiveMetalG) : 0;
+
   let txt = `=======================================================\n`;
   txt += `   CASTING CALC — ЕКОНОМІЧНИЙ ЗВІТ СОБІВАРТОСТІ ЛИТВА   \n`;
   txt += `=======================================================\n`;
@@ -6565,8 +7239,25 @@ function getCostReportText() {
   txt += ` • Мастило/амортизація: ${flasksCount} оп. × ${vacOilFlask} грн = ${costVacOilTotal.toFixed(2)} грн\n`;
   txt += ` • РАЗОМ ВАКУУМ:        ${costVacuumTotal.toFixed(2)} грн (${costVacPerFlask.toFixed(2)} грн/опока)\n\n`;
 
+  if (cleanFlasksCount > 0 && totalEffectiveMetalG > 0) {
+    txt += `-------------------------------------------------------\n`;
+    txt += `🎯 5. РОЗРАХУНОК НА ЧИСТУ ВАГУ ГОТОВИХ ВИРОБІВ:\n`;
+    txt += `-------------------------------------------------------\n`;
+    if (isMultiBatch && perFlaskReportLines) {
+      txt += perFlaskReportLines;
+      txt += ` • Сумарна розрахункова вага: ${totalEffectiveMetalG.toFixed(2)} г (чистих виробів: ${totalCleanProductsMetalG.toFixed(2)} г, повного металу інш. оп.: ${(totalEffectiveMetalG - totalCleanProductsMetalG).toFixed(2)} г)\n`;
+      txt += ` • СЕРЕДНЯ СОБІВАРТІСТЬ НА 1 Г ЗАВАНТАЖЕННЯ: ${costPerGramClean.toFixed(2)} грн / г\n`;
+      txt += ` • Середня собівартість на весь метал (${totalMetalG.toFixed(2)} г): ${costPerGram.toFixed(2)} грн / г\n\n`;
+    } else {
+      txt += ` • Вага восковки/моделі: ${cleanModelW.toFixed(2)} г (густина ρ = ${cleanModelD.toFixed(2)} г/см³)\n`;
+      txt += ` • Розрахункова чиста вага: ${totalEffectiveMetalG.toFixed(2)} г (${cleanMetalName}, ρ = ${cleanMetalDensity.toFixed(2)})\n`;
+      txt += ` • СОБІВАРТІСТЬ НА 1 Г ЧИСТОГО ВИРОБУ: ${costPerGramClean.toFixed(2)} грн / г\n`;
+      txt += ` • Собівартість на весь метал опоки:   ${costPerGram.toFixed(2)} грн / г (різниця: +${(costPerGramClean - costPerGram).toFixed(2)} грн/г)\n\n`;
+    }
+  }
+
   txt += `=======================================================\n`;
-  txt += `💎 5. ПОВНА ЗВЕДЕНА СОБІВАРТІСТЬ ТЕХНОЛОГІЧНОГО ЦИКЛУ:\n`;
+  txt += `💎 ${cleanFlasksCount > 0 ? "6" : "5"}. ПОВНА ЗВЕДЕНА СОБІВАРТІСТЬ ТЕХНОЛОГІЧНОГО ЦИКЛУ:\n`;
   txt += `=======================================================\n`;
   txt += ` 1. Формомаса + вода:        ${costMaterials.toFixed(2)} грн\n`;
   txt += ` 2. Енергія випалювання:      ${costBurnout.toFixed(2)} грн\n`;
@@ -6576,7 +7267,12 @@ function getCostReportText() {
   txt += `-------------------------------------------------------\n`;
   txt += ` 🏁 ВСЬОГО СОБІВАРТІСТЬ:      ${grandTotal.toFixed(2)} грн\n`;
   txt += ` 🏺 НА 1 ОПОКУ:               ${costPerFlask.toFixed(2)} грн / опока\n`;
-  txt += ` ⚖️ НА 1 ГРАМ МЕТАЛУ:         ${costPerGram.toFixed(2)} грн / г\n`;
+  if (cleanFlasksCount > 0 && totalEffectiveMetalG > 0) {
+    txt += ` 🎯 НА 1 Г РОЗРАХУНКОВОГО МЕТАЛУ: ${costPerGramClean.toFixed(2)} грн / г (на ${totalEffectiveMetalG.toFixed(2)} г ${isMultiBatch ? 'виробів+металу' : 'готових виробів'})\n`;
+    txt += ` ⚖️ НА 1 Г ВСЬОГО МЕТАЛУ:         ${costPerGram.toFixed(2)} грн / г (на ${totalMetalG.toFixed(2)} г металу з литниками)\n`;
+  } else {
+    txt += ` ⚖️ НА 1 ГРАМ МЕТАЛУ:             ${costPerGram.toFixed(2)} грн / г (на ${totalMetalG.toFixed(2)} г металу з литниками)\n`;
+  }
   txt += `=======================================================\n`;
   txt += `Casting Calc — Ювелірне виробництво та економіка литва\n`;
 
