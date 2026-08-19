@@ -44,7 +44,8 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    body { background-color: var(--bg-main); color: var(--text); padding: 12px; padding-bottom: 40px; }
+    html { scroll-behavior: smooth; }
+    body { background-color: var(--bg-main); color: var(--text); padding: 12px; padding-bottom: 120px; scroll-padding-top: 80px; scroll-padding-bottom: 300px; }
 
     .container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
     
@@ -56,11 +57,11 @@
     .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 12px; color: var(--accent); display: flex; justify-content: space-between; align-items: center; }
 
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; scroll-margin-top: 80px; scroll-margin-bottom: 220px; }
     label { font-size: 0.85rem; color: var(--text-muted); display: inline-flex; align-items: center; flex-wrap: wrap; gap: 4px; }
     
-    input, select { background-color: var(--bg-input); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
-    input:focus, select:focus { border-color: var(--accent); }
+    input, select, textarea { background-color: var(--bg-input); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; scroll-margin-top: 80px; scroll-margin-bottom: 220px; }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
 
     .btn { background-color: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 10px 16px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
     .btn:hover { background-color: var(--accent-hover); }
@@ -880,6 +881,25 @@
           <div style="font-size: 1.3rem; font-weight: 700; color: #fde047; margin-top: 2px;" id="burnout-sync-metal">0.00 г</div>
           <div style="font-size: 0.72rem; color: #fde047; margin-top: 2px;" id="burnout-sync-metal-sub">Для розрахунку плавки</div>
         </div>
+      </div>
+    </div>
+
+    <!-- Панель швидкого керування блоками: Згорнути / Розгорнути все -->
+    <div class="burnout-collapse-toolbar" style="display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.75); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; flex-wrap: wrap; gap: 8px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 0.9rem; font-weight: 700; color: #f8fafc;">📑 Блоки розрахунку випалювання:</span>
+        <span id="burnout-blocks-state-badge" class="badge badge-pending" style="font-size: 0.76rem;">4 блоки</span>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-toggle-all-burnout" onclick="toggleAllBurnoutCards()" style="font-size: 0.82rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;" title="Перемкнути всі блоки: якщо згорнуті — розгорнути всі, якщо розгорнуті — згорнути всі">
+          <span id="btn-toggle-all-icon">↕️</span> <span id="btn-toggle-all-text">Розгорнути / Згорнути все</span>
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-expand-all-burnout" onclick="expandAllBurnoutCards()" style="font-size: 0.82rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;" title="Розгорнути всі блоки та таблиці випалювання">
+          <span>⊞</span> <span>Розгорнути все</span>
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-collapse-all-burnout" onclick="collapseAllBurnoutCards()" style="font-size: 0.82rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;" title="Згорнути всі блоки для компактного огляду">
+          <span>⊟</span> <span>Згорнути все</span>
+        </button>
       </div>
     </div>
 
@@ -2425,6 +2445,40 @@ function selectElementValue(el) {
   } catch (err) {}
 }
 
+function scrollInputIntoVisibleArea(el) {
+  if (!el || typeof el.getBoundingClientRect !== 'function') return;
+
+  function performScroll() {
+    try {
+      const rect = el.getBoundingClientRect();
+      const vpHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      
+      // If the field is covered by the keyboard or is in the lower half of the screen
+      // Keep it centered at around 25% to 35% from the top of the visible screen area
+      if (rect.bottom > vpHeight - 75 || rect.top < 65) {
+        const targetOffsetFromTop = Math.max(70, vpHeight * 0.28);
+        const scrollDelta = rect.top - targetOffsetFromTop;
+        
+        window.scrollBy({
+          top: scrollDelta,
+          behavior: 'smooth'
+        });
+      }
+    } catch (err) {
+      try {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+      } catch (e) {}
+    }
+  }
+
+  // Perform multiple staged adjustments as the iPad/mobile keyboard opens and resizes the viewport
+  performScroll();
+  setTimeout(performScroll, 80);
+  setTimeout(performScroll, 220);
+  setTimeout(performScroll, 420);
+  setTimeout(performScroll, 650);
+}
+
 function initAutoSelectInputs() {
   let focusedInput = null;
   let focusTime = 0;
@@ -2445,6 +2499,7 @@ function initAutoSelectInputs() {
     requestAnimationFrame(() => selectElementValue(el));
     setTimeout(() => selectElementValue(el), 30);
     setTimeout(() => selectElementValue(el), 100);
+    scrollInputIntoVisibleArea(el);
   }
 
   // Обробник отримання фокусу (клік, тап, клавіша Tab)
@@ -2454,6 +2509,7 @@ function initAutoSelectInputs() {
       focusedInput = target;
       focusTime = Date.now();
       doSelect(target);
+      scrollInputIntoVisibleArea(target);
     }
   }, true);
 
@@ -2467,13 +2523,14 @@ function initAutoSelectInputs() {
     }
   }, true);
 
-  // Обробник завершення тапу на мобільних пристроях (iOS Safari / Android)
+  // Обробник завершення тапу на мобільних пристроях (iOS Safari / iPadOS / Android)
   document.addEventListener('touchend', function(e) {
     const target = e.target;
     if (isEditableInput(target)) {
       focusedInput = target;
       focusTime = Date.now();
       doSelect(target);
+      scrollInputIntoVisibleArea(target);
     }
   }, { passive: true, capture: true });
 
@@ -2486,6 +2543,15 @@ function initAutoSelectInputs() {
       }
     }
   }, true);
+
+  // Відстеження зміни розміру віртуальної клавіатури на iPad / iOS
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+      if (focusedInput && document.activeElement === focusedInput) {
+        scrollInputIntoVisibleArea(focusedInput);
+      }
+    });
+  }
 }
 
 // --- ІНІЦІАЛІЗАЦІЯ ---
@@ -4633,6 +4699,7 @@ function initBurnoutCalculator() {
   calculateBurnoutCycle();
   calculateTotalProductionCost();
   fetchNBUMetalRates(false);
+  updateBurnoutBlocksBadge();
 }
 
 function syncBurnoutInputsToUI() {
@@ -4883,10 +4950,18 @@ function applyRegionalTariff(tariffKey) {
 }
 
 // --- УПРАВЛІННЯ РОЗКРИВНИМИ БЛОКАМИ ВКЛАДКИ ВИПАЛЮВАННЯ ---
-function toggleBurnoutCard(cardId) {
+function toggleBurnoutCard(cardId, forceExpand = null) {
   const card = document.getElementById(cardId);
   if (!card) return;
-  card.classList.toggle("collapsed");
+
+  if (forceExpand === true) {
+    card.classList.remove("collapsed");
+  } else if (forceExpand === false) {
+    card.classList.add("collapsed");
+  } else {
+    card.classList.toggle("collapsed");
+  }
+
   const isCollapsed = card.classList.contains("collapsed");
 
   let hintId = "";
@@ -4897,26 +4972,115 @@ function toggleBurnoutCard(cardId) {
 
   const hint = document.getElementById(hintId);
   if (hint) hint.innerText = isCollapsed ? "Розгорнути ▼" : "Згорнути ▲";
+
+  updateBurnoutBlocksBadge();
 }
 
-function toggleBurnoutZoneBreakdown() {
+function toggleBurnoutZoneBreakdown(forceExpand = null) {
   const box = document.getElementById("burnout-dual-breakdown-box");
   if (!box) return;
-  box.classList.toggle("collapsed");
-  const isCollapsed = box.classList.contains("collapsed");
 
+  if (forceExpand === true) {
+    box.classList.remove("collapsed");
+  } else if (forceExpand === false) {
+    box.classList.add("collapsed");
+  } else {
+    box.classList.toggle("collapsed");
+  }
+
+  const isCollapsed = box.classList.contains("collapsed");
   const hint = document.getElementById("hint-burnout-zones");
   if (hint) hint.innerText = isCollapsed ? "Розгорнути ▼" : "Згорнути ▲";
 }
 
-function toggleVacuumBox() {
+function toggleVacuumBox(forceExpand = null) {
   const box = document.getElementById("cost-vacuum-collapsible-box");
   if (!box) return;
-  box.classList.toggle("collapsed");
-  const isCollapsed = box.classList.contains("collapsed");
 
+  if (forceExpand === true) {
+    box.classList.remove("collapsed");
+  } else if (forceExpand === false) {
+    box.classList.add("collapsed");
+  } else {
+    box.classList.toggle("collapsed");
+  }
+
+  const isCollapsed = box.classList.contains("collapsed");
   const hint = document.getElementById("hint-vacuum-box");
   if (hint) hint.innerText = isCollapsed ? "Розгорнути ▼" : "Згорнути ▲";
+}
+
+function expandAllBurnoutCards() {
+  const blockIds = ['card-burnout-block1', 'card-burnout-block2', 'card-burnout-block3', 'card-burnout-block4'];
+  blockIds.forEach(id => toggleBurnoutCard(id, true));
+  toggleBurnoutZoneBreakdown(true);
+  toggleVacuumBox(true);
+  updateBurnoutBlocksBadge();
+  showToast("Розгорнуто всі блоки випалювання");
+}
+
+function collapseAllBurnoutCards() {
+  const blockIds = ['card-burnout-block1', 'card-burnout-block2', 'card-burnout-block3', 'card-burnout-block4'];
+  blockIds.forEach(id => toggleBurnoutCard(id, false));
+  toggleBurnoutZoneBreakdown(false);
+  toggleVacuumBox(false);
+  updateBurnoutBlocksBadge();
+  showToast("Згорнуто всі блоки випалювання");
+}
+
+function toggleAllBurnoutCards() {
+  const blockIds = ['card-burnout-block1', 'card-burnout-block2', 'card-burnout-block3', 'card-burnout-block4'];
+  const hasCollapsed = blockIds.some(id => {
+    const el = document.getElementById(id);
+    return el && el.classList.contains('collapsed');
+  });
+
+  if (hasCollapsed) {
+    expandAllBurnoutCards();
+  } else {
+    collapseAllBurnoutCards();
+  }
+}
+
+function updateBurnoutBlocksBadge() {
+  const blockIds = ['card-burnout-block1', 'card-burnout-block2', 'card-burnout-block3', 'card-burnout-block4'];
+  let openCount = 0;
+  blockIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.classList.contains('collapsed')) {
+      openCount++;
+    }
+  });
+
+  const badge = document.getElementById('burnout-blocks-state-badge');
+  const btnToggleText = document.getElementById('btn-toggle-all-text');
+  const btnToggleIcon = document.getElementById('btn-toggle-all-icon');
+
+  if (badge) {
+    if (openCount === 4) {
+      badge.className = 'badge badge-success';
+      badge.innerText = 'Всі 4 розгорнуто';
+    } else if (openCount === 0) {
+      badge.className = 'badge badge-pending';
+      badge.innerText = 'Всі згорнуто';
+    } else {
+      badge.className = 'badge';
+      badge.innerText = `Розгорнуто ${openCount} з 4`;
+    }
+  }
+
+  if (btnToggleText && btnToggleIcon) {
+    if (openCount === 4) {
+      btnToggleText.innerText = 'Згорнути все';
+      btnToggleIcon.innerText = '⊟';
+    } else if (openCount === 0) {
+      btnToggleText.innerText = 'Розгорнути все';
+      btnToggleIcon.innerText = '⊞';
+    } else {
+      btnToggleText.innerText = 'Розгорнути / Згорнути все';
+      btnToggleIcon.innerText = '↕️';
+    }
+  }
 }
 
 // --- УПРАВЛІННЯ ПРЕСЕТАМИ ВИПАЛЮВАННЯ (СТВОРЕННЯ, ВИДАЛЕННЯ, ВИБІР) ---
