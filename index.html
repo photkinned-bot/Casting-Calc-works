@@ -2493,13 +2493,40 @@ function initAutoSelectInputs() {
     return !ignoredTypes.includes(type);
   }
 
+  function shouldAutoSelect(el) {
+    if (!isEditableInput(el)) return false;
+    if (el.tagName === 'TEXTAREA') return false;
+    if (el.classList.contains('no-auto-select') || el.getAttribute('data-no-auto-select') === 'true') return false;
+    if (el.classList.contains('auto-select') || el.getAttribute('data-auto-select') === 'true') return true;
+
+    // Текстові поля (назва кроку у графіку випалювання, примітки, текстові описи)
+    // НЕ повинні автоматично виділяти весь рядок, щоб користувач міг поставити курсор у будь-яке місце і виправити 1-2 символи
+    if (el.classList.contains('burnout-table-input') && el.type === 'text') return false;
+    if (el.classList.contains('note-input')) return false;
+
+    const type = (el.type || 'text').toLowerCase();
+    // Автоматичне виділення лише для числових полів вводу (type="number")
+    return type === 'number';
+  }
+
   function doSelect(el) {
-    if (!isEditableInput(el)) return;
+    if (!shouldAutoSelect(el)) return;
     selectElementValue(el);
-    requestAnimationFrame(() => selectElementValue(el));
-    setTimeout(() => selectElementValue(el), 30);
-    setTimeout(() => selectElementValue(el), 100);
-    scrollInputIntoVisibleArea(el);
+    requestAnimationFrame(() => {
+      if (shouldAutoSelect(el) && document.activeElement === el) {
+        selectElementValue(el);
+      }
+    });
+    setTimeout(() => {
+      if (shouldAutoSelect(el) && document.activeElement === el) {
+        selectElementValue(el);
+      }
+    }, 30);
+    setTimeout(() => {
+      if (shouldAutoSelect(el) && document.activeElement === el) {
+        selectElementValue(el);
+      }
+    }, 100);
   }
 
   // Обробник отримання фокусу (клік, тап, клавіша Tab)
@@ -2508,16 +2535,18 @@ function initAutoSelectInputs() {
     if (isEditableInput(target)) {
       focusedInput = target;
       focusTime = Date.now();
-      doSelect(target);
+      if (shouldAutoSelect(target)) {
+        doSelect(target);
+      }
       scrollInputIntoVisibleArea(target);
     }
   }, true);
 
-  // Обробник відпускання миші (mouseup скидає стандартне виділення браузера)
+  // Обробник відпускання миші (mouseup)
   document.addEventListener('mouseup', function(e) {
     const target = e.target;
     if (isEditableInput(target) && target === focusedInput) {
-      if (Date.now() - focusTime < 450) {
+      if (shouldAutoSelect(target) && Date.now() - focusTime < 450) {
         doSelect(target);
       }
     }
@@ -2529,7 +2558,9 @@ function initAutoSelectInputs() {
     if (isEditableInput(target)) {
       focusedInput = target;
       focusTime = Date.now();
-      doSelect(target);
+      if (shouldAutoSelect(target)) {
+        doSelect(target);
+      }
       scrollInputIntoVisibleArea(target);
     }
   }, { passive: true, capture: true });
@@ -2538,7 +2569,7 @@ function initAutoSelectInputs() {
   document.addEventListener('click', function(e) {
     const target = e.target;
     if (isEditableInput(target) && target === focusedInput) {
-      if (Date.now() - focusTime < 450) {
+      if (shouldAutoSelect(target) && Date.now() - focusTime < 450) {
         doSelect(target);
       }
     }
@@ -5480,8 +5511,10 @@ function renderBurnoutStepsTable() {
         </td>
         <td>
           <input type="text" value="${escapeHtml(step.name)}" 
-            class="burnout-table-input" 
+            class="burnout-table-input no-auto-select" 
+            data-no-auto-select="true"
             style="text-align: left; font-weight: 600; min-width: 170px;" 
+            oninput="onBurnoutStepInputChange(${i}, 'name', this.value)"
             onchange="onBurnoutStepInputChange(${i}, 'name', this.value)">
         </td>
         <td style="text-align: center;">
