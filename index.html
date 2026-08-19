@@ -2287,6 +2287,10 @@ function updateBurnoutCartPreview() {
     flasksCountInput.value = totalFlasks;
   }
 
+  if (typeof syncMetalAlloyFromBatch === 'function') {
+    syncMetalAlloyFromBatch(false);
+  }
+
   calculateBurnoutCycle();
   calculateTotalProductionCost();
 }
@@ -2942,6 +2946,9 @@ function onWaterPriceDirectInput(val) {
 function applyMetalPreset() {
   updateMetalColorBadgeDisplay();
   calculateSingle();
+  if (typeof syncMetalAlloyFromBatch === 'function' && (!state.batch || state.batch.length === 0)) {
+    syncMetalAlloyFromBatch(false);
+  }
 }
 
 function openPresetModal() { 
@@ -5556,6 +5563,16 @@ function calculateTotalProductionCost() {
     totalMetalG += (item.totalMetalNeeded || 0);
   });
 
+  // Якщо кошик порожній, але розраховується 1 поточна опока з першої вкладки
+  if (state.batch.length === 0 && typeof getSingleCalculations === 'function') {
+    const singleCalc = getSingleCalculations();
+    if (singleCalc && singleCalc.totalMetalNeeded > 0) {
+      totalMetalG = singleCalc.totalMetalNeeded;
+      totalPowderG = singleCalc.powderWeight || 0;
+      totalWaterMl = singleCalc.waterVolume || 0;
+    }
+  }
+
   const powderKg = totalPowderG / 1000;
   const waterL = totalWaterMl / 1000;
 
@@ -5620,10 +5637,54 @@ function calculateTotalProductionCost() {
   const costVacuumOilTotal = vacuumOilFlask * flasksCount;
   const costVacuumTotal = costVacuumPerFlask * flasksCount;
 
-  const metalLostG = totalMetalG * (metalLossPercent / 100);
-  const costMetalLoss = metalLostG * metalPriceGram;
-  const costMeltingTotal = costMeltingConsumables + costMetalLoss;
+  // --- РОЗРАХУНОК ЧАДУ МЕТАЛУ (ПООПОЧНИЙ ТА СУМАРНИЙ) ---
+  const selectPreset = document.getElementById("metal-price-preset-select");
+  const isMixedBatchMode = selectPreset && selectPreset.value === "batch_mixed" && state.batch.length > 1;
 
+  let metalLostG = 0;
+  let costMetalLoss = 0;
+  let perMetalBreakdown = [];
+
+  if (isMixedBatchMode) {
+    const metalMap = {};
+    state.batch.forEach(item => {
+      recomputeFlaskItem(item);
+      const meta = typeof getMetalAlloyMeta === 'function' ? getMetalAlloyMeta(item.metal) : { key: 'au585', name: item.metal.name || 'Сплав', icon: '💎', rateGram: 3700, lossPercent: 1.0 };
+      const w = item.totalMetalNeeded || 0;
+      if (!metalMap[meta.key]) {
+        metalMap[meta.key] = {
+          meta: meta,
+          weight: 0,
+          flasksCount: 0
+        };
+      }
+      metalMap[meta.key].weight += w;
+      metalMap[meta.key].flasksCount += 1;
+    });
+
+    Object.keys(metalMap).forEach(k => {
+      const g = metalMap[k];
+      const lossG = g.weight * (metalLossPercent / 100);
+      const costL = lossG * g.meta.rateGram;
+      metalLostG += lossG;
+      costMetalLoss += costL;
+      perMetalBreakdown.push({
+        key: k,
+        name: g.meta.name,
+        icon: g.meta.icon,
+        weight: g.weight,
+        flasksCount: g.flasksCount,
+        rateGram: g.meta.rateGram,
+        lossG: lossG,
+        costLoss: costL
+      });
+    });
+  } else {
+    metalLostG = totalMetalG * (metalLossPercent / 100);
+    costMetalLoss = metalLostG * metalPriceGram;
+  }
+
+  const costMeltingTotal = costMeltingConsumables + costMetalLoss;
   const grandTotal = costMaterials + costBurnout + costMeltingTotal + costVacuumTotal;
   const grandPerFlask = grandTotal / Math.max(1, flasksCount);
   const costPerGram = totalMetalG > 0 ? (grandTotal / totalMetalG) : 0;
@@ -5674,10 +5735,21 @@ function calculateTotalProductionCost() {
   if (sumBurnout) sumBurnout.innerText = `${costBurnout.toFixed(2)} грн (${lastBurnoutCalculations.totalActualKwh.toFixed(2)} кВт·год)`;
   if (sumMelting) sumMelting.innerText = `${costMeltingConsumables.toFixed(2)} грн (${flasksCount} оп. × ${priceMeltingFlask}+${priceGasolineFlask}+${priceCompressorFlask} грн)`;
   if (sumVacuum) sumVacuum.innerText = `${costVacuumTotal.toFixed(2)} грн (${flasksCount} оп. × ${costVacuumPerFlask.toFixed(2)} грн | ${totalVacuumKwh.toFixed(2)} кВт·г)`;
-  if (sumLoss) sumLoss.innerText = `${costMetalLoss.toFixed(2)} грн (${metalLostG.toFixed(2)} г угару при ${metalLossPercent}%)`;
+  
+  if (sumLoss) {
+    if (isMixedBatchMode && perMetalBreakdown.length > 1) {
+      const breakdownText = perMetalBreakdown.map(b => `${b.icon} ${b.name.split(' ')[0]}: ${b.costLoss.toFixed(2)} грн`).join(' + ');
+      sumLoss.innerHTML = `<strong>${costMetalLoss.toFixed(2)} грн</strong> <span style="font-size: 0.76rem; color: #38bdf8;">(${breakdownText} | ${metalLostG.toFixed(2)} г при ${metalLossPercent}%)</span>`;
+    } else {
+      sumLoss.innerText = `${costMetalLoss.toFixed(2)} грн (${metalLostG.toFixed(2)} г угару при ${metalLossPercent}%)`;
+    }
+  }
+
   if (sumPerGram) sumPerGram.innerText = totalMetalG > 0 ? `${costPerGram.toFixed(2)} грн/г (на ${totalMetalG.toFixed(2)} г металу)` : `0.00 грн/г`;
 
-  renderBatchMetalSyncBox();
+  if (typeof renderBatchMetalSyncBox === 'function') {
+    renderBatchMetalSyncBox(perMetalBreakdown, isMixedBatchMode);
+  }
 }
 
 // -------------------------------------------------------------
@@ -5998,7 +6070,43 @@ function renderNBURatesBar() {
   }
 }
 
-function renderMetalPricePresetOptions() {
+// ФУНКЦІЯ МЕТАДАНИХ СПЛАВУ ТА КУРСУ НБУ
+function getMetalAlloyMeta(metal) {
+  const m = metal || {};
+  const mName = (m.name || "").toLowerCase();
+  const mId = (m.id || "").toLowerCase();
+  const p = parseInt(m.targetPurity || m.basePurity || m.purity || 585, 10);
+
+  const au = nbuMetalRates.gold || 6318.50;
+  const ag = nbuMetalRates.silver || 94.37;
+  const pt = nbuMetalRates.platinum || 3394.00;
+  const pd = nbuMetalRates.palladium || 1908.45;
+
+  if (mId.includes("ag") || mName.includes("срібл") || p === 925 || (p === 999 && mId.includes("ag"))) {
+    if (p === 999) {
+      return { key: "ag999", name: "Чистота Срібло 999.9", icon: "🥈", rateGram: Number(ag.toFixed(2)), lossPercent: 1.0 };
+    }
+    return { key: "ag925", name: "Срібло 925 (Ag 925)", icon: "🔘", rateGram: Number((ag * 0.925).toFixed(2)), lossPercent: 1.2 };
+  } else if (mId.includes("pt") || mName.includes("платин") || p === 950 && mId.includes("pt")) {
+    return { key: "pt950", name: "Платина 950 (Pt 950)", icon: "💎", rateGram: Number((pt * 0.950).toFixed(2)), lossPercent: 0.8 };
+  } else if (mId.includes("pd") || mName.includes("палад")) {
+    return { key: "pd950", name: "Паладій 950 (Pd 950)", icon: "⚪", rateGram: Number((pd * 0.950).toFixed(2)), lossPercent: 0.8 };
+  } else if (mId.includes("brass") || mName.includes("латун") || mName.includes("бронз")) {
+    return { key: "brass", name: "Латунь / Бронза ливарна", icon: "🟠", rateGram: 15.00, lossPercent: 1.5 };
+  } else {
+    // Золото за пробами
+    if (p === 750) {
+      return { key: "au750", name: "Золото 750 (Au 750)", icon: "🥇", rateGram: Number((au * 0.750).toFixed(2)), lossPercent: 1.0 };
+    } else if (p === 375) {
+      return { key: "au375", name: "Золото 375 (Au 375)", icon: "🥇", rateGram: Number((au * 0.375).toFixed(2)), lossPercent: 1.2 };
+    } else if (p === 999) {
+      return { key: "au999", name: "Чистота Золото 999.9", icon: "🏆", rateGram: Number(au.toFixed(2)), lossPercent: 0.8 };
+    }
+    return { key: "au585", name: "Золото 585 (Au 585)", icon: "🟡", rateGram: Number((au * 0.585).toFixed(2)), lossPercent: 1.0 };
+  }
+}
+
+function renderMetalPricePresetOptions(activeKey = null) {
   const select = document.getElementById("metal-price-preset-select");
   if (!select) return;
 
@@ -6007,127 +6115,289 @@ function renderMetalPricePresetOptions() {
   const pt = nbuMetalRates.platinum;
   const pd = nbuMetalRates.palladium || 1908.45;
 
-  const au585 = Math.round(au * 0.585);
-  const au750 = Math.round(au * 0.750);
-  const au375 = Math.round(au * 0.375);
-  const au999 = Math.round(au);
-  const ag925 = (ag * 0.925).toFixed(2);
-  const ag999 = ag.toFixed(2);
-  const pt950 = Math.round(pt * 0.950);
-  const pd950 = Math.round(pd * 0.950);
+  const au585 = Number((au * 0.585).toFixed(2));
+  const au750 = Number((au * 0.750).toFixed(2));
+  const au375 = Number((au * 0.375).toFixed(2));
+  const au999 = Number(au.toFixed(2));
+  const ag925 = Number((ag * 0.925).toFixed(2));
+  const ag999 = Number(ag.toFixed(2));
+  const pt950 = Number((pt * 0.950).toFixed(2));
+  const pd950 = Number((pd * 0.950).toFixed(2));
 
-  let html = `<option value="" disabled selected>-- Швидкий вибір сплаву за курсом НБУ --</option>`;
-  html += `<option value="${au585}">🥇 Золото 585 (Au 585) — ~${au585} грн/г</option>`;
-  html += `<option value="${au750}">🥇 Золото 750 (Au 750) — ~${au750} грн/г</option>`;
-  html += `<option value="${au375}">🥇 Золото 375 (Au 375) — ~${au375} грн/г</option>`;
-  html += `<option value="${au999}">🏆 Чистота Золото 999.9 — ${au999} грн/г</option>`;
-  html += `<option value="${ag925}">🥈 Срібло 925 (Ag 925) — ~${ag925} грн/г</option>`;
-  html += `<option value="${ag999}">🥈 Чистота Срібло 999.9 — ${ag999} грн/г</option>`;
-  html += `<option value="${pt950}">⚪ Платина 950 (Pt 950) — ~${pt950} грн/г</option>`;
-  html += `<option value="${pd950}">⚪ Паладій 950 (Pd 950) — ~${pd950} грн/г</option>`;
-  html += `<option value="15">🟡 Латунь / Бронза ливарна — 15 грн/г</option>`;
+  let html = `<option value="" disabled>-- Швидкий вибір сплаву за курсом НБУ --</option>`;
+
+  // Якщо в кошику є кілька різних металів
+  if (state.batch && state.batch.length > 1) {
+    const metalKeys = new Set(state.batch.map(item => getMetalAlloyMeta(item.metal).key));
+    if (metalKeys.size > 1) {
+      html += `<option value="batch_mixed" style="font-weight: 700; color: #fde047;">📦 Змішаний заміс (${state.batch.length} оп. / ${metalKeys.size} сплави) — Поопочний розрахунок</option>`;
+    }
+  }
+
+  html += `<option value="au585">🟡 Золото 585 (Au 585) — ~${Math.round(au585)} грн/г (чад 1.0%)</option>`;
+  html += `<option value="au750">🥇 Золото 750 (Au 750) — ~${Math.round(au750)} грн/г (чад 1.0%)</option>`;
+  html += `<option value="au375">🥇 Золото 375 (Au 375) — ~${Math.round(au375)} грн/г (чад 1.2%)</option>`;
+  html += `<option value="au999">🏆 Чистота Золото 999.9 — ~${Math.round(au999)} грн/г (чад 0.8%)</option>`;
+  html += `<option value="ag925">🔘 Срібло 925 (Ag 925) — ~${ag925.toFixed(2)} грн/г (чад 1.2%)</option>`;
+  html += `<option value="ag999">🥈 Чистота Срібло 999.9 — ~${ag999.toFixed(2)} грн/г (чад 1.0%)</option>`;
+  html += `<option value="pt950">💎 Платина 950 (Pt 950) — ~${Math.round(pt950)} грн/г (чад 0.8%)</option>`;
+  html += `<option value="pd950">⚪ Паладій 950 (Pd 950) — ~${Math.round(pd950)} грн/г (чад 0.8%)</option>`;
+  html += `<option value="brass">🟠 Латунь / Бронза ливарна — 15.00 грн/г (чад 1.5%)</option>`;
 
   select.innerHTML = html;
+  if (activeKey) {
+    select.value = activeKey;
+  }
+}
+
+// АВТОМАТИЧНА СИНХРОНІЗАЦІЯ СПЛАВУ ТА ЧАДУ З ОПОК
+function syncMetalAlloyFromBatch(isManualUserTrigger = false) {
+  const select = document.getElementById("metal-price-preset-select");
+  const priceInput = document.getElementById("metal-price-gram");
+  const lossInput = document.getElementById("metal-loss-percent");
+  const metalSubEl = document.getElementById("burnout-sync-metal-sub");
+
+  let metalsList = [];
+  if (state.batch && state.batch.length > 0) {
+    metalsList = state.batch.map(item => {
+      recomputeFlaskItem(item);
+      return {
+        metal: item.metal,
+        weight: item.totalMetalNeeded || 0
+      };
+    });
+  } else {
+    const presetSelect = document.getElementById("preset-metal");
+    const mIdx = presetSelect ? parseInt(presetSelect.value, 10) : 0;
+    const currentMetal = METALS[mIdx] || METALS[0];
+    const singleCalc = typeof getSingleCalculations === 'function' ? getSingleCalculations() : null;
+    metalsList = [{
+      metal: currentMetal,
+      weight: singleCalc ? (singleCalc.totalMetalNeeded || 0) : 0
+    }];
+  }
+
+  const metalMap = {};
+  let totalW = 0;
+  metalsList.forEach(mItem => {
+    const meta = getMetalAlloyMeta(mItem.metal);
+    totalW += mItem.weight;
+    if (!metalMap[meta.key]) {
+      metalMap[meta.key] = {
+        meta: meta,
+        weight: 0,
+        count: 0
+      };
+    }
+    metalMap[meta.key].weight += mItem.weight;
+    metalMap[meta.key].count += 1;
+  });
+
+  const distinctKeys = Object.keys(metalMap);
+  let activeKey = "au585";
+  let syncedRate = 3708;
+  let syncedLossPercent = 1.0;
+  let syncLabel = "";
+
+  if (distinctKeys.length === 1) {
+    const single = metalMap[distinctKeys[0]];
+    activeKey = single.meta.key;
+    syncedRate = single.meta.rateGram;
+    syncedLossPercent = single.meta.lossPercent;
+    syncLabel = `${single.meta.icon} ${single.meta.name} (~${Math.round(syncedRate)} грн/г)`;
+    
+    renderMetalPricePresetOptions(activeKey);
+    if (select) select.value = activeKey;
+    if (priceInput) priceInput.value = syncedRate;
+    if (lossInput) lossInput.value = syncedLossPercent;
+  } else if (distinctKeys.length > 1) {
+    activeKey = "batch_mixed";
+    let weightedSum = 0;
+    let totalLossGrams = 0;
+
+    distinctKeys.forEach(k => {
+      const g = metalMap[k];
+      weightedSum += (g.weight * g.meta.rateGram);
+      const lossG = g.weight * (g.meta.lossPercent / 100);
+      totalLossGrams += lossG;
+    });
+
+    const avgPrice = totalW > 0 ? (weightedSum / totalW) : 2500;
+    syncedRate = Number(avgPrice.toFixed(2));
+    syncedLossPercent = totalW > 0 ? Number(((totalLossGrams / totalW) * 100).toFixed(2)) : 1.0;
+
+    renderMetalPricePresetOptions("batch_mixed");
+    if (select) select.value = "batch_mixed";
+    if (priceInput) priceInput.value = syncedRate;
+    if (lossInput) lossInput.value = syncedLossPercent;
+
+    const shortNames = distinctKeys.map(k => metalMap[k].meta.name.split(' ')[0]).join(' + ');
+    syncLabel = `📦 Змішаний: ${shortNames} (~${Math.round(syncedRate)} грн/г)`;
+  } else {
+    renderMetalPricePresetOptions("au585");
+    if (select) select.value = "au585";
+    syncLabel = "🟡 Золото 585 (~3 696 грн/г)";
+  }
+
+  if (metalSubEl) {
+    metalSubEl.innerText = syncLabel;
+  }
+
+  if (isManualUserTrigger) {
+    showToast(`⚡ Синхронізовано метал зі специфікацією: ${syncLabel}`);
+    calculateTotalProductionCost();
+  }
 }
 
 function applySelectedMetalAlloyRate() {
   const select = document.getElementById("metal-price-preset-select");
   if (!select || !select.value) return;
 
-  const val = parseFloat(select.value);
-  if (!isNaN(val) && val > 0) {
-    const input = document.getElementById("metal-price-gram");
-    if (input) {
-      input.value = val;
-      calculateTotalProductionCost();
-      showToast(`✅ Встановлено оціночну ціну металу: ${val} грн/г`);
-    }
-  }
-}
+  const choice = select.value;
+  const priceInput = document.getElementById("metal-price-gram");
+  const lossInput = document.getElementById("metal-loss-percent");
 
-function renderBatchMetalSyncBox() {
-  const box = document.getElementById("batch-metal-sync-box") || document.getElementById("batch-metals-sync-box");
-  if (!box) return;
-
-  if (!state.batch || state.batch.length === 0) {
-    box.style.display = "none";
+  if (choice === "batch_mixed") {
+    syncMetalAlloyFromBatch(true);
     return;
   }
 
+  const dummyMetal = { 
+    id: choice, 
+    basePurity: (choice === 'ag925' ? 925 : (choice === 'au750' ? 750 : (choice === 'au375' ? 375 : (choice === 'pt950' ? 950 : (choice === 'pd950' ? 950 : (choice === 'brass' ? 1000 : (choice === 'ag999' ? 999 : (choice === 'au999' ? 999 : 585)))))))) 
+  };
+  const meta = getMetalAlloyMeta(dummyMetal);
+
+  if (meta && priceInput) {
+    priceInput.value = meta.rateGram;
+    if (lossInput) {
+      lossInput.value = meta.lossPercent;
+    }
+    calculateTotalProductionCost();
+    showToast(`✅ Застосовано сплав: ${meta.name} (${meta.rateGram} грн/г, чад ${meta.lossPercent}%)`);
+  }
+}
+
+function renderBatchMetalSyncBox(perMetalBreakdown = [], isMixed = false) {
+  const box = document.getElementById("batch-metal-sync-box") || document.getElementById("batch-metals-sync-box");
+  if (!box) return;
+
   let totalWeight = 0;
-  let weightedSum = 0;
+  let totalFlasks = state.batch.length;
   const metalMap = {};
 
-  state.batch.forEach(item => {
-    recomputeFlaskItem(item);
-    const mName = item.metal.name || "Сплав";
-    const mWeight = item.totalMetalNeeded || 0;
-    totalWeight += mWeight;
+  if (totalFlasks > 0) {
+    state.batch.forEach(item => {
+      recomputeFlaskItem(item);
+      const meta = getMetalAlloyMeta(item.metal);
+      const w = item.totalMetalNeeded || 0;
+      totalWeight += w;
+      if (!metalMap[meta.key]) {
+        metalMap[meta.key] = {
+          meta: meta,
+          weight: 0,
+          count: 0
+        };
+      }
+      metalMap[meta.key].weight += w;
+      metalMap[meta.key].count += 1;
+    });
+  } else {
+    const singleCalc = typeof getSingleCalculations === 'function' ? getSingleCalculations() : null;
+    const presetSelect = document.getElementById("preset-metal");
+    const mIdx = presetSelect ? parseInt(presetSelect.value, 10) : 0;
+    const currentMetal = METALS[mIdx] || METALS[0];
+    const meta = getMetalAlloyMeta(currentMetal);
+    const w = singleCalc ? (singleCalc.totalMetalNeeded || 0) : 0;
+    totalWeight = w;
+    metalMap[meta.key] = {
+      meta: meta,
+      weight: w,
+      count: 1
+    };
+    totalFlasks = 1;
+  }
 
-    // Розрахунок ціни за грам на основі НБУ
-    let rateGram = 3700;
-    const p = item.metal.targetPurity || 585;
-    const mId = (item.metal.id || "").toLowerCase();
+  const distinctKeys = Object.keys(metalMap);
+  const lossPercent = parseFloat(document.getElementById("metal-loss-percent")?.value) || 1.0;
 
-    if (mId.includes("ag") || mName.toLowerCase().includes("срібл") || p === 925) {
-      rateGram = nbuMetalRates.silver * (p / 1000);
-    } else if (mId.includes("pt") || mName.toLowerCase().includes("платин") || p === 950) {
-      rateGram = nbuMetalRates.platinum * (p / 1000);
-    } else if (mId.includes("pd") || mName.toLowerCase().includes("палад")) {
-      rateGram = (nbuMetalRates.palladium || 1908.45) * (p / 1000);
-    } else if (mId.includes("brass") || mName.toLowerCase().includes("латун") || mName.toLowerCase().includes("бронз")) {
-      rateGram = 15;
-    } else {
-      // Золото
-      rateGram = nbuMetalRates.gold * (p / 1000);
-    }
+  if (distinctKeys.length <= 1) {
+    const single = metalMap[distinctKeys[0]] || { meta: getMetalAlloyMeta({}), weight: 0, count: 1 };
+    const lossG = single.weight * (lossPercent / 100);
+    const lossCost = lossG * single.meta.rateGram;
 
-    weightedSum += (mWeight * rateGram);
+    box.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <div>
+          <div style="font-size: 0.78rem; font-weight: 700; color: #38bdf8; margin-bottom: 2px;">
+            ⚡ Сплав опоки (Синхронізовано): ${single.meta.icon} <strong>${escapeHtml(single.meta.name)}</strong>
+          </div>
+          <div style="font-size: 0.74rem; color: var(--text-muted);">
+            Загальна вага металу: <strong style="color: #fde047;">${single.weight.toFixed(2)} г</strong> • Курс НБУ: <strong style="color: #38bdf8;">${single.meta.rateGram.toFixed(2)} грн/г</strong>
+            <br>
+            Технологічний чад (${lossPercent}%): <strong>${lossG.toFixed(2)} г</strong> = <strong style="color: #f87171;">${lossCost.toFixed(2)} грн</strong>
+          </div>
+        </div>
+        <div>
+          <button type="button" class="btn-preset-action" onclick="syncMetalAlloyFromBatch(true)" style="font-size: 0.74rem; padding: 4px 8px; border-color: #38bdf8; color: #38bdf8; background: rgba(56, 189, 248, 0.1);" title="Примусово оновити ціну та сплав з опоки">
+            🔄 Скинути до металу опоки
+          </button>
+        </div>
+      </div>
+    `;
+    box.style.display = "block";
+  } else {
+    let rowsHtml = "";
+    let sumLossG = 0;
+    let sumLossCost = 0;
 
-    if (!metalMap[mName]) {
-      metalMap[mName] = { weight: 0, rateGram: rateGram, icon: item.metal.icon || "💎" };
-    }
-    metalMap[mName].weight += mWeight;
-  });
+    distinctKeys.forEach(k => {
+      const g = metalMap[k];
+      const lossG = g.weight * (lossPercent / 100);
+      const lossCost = lossG * g.meta.rateGram;
+      sumLossG += lossG;
+      sumLossCost += lossCost;
 
-  const avgPriceGram = totalWeight > 0 ? (weightedSum / totalWeight) : Math.round(nbuMetalRates.gold * 0.585);
-  window._batchWeightedMetalPrice = avgPriceGram;
+      rowsHtml += `
+        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.6); padding: 4px 8px; border-radius: 4px; font-size: 0.74rem; border: 1px solid rgba(255, 255, 255, 0.05); margin-top: 4px;">
+          <div>
+            <span style="font-weight: 600; color: #f8fafc;">${g.meta.icon} ${escapeHtml(g.meta.name)}</span>
+            <span style="color: var(--text-muted); margin-left: 4px;">(${g.count} оп. / ${g.weight.toFixed(1)} г)</span>
+          </div>
+          <div style="text-align: right;">
+            <span style="color: var(--text-muted); font-size: 0.7rem;">${g.meta.rateGram.toFixed(1)} грн/г • угар ${lossG.toFixed(2)} г ➔</span>
+            <strong style="color: #f87171; margin-left: 4px;">${lossCost.toFixed(2)} грн</strong>
+          </div>
+        </div>
+      `;
+    });
 
-  let metalsHtml = Object.keys(metalMap).map(k => {
-    return `<span style="display: inline-block; margin-right: 8px; margin-bottom: 4px;"><strong>${escapeHtml(k)}</strong>: ${metalMap[k].weight.toFixed(1)} г (~${Math.round(metalMap[k].rateGram)} грн/г)</span>`;
-  }).join(" ");
-
-  box.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+    box.innerHTML = `
       <div>
-        <div style="font-size: 0.78rem; font-weight: 700; color: #38bdf8; margin-bottom: 2px;">
-          📦 Сплави у поточному кошику (${state.batch.length} оп. / ${totalWeight.toFixed(1)} г):
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 4px;">
+          <div style="font-size: 0.78rem; font-weight: 700; color: #fde047;">
+            📦 Змішаний заміс (${totalFlasks} опок / ${distinctKeys.length} різних сплави):
+          </div>
+          <button type="button" class="btn-preset-action" onclick="syncMetalAlloyFromBatch(true)" style="font-size: 0.72rem; padding: 3px 8px; border-color: #fde047; color: #fde047; background: rgba(253, 224, 71, 0.1);" title="Оновити поопочний розрахунок втрат для кожного сплаву">
+            ⚡ Поопочна синхронізація
+          </button>
         </div>
-        <div style="font-size: 0.74rem; color: var(--text-muted);">
-          ${metalsHtml}
+        <div style="font-size: 0.73rem; color: var(--text-muted); margin-bottom: 6px;">
+          Кожен метал має окремий курс НБУ та розраховується індивідуально:
+        </div>
+        ${rowsHtml}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(255,255,255,0.1); font-size: 0.78rem;">
+          <span style="color: #38bdf8;">Разом безповоротний чад металів (${sumLossG.toFixed(2)} г):</span>
+          <strong style="color: #f87171; font-size: 0.88rem;">${sumLossCost.toFixed(2)} грн</strong>
         </div>
       </div>
-      <div style="display: flex; align-items: center; gap: 6px;">
-        <span style="font-size: 0.8rem; font-weight: 700; color: #fde047;">
-          ~${Math.round(avgPriceGram).toLocaleString('uk-UA')} грн/г
-        </span>
-        <button type="button" class="btn-preset-action" id="btn-apply-batch-metal-rate" onclick="applyBatchWeightedMetalRate()" style="font-size: 0.74rem; padding: 4px 8px; border-color: #fde047; color: #fde047; background: rgba(253, 224, 71, 0.1);" title="Застосувати середньозважену ціну замісу для розрахунку чаду">
-          ⚡ Застосувати ціну для кошика
-        </button>
-      </div>
-    </div>
-  `;
-  box.style.display = "block";
+    `;
+    box.style.display = "block";
+  }
 }
 
 function applyBatchWeightedMetalRate() {
-  const avg = window._batchWeightedMetalPrice || Math.round(nbuMetalRates.gold * 0.585);
-  const input = document.getElementById("metal-price-gram");
-  if (input) {
-    input.value = Math.round(avg);
-    calculateTotalProductionCost();
-    showToast(`✅ Застосовано середньозважену ціну металів замісу: ${Math.round(avg)} грн/г`);
-  }
+  syncMetalAlloyFromBatch(true);
 }
 
 function saveBurnoutConfigLocal() {
@@ -6198,8 +6468,39 @@ function getCostReportText() {
   const costVacOilTotal = vacOilFlask * flasksCount;
   const costVacuumTotal = costVacPerFlask * flasksCount;
 
-  const metalLossG = totalMetalG * ((prices.metalLossPercent || 1.0) / 100);
-  const costMetalLoss = metalLossG * (prices.metalPriceGram || 2600);
+  // Розрахунок чаду металів
+  const selectPreset = document.getElementById("metal-price-preset-select");
+  const isMixedBatchMode = selectPreset && selectPreset.value === "batch_mixed" && state.batch.length > 1;
+
+  let metalLossG = 0;
+  let costMetalLoss = 0;
+  let metalBreakdownLines = "";
+
+  if (isMixedBatchMode) {
+    const metalMap = {};
+    state.batch.forEach(item => {
+      const meta = getMetalAlloyMeta(item.metal);
+      const w = item.totalMetalNeeded || 0;
+      if (!metalMap[meta.key]) {
+        metalMap[meta.key] = { meta: meta, weight: 0, count: 0 };
+      }
+      metalMap[meta.key].weight += w;
+      metalMap[meta.key].count += 1;
+    });
+
+    Object.keys(metalMap).forEach(k => {
+      const g = metalMap[k];
+      const lossG = g.weight * ((prices.metalLossPercent || 1.0) / 100);
+      const costL = lossG * g.meta.rateGram;
+      metalLossG += lossG;
+      costMetalLoss += costL;
+      metalBreakdownLines += `   - ${g.meta.name}: ${g.weight.toFixed(1)} г × ${(prices.metalLossPercent || 1.0)}% = ${lossG.toFixed(2)} г (${g.meta.rateGram.toFixed(1)} грн/г) ➔ ${costL.toFixed(2)} грн\n`;
+    });
+  } else {
+    metalLossG = totalMetalG * ((prices.metalLossPercent || 1.0) / 100);
+    costMetalLoss = metalLossG * (prices.metalPriceGram || 2600);
+  }
+
   const costMeltingTotal = costMeltingConsumables + costMetalLoss;
   const grandTotal = costMaterials + costBurnout + costMeltingTotal + costVacuumTotal;
   const costPerFlask = grandTotal / Math.max(1, flasksCount);
@@ -6243,8 +6544,13 @@ function getCostReportText() {
   txt += ` • Робота плавки:       ${flasksCount} опок × ${prices.meltingFlask || 45} грн = ${costMeltingLabor.toFixed(2)} грн\n`;
   txt += ` • Бензин для пальника: ${flasksCount} опок × ${prices.gasolineFlask ?? 14.40} грн = ${costGasoline.toFixed(2)} грн\n`;
   txt += ` • Робота компресора:   ${flasksCount} опок × ${prices.compressorFlask ?? 5} грн = ${costCompressor.toFixed(2)} грн\n`;
-  txt += ` • Норма чаду металу:   ${prices.metalLossPercent}% від ${totalMetalG.toFixed(2)} г = ${metalLossG.toFixed(2)} г угару\n`;
-  txt += ` • Вартість втрат:      ${metalLossG.toFixed(2)} г × ${prices.metalPriceGram} грн/г = ${costMetalLoss.toFixed(2)} грн\n`;
+  if (isMixedBatchMode && metalBreakdownLines) {
+    txt += ` • Змішаний заміс (поопочний розрахунок втрат):\n${metalBreakdownLines}`;
+    txt += ` • Загальний чад:       ${metalLossG.toFixed(2)} г = ${costMetalLoss.toFixed(2)} грн\n`;
+  } else {
+    txt += ` • Норма чаду металу:   ${prices.metalLossPercent}% від ${totalMetalG.toFixed(2)} г = ${metalLossG.toFixed(2)} г угару\n`;
+    txt += ` • Вартість втрат:      ${metalLossG.toFixed(2)} г × ${prices.metalPriceGram} грн/г = ${costMetalLoss.toFixed(2)} грн\n`;
+  }
   txt += ` • РАЗОМ ПЛАВКА ТА ЧАД: ${costMeltingTotal.toFixed(2)} грн\n\n`;
 
   txt += `-------------------------------------------------------\n`;
