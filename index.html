@@ -753,6 +753,22 @@
         <input type="number" id="sprue-margin" value="15" min="0" oninput="calculateSingle()">
       </div>
       <div class="form-group">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+          <label for="investment-margin" style="margin-bottom: 0;">
+            Запас формомаси на стінки чаші (%)
+            <button type="button" class="help-btn" onclick="openHelpModal('investment_margin')" title="Довідка: Запас формомаси на залишок у чаші замісу (15–20%)">?</button>
+          </label>
+          <span id="investment-margin-badge" class="badge badge-success" style="font-size: 0.72rem; padding: 1px 6px;">+15% на стінки</span>
+        </div>
+        <input type="number" id="investment-margin" value="15" min="0" max="50" step="1" oninput="onInvestmentMarginInput()" title="Рекомендований запас 15–20% для компенсації залишків суміші на стінках чаші та міксера">
+        <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;">
+          <button type="button" class="quick-chip" onclick="setInvestmentMargin(0)">0%</button>
+          <button type="button" class="quick-chip" onclick="setInvestmentMargin(10)">+10%</button>
+          <button type="button" class="quick-chip" onclick="setInvestmentMargin(15)">+15% (Стандарт)</button>
+          <button type="button" class="quick-chip" onclick="setInvestmentMargin(20)">+20% (Густа чаша)</button>
+        </div>
+      </div>
+      <div class="form-group">
         <label for="existing-metal">
           Наявний метал (г)
           <button type="button" class="help-btn" onclick="openHelpModal('existing_metal')" title="Довідка: Наявний метал для відрахування">?</button>
@@ -1864,11 +1880,19 @@
       </div>
 
       <!-- Додаткове налаштування ливника (якщо треба скоригувати) -->
-      <div class="form-group">
-        <label for="recalc-sprue-input" style="font-size: 0.8rem; color: var(--text-muted);">
-          Запас на ливникову систему (%):
-        </label>
-        <input type="number" id="recalc-sprue-input" step="1" min="0" max="100" oninput="updateRecalcLivePreview()" style="font-size: 0.9rem;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="recalc-sprue-input" style="font-size: 0.8rem; color: var(--text-muted);">
+            Запас ливника (%):
+          </label>
+          <input type="number" id="recalc-sprue-input" step="1" min="0" max="100" oninput="updateRecalcLivePreview()" style="font-size: 0.9rem;">
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="recalc-inv-margin-input" style="font-size: 0.8rem; color: var(--text-muted);">
+            Запас формомаси (%):
+          </label>
+          <input type="number" id="recalc-inv-margin-input" step="1" min="0" max="50" oninput="updateRecalcLivePreview()" style="font-size: 0.9rem;" title="Запас на залишок у чаші замісу (15–20%)">
+        </div>
       </div>
 
       <!-- Результат онлайн-перерахунку -->
@@ -2750,6 +2774,42 @@ function resetFlaskToCurrentPreset() {
   showToast("Відновлено параметри пресету опоки");
 }
 
+// --- КЕРУВАННЯ ТЕХНОЛОГІЧНИМ ЗАПАСОМ ФОРМОМАСИ (15–20% НА СТІНКИ ЧАШІ) ---
+function setInvestmentMargin(val) {
+  const input = document.getElementById("investment-margin");
+  if (input) {
+    input.value = val;
+    updateInvestmentMarginBadge();
+    calculateSingle();
+    showToast(`Встановлено запас формомаси: +${val}%`);
+  }
+}
+
+function onInvestmentMarginInput() {
+  updateInvestmentMarginBadge();
+  calculateSingle();
+}
+
+function updateInvestmentMarginBadge() {
+  const input = document.getElementById("investment-margin");
+  const badge = document.getElementById("investment-margin-badge");
+  if (!input || !badge) return;
+  const val = parseFloat(input.value) || 0;
+  if (val === 0) {
+    badge.className = "badge";
+    badge.style.backgroundColor = "var(--bg-input)";
+    badge.style.color = "var(--text-muted)";
+    badge.style.borderColor = "var(--border)";
+    badge.innerText = "0% (без запасу)";
+  } else {
+    badge.className = "badge badge-success";
+    badge.style.backgroundColor = "";
+    badge.style.color = "";
+    badge.style.borderColor = "";
+    badge.innerText = `+${val}% на стінки`;
+  }
+}
+
 // --- КЕРУВАННЯ ПРИМІТКАМИ ТА ШВИДКЕ ОЧИЩЕННЯ ---
 function clearFlaskNote() {
   const noteEl = document.getElementById("flask-note");
@@ -3490,6 +3550,8 @@ function getSingleCalculations() {
   const modelW = parseFloat(document.getElementById("model-weight").value) || 0;
   const polyDensity = parseFloat(document.getElementById("polymer-density").value) || 1.1;
   const sprueMargin = parseFloat(document.getElementById("sprue-margin").value) || 0;
+  const invMarginEl = document.getElementById("investment-margin");
+  const invMargin = invMarginEl ? (parseFloat(invMarginEl.value) || 0) : 15;
   const existingMetal = parseFloat(document.getElementById("existing-metal").value) || 0;
   const noteEl = document.getElementById("flask-note");
   const note = noteEl ? noteEl.value.trim() : "";
@@ -3509,7 +3571,12 @@ function getSingleCalculations() {
   const investmentVolume = Math.max(0, flaskVolume - modelVolume); // см3
 
   // 2. Формомаса (Густина сухого гіпсу ~ 1.15 г/см3 у засипці)
-  const powderWeight = investmentVolume * 1.15; // грами
+  // Базова маса під чистий геометричний об'єм форми
+  const basePowderWeight = investmentVolume * 1.15; // грами
+  const baseWaterVolume = basePowderWeight * (invRatio / 100); // мл
+  
+  // Фактична маса з урахуванням технологічного запасу на стінки та дно чаші (15–20%)
+  const powderWeight = basePowderWeight * (1 + invMargin / 100); // грами
   const waterVolume = powderWeight * (invRatio / 100); // мл
 
   // 3. Метал
@@ -3531,9 +3598,10 @@ function getSingleCalculations() {
   }
 
   return {
-    d, h, modelW, polyDensity, sprueMargin, existingMetal,
+    d, h, modelW, polyDensity, sprueMargin, invMargin, existingMetal,
     invRatio, metal, note, completed: false,
     flaskVolume, modelVolume, investmentVolume,
+    basePowderWeight, baseWaterVolume,
     powderWeight, waterVolume,
     totalMetalNeeded, remainingMetalNeeded, pureMetalToAdd, alloyToAdd
   };
@@ -3551,8 +3619,21 @@ function calculateSingle() {
     </div>
     <div class="results-row">
       <span>Суха формомаса / Вода (${calc.invRatio}:100):</span>
-      <span class="val" style="color: #a7f3d0;">${Math.round(calc.powderWeight)} г / ${Math.round(calc.waterVolume)} мл</span>
+      <span class="val" style="color: #a7f3d0; font-size: 1.05rem;">
+        <strong style="color: #a7f3d0;">${Math.round(calc.powderWeight)} г</strong> / <strong style="color: #38bdf8;">${Math.round(calc.waterVolume)} мл</strong>
+      </span>
     </div>
+    ${calc.invMargin > 0 ? `
+    <div class="results-row" style="background: rgba(16, 185, 129, 0.08); padding: 4px 8px; border-radius: 6px; margin-top: 2px;">
+      <span style="font-size: 0.76rem; color: #a7f3d0;">🥣 Враховано +${calc.invMargin}% на залишок у чаші:</span>
+      <span style="font-size: 0.76rem; color: #a7f3d0; text-align: right;">Чистий об'єм: <strong>${Math.round(calc.basePowderWeight)} г</strong> / <strong>${Math.round(calc.baseWaterVolume)} мл</strong> (+${Math.round(calc.powderWeight - calc.basePowderWeight)} г запас)</span>
+    </div>
+    ` : `
+    <div class="results-row" style="background: rgba(100, 116, 139, 0.1); padding: 4px 8px; border-radius: 6px; margin-top: 2px;">
+      <span style="font-size: 0.76rem; color: var(--text-muted);">🥣 Запас на стінки чаші:</span>
+      <span style="font-size: 0.76rem; color: var(--text-muted); text-align: right;">0% (суворо за чистим об'ємом)</span>
+    </div>
+    `}
     <div class="results-row">
       <span>Густина сплаву (ρ) / Коефіцієнт:</span>
       <span class="val" style="display: flex; align-items: center; gap: 6px; justify-content: flex-end; flex-wrap: wrap;">
@@ -3595,7 +3676,7 @@ function calculateSingle() {
 }
 
 // --- ПЕРЕРАХУНОК МЕТАЛУ ТА ШИХТОВКИ ДЛЯ ОПОКИ В КОШИКУ ---
-function recomputeFlaskItem(item, newExistingMetal = null, newSprueMargin = null, newCompleted = null, newNote = null) {
+function recomputeFlaskItem(item, newExistingMetal = null, newSprueMargin = null, newCompleted = null, newNote = null, newInvMargin = null) {
   // Нормалізація металу та колірних метаданих
   if (!item.metal || !item.metal.density) {
     const metalId = String((item.metal && item.metal.id) || item.metal || "").toLowerCase();
@@ -3631,6 +3712,11 @@ function recomputeFlaskItem(item, newExistingMetal = null, newSprueMargin = null
   } else if (item.note === undefined) {
     item.note = "";
   }
+  if (newInvMargin !== null && !isNaN(newInvMargin) && newInvMargin >= 0) {
+    item.invMargin = parseFloat(newInvMargin);
+  } else if (item.invMargin === undefined || isNaN(item.invMargin)) {
+    item.invMargin = 15;
+  }
 
   if (item.cleanModelW === undefined) {
     item.cleanModelW = 0;
@@ -3639,11 +3725,28 @@ function recomputeFlaskItem(item, newExistingMetal = null, newSprueMargin = null
     item.cleanModelD = item.polyDensity || 0.93;
   }
 
-  // Перевірка об'єму моделі та густини
+  // Геометрія опоки та об'єми
+  const d = item.d || 60;
+  const h = item.h || 100;
+  const flaskRadiusCm = (d / 10) / 2;
+  const flaskHeightCm = h / 10;
+  item.flaskVolume = Math.PI * Math.pow(flaskRadiusCm, 2) * flaskHeightCm;
+
   const polyDensity = item.polyDensity || 1.1;
-  const modelVolume = item.modelVolume !== undefined ? item.modelVolume : (item.modelW / polyDensity);
+  const modelVolume = item.modelVolume !== undefined ? item.modelVolume : ((item.modelW || 0) / polyDensity);
   item.modelVolume = modelVolume;
   item.polyDensity = polyDensity;
+
+  item.investmentVolume = Math.max(0, item.flaskVolume - modelVolume);
+
+  const invRatio = item.invRatio || 38;
+  item.invRatio = invRatio;
+
+  // Розрахунок маси формомаси: чистий об'єм та з урахуванням запасу на стінки чаші замісу (15–20%)
+  item.basePowderWeight = item.investmentVolume * 1.15;
+  item.baseWaterVolume = item.basePowderWeight * (invRatio / 100);
+  item.powderWeight = item.basePowderWeight * (1 + item.invMargin / 100);
+  item.waterVolume = item.powderWeight * (invRatio / 100);
 
   // Базовий та повний метал з урахуванням ливника
   const baseMetalNeeded = item.modelVolume * item.metal.density;
@@ -3717,6 +3820,10 @@ function openRecalcModal(index) {
   document.getElementById("recalc-sprue-val").innerText = `+${item.sprueMargin}%`;
   document.getElementById("recalc-existing-input").value = item.existingMetal > 0 ? item.existingMetal : "";
   document.getElementById("recalc-sprue-input").value = item.sprueMargin !== undefined ? item.sprueMargin : 15;
+  const recalcInvMarginEl = document.getElementById("recalc-inv-margin-input");
+  if (recalcInvMarginEl) {
+    recalcInvMarginEl.value = item.invMargin !== undefined ? item.invMargin : 15;
+  }
   document.getElementById("recalc-note-input").value = item.note || "";
   document.getElementById("recalc-completed-input").checked = !!item.completed;
   onRecalcNoteInput();
@@ -3821,8 +3928,9 @@ function saveRecalcModal(closeAfter = false) {
   const sprueInput = parseFloat(document.getElementById("recalc-sprue-input").value) || item.sprueMargin;
   const completedInput = document.getElementById("recalc-completed-input").checked;
   const noteInput = document.getElementById("recalc-note-input").value;
+  const invMarginInput = parseFloat(document.getElementById("recalc-inv-margin-input")?.value);
 
-  recomputeFlaskItem(item, existingInput, sprueInput, completedInput, noteInput);
+  recomputeFlaskItem(item, existingInput, sprueInput, completedInput, noteInput, invMarginInput);
   localStorage.setItem("cc_batch", JSON.stringify(state.batch));
   renderBatch();
 
@@ -3842,8 +3950,9 @@ function navigateRecalcModal(step) {
   const sprueInput = parseFloat(document.getElementById("recalc-sprue-input").value) || item.sprueMargin;
   const completedInput = document.getElementById("recalc-completed-input").checked;
   const noteInput = document.getElementById("recalc-note-input").value;
+  const invMarginInput = parseFloat(document.getElementById("recalc-inv-margin-input")?.value);
 
-  recomputeFlaskItem(item, existingInput, sprueInput, completedInput, noteInput);
+  recomputeFlaskItem(item, existingInput, sprueInput, completedInput, noteInput, invMarginInput);
   localStorage.setItem("cc_batch", JSON.stringify(state.batch));
   renderBatch();
 
@@ -3935,8 +4044,14 @@ function renderBatch() {
             <span class="density-ratio">(${(item.metal.density / (item.polyDensity || 1.1)).toFixed(2)}×)</span>
           </div>
         </td>
-        <td><span style="color: #a7f3d0; font-weight: 600;">${Math.round(item.powderWeight)} г</span></td>
-        <td><span style="color: #38bdf8; font-weight: 600;">${Math.round(item.waterVolume)} мл</span></td>
+        <td>
+          <span style="color: #a7f3d0; font-weight: 600;">${Math.round(item.powderWeight)} г</span>
+          ${item.invMargin > 0 ? `<div style="font-size: 0.72rem; color: #6ee7b7;">+${item.invMargin}% чаша</div>` : ''}
+        </td>
+        <td>
+          <span style="color: #38bdf8; font-weight: 600;">${Math.round(item.waterVolume)} мл</span>
+          <div style="font-size: 0.72rem; color: #7dd3fc;">(${item.invRatio || 38}:100)</div>
+        </td>
         <td>${metalDetail}</td>
         <td>
           <input type="text" class="note-input" value="${escapeHtml(item.note || '')}" placeholder="Примітка..." onchange="updateFlaskNote(${i}, this.value)" style="min-width: 110px;">
@@ -4063,9 +4178,12 @@ function renderBatchSummary() {
 
     <!-- Блок замісу формомаси -->
     <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;">
-      <div style="font-size: 0.85rem; font-weight: 600; color: #a7f3d0; margin-bottom: 6px;">🥣 ЗАМІС ФОРМОМАСИ (СУМАРНО ДЛЯ ВСІХ ОПОК):</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
+        <div style="font-size: 0.85rem; font-weight: 600; color: #a7f3d0;">🥣 ЗАМІС ФОРМОМАСИ (СУМАРНО ДЛЯ ВСІХ ОПОК):</div>
+        <span style="font-size: 0.72rem; color: #6ee7b7; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 1px 6px; border-radius: 4px;">+15–20% запас на стінки враховано</span>
+      </div>
       <div class="results-row" style="border-bottom: 1px dotted rgba(255,255,255,0.15);">
-        <span>Загальна суха формомаса:</span>
+        <span>Загальна суха формомаса до зважування:</span>
         <span class="val" style="font-size: 1.15rem; color: #a7f3d0;">${Math.round(totalPowder)} г</span>
       </div>
       <div class="results-row">
@@ -4140,7 +4258,7 @@ function getFormattedTextReport() {
     txt += `  • Вага моделі:        ${item.modelW} г (густина моделі: ${item.polyDensity} г/см³, об'єм: ${item.modelVolume.toFixed(2)} см³)\n`;
     txt += `  • Густина сплаву (ρ): ${item.metal.density.toFixed(2)} г/см³ (коефіцієнт: ${(item.metal.density / (item.polyDensity || 1.1)).toFixed(2)}x)\n`;
     txt += `  • Ливникова система:  +${item.sprueMargin}%\n`;
-    txt += `  • Формомаса на опоку: ${Math.round(item.powderWeight)} г порошку + ${Math.round(item.waterVolume)} мл води\n`;
+    txt += `  • Формомаса на опоку: ${Math.round(item.powderWeight)} г порошку + ${Math.round(item.waterVolume)} мл води (запас на стінки: +${item.invMargin !== undefined ? item.invMargin : 15}%)\n`;
     txt += `  • ВСЬОГО МЕТАЛУ:      ${item.totalMetalNeeded.toFixed(2)} г [Формула: (${item.modelVolume.toFixed(2)} см³ × ${item.metal.density.toFixed(2)} г/см³) + ${item.sprueMargin}%]\n`;
     if (item.existingMetal > 0) {
       txt += `  • Наявний метал/брухт: -${item.existingMetal.toFixed(2)} г (доплавка: ${item.remainingMetalNeeded.toFixed(2)} г)\n`;
@@ -4231,6 +4349,7 @@ function buildProjectObject() {
     modelW: parseFloat(document.getElementById("model-weight").value) || 0,
     polyDensity: parseFloat(document.getElementById("polymer-density").value) || 1.1,
     sprueMargin: parseFloat(document.getElementById("sprue-margin").value) || 15,
+    invMargin: parseFloat(document.getElementById("investment-margin")?.value) || 15,
     existingMetal: parseFloat(document.getElementById("existing-metal").value) || 0,
     note: document.getElementById("flask-note") ? document.getElementById("flask-note").value.trim() : ""
   };
@@ -4418,6 +4537,9 @@ function parseAndApplyProjectJSON(jsonText, sourceName = "") {
       if (importedSingle.modelW !== undefined) document.getElementById("model-weight").value = importedSingle.modelW;
       if (importedSingle.polyDensity !== undefined) document.getElementById("polymer-density").value = importedSingle.polyDensity;
       if (importedSingle.sprueMargin !== undefined) document.getElementById("sprue-margin").value = importedSingle.sprueMargin;
+      if (importedSingle.invMargin !== undefined && document.getElementById("investment-margin")) {
+        setInvestmentMargin(importedSingle.invMargin);
+      }
       if (importedSingle.existingMetal !== undefined) document.getElementById("existing-metal").value = importedSingle.existingMetal;
       if (importedSingle.note !== undefined && document.getElementById("flask-note")) {
         document.getElementById("flask-note").value = importedSingle.note;
@@ -7610,6 +7732,15 @@ const HELP_TOPICS = {
     desc: "Висота сталевої гільзи опоки від гумового башмака до верхнього зрізу в міліметрах.",
     impact: "Визначає загальну місткість форми та безпечну відстань від верхівки воскової ялинки до верхнього краю формомаси (мінімум 10–15 мм).",
     tip: "Для запобігання переливу формомаси під час кипіння у вакуумній камері рівень заливки повинен бути на 5–10 мм нижче краю гільзи."
+  },
+  investment_margin: {
+    title: "Запас формомаси на стінки посудини замісу (%)",
+    badge: "Втрати на стінках чаші",
+    category: "Опока і розрахунок",
+    formula: "M_порошку = V_опоки × 1.15 × (1 + Запас% / 100) | V_води = M_порошку × (Пропорція / 100)",
+    desc: "Технологічна надбавка (+15% ... +20%) до розрахованої маси сухої формомаси та води. Компенсує суміш, яка неминуче залишається на внутрішніх стінках, дні та мішалці чаші/колби під час вакуумного або ручного замісу.",
+    impact: "Гарантує, що після переливання готового гіпсового розчину з посудини в опоку його об'єму вистачить точно до верхнього технологічного рівня гільзи без аварійного браку та оголення воскової ялинки.",
+    tip: "Для гладких силіконових чаш достатньо +10–15%, для об'ємних металевих колб вакуумних міксерів або великих замісів рекомендується встановлювати +15–20%."
   },
   model_weight: {
     title: "Вага воскової моделі / фотополімеру (г)",
